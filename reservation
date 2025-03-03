@@ -5,7 +5,7 @@
   <title>예약업무 관리</title>
   <link rel="stylesheet" href="style.css">
   <script>
-    const gasUrl = 'https://script.google.com/macros/s/your_script_url/exec'; // 배포 후 URL로 변경 필요
+    const gasUrl = 'https://script.google.com/macros/s/AKfycbwCiRN7TNVJ6VWk97aD02jndsE5vTcx1pmGNpsTwGK495QsdYg5Lb3aio4RxHKMmuMR/exec'; // 배포 후 URL로 변경 필요
 
     const excludedOptions = [
       '인원수를 꼭 체크해주세요.', '수영장 및 외부시설 안내', '객실 시설 안내',
