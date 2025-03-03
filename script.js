@@ -245,27 +245,14 @@ function copyResult() {
 
 function sendToSheet() {
   const data = parseReservation(document.getElementById('inputData').value);
-
-  // 예약번호 앞에 작은따옴표 추가하여 문자로 명시적 전송
-  const params = new URLSearchParams({
-    예약번호: "'" + data.예약번호.trim(),
-    예약자: data.예약자,
-    전화번호: data.전화번호,
-    이용객실: data.이용객실,
-    이용기간: data.이용기간,
-    수량: data.수량,
-    옵션: data.옵션,
-    총이용인원: data.총이용인원,
-    입실시간: data.입실시간,
-    결제금액: data.결제금액,
-    예약플랫폼: data.예약플랫폼
-  });
+  const params = new URLSearchParams(data);
 
   fetch(gasUrl + '?' + params)
     .then(r => r.text())
     .then(msg => alert(msg))
     .catch(err => alert('전송 중 오류 발생: ' + err));
 }
+
 
 
 function generateReservationMessage() {
