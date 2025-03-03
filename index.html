@@ -22,13 +22,42 @@
 
   <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
 
-  <div class="buttons">
-    <button onclick="processReservation()">파싱 결과 보기</button>
-    <button onclick="generateReservationMessage()">안내문자 양식적용</button>
-    <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
-  </div>
+  <!-- 버튼 부분 -->
+<div class="buttons">
+  <button onclick="processReservation()">파싱 결과 보기</button>
+  <button onclick="generateReservationMessage()">안내문자 양식적용</button>
+  <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
+</div>
 
-  <button onclick="copyResult()">결과 복사하기</button>
+<div class="button-container">
+  <button onclick="openTemplateModal()">양식 변경하기</button>
+</div>
+
+<!-- 양식수정 모달창 -->
+<div id="templateModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeTemplateModal()">&times;</span>
+    <h3>안내문자 양식 수정</h3>
+
+    <label>무통장 양식:</label>
+    <textarea id="templateBank"></textarea>
+
+    <label>네이버 숙박 양식:</label>
+    <textarea id="templateNaverStay"></textarea>
+
+    <label>네이버 당일 양식:</label>
+    <textarea id="templateNaverDay"></textarea>
+
+    <label>야놀자 양식:</label>
+    <textarea id="templateYanolja"></textarea>
+
+    <label>여기어때 양식:</label>
+    <textarea id="templateHere"></textarea>
+
+    <button onclick="saveTemplates()">양식 저장하기</button>
+  </div>
+</div>
+
 
   <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 
