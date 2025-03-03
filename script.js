@@ -22,7 +22,6 @@ function parseNaverReservation(text) {
     return line ? line.replace(keyword, '').trim() : '';
   };
 
-  // 방문자 처리 로직 추가
   let visitorLine = lines.find(line => line.includes('방문자'));
   let 예약자 = '';
   let 전화번호 = '';
@@ -38,7 +37,6 @@ function parseNaverReservation(text) {
     전화번호 = getValue('전화번호');
   }
 
-  // 객실 이름 파싱
   let siteLine = lines.find(line => line.includes('사이트'));
   let 이용객실 = '';
   if (siteLine) {
@@ -50,7 +48,6 @@ function parseNaverReservation(text) {
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // 옵션 처리 로직
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
@@ -62,20 +59,19 @@ function parseNaverReservation(text) {
     '수영장 및 외부시설 안내',
     '객실 시설 안내',
     '당일캠핑 안내',
+    '무통장입금 안내',
     'Please make sure to check the number of people.',
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
   ];
   const filteredOptions = optionLines.filter(line => !unwantedOptions.some(unwanted => line.includes(unwanted)));
 
-  // 총 이용 인원 정보 파싱
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
   if (totalPeopleIndex !== -1 && totalPeopleIndex + 1 < lines.length) {
     총이용인원 = lines[totalPeopleIndex + 1].trim();
   }
 
-  // 입실 시간 파싱
   let checkInTimeIndex = lines.findIndex(line => line.includes('입실 시간 선택'));
   let 입실시간 = '';
   if (checkInTimeIndex !== -1 && checkInTimeIndex + 1 < lines.length) {
@@ -92,7 +88,7 @@ function parseNaverReservation(text) {
     옵션: filteredOptions.join(', '),
     총이용인원,
     입실시간,
-    결제금액: getValue('결제금액'),
+    결제금액: getValue('결제금액') || getValue('결제예상금액'), // 👈 수정된 부분
     예약플랫폼: '네이버'
   };
 }
