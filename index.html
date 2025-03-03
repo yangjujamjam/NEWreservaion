@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>예약 업무 관리</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top-menu">
+    <nav>
+      <ul>
+        <li><a href="index.html">예약업무</a></li>
+        <li><a href="#">예약관리</a></li>
+        <li><a href="#">예약캘린더</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <h1>예약 업무 관리</h1>
+
+  <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
+
+  <div class="buttons">
+    <button onclick="processReservation()">파싱하기</button>
+    <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
+  </div>
+
+  <div class="message-buttons">
+    <button onclick="createMessage(1)">예약안내문자(무통장)</button>
+    <button onclick="createMessage(2)">예약확정문자(숙박)</button>
+    <button onclick="createMessage(3)">예약확정문자(당일캠핑)</button>
+    <button onclick="createMessage(4)">예약확정문자(늦은입실)</button>
+    <button onclick="createMessage(5)">예약확정문자(빠른입실)</button>
+    <button onclick="createMessage(6)">예약확정문자(야놀자)</button>
+    <button onclick="createMessage(7)">예약확정문자(여기어때)</button>
+  </div>
+
+  <button onclick="copyResult()">결과 복사하기</button>
+
+  <pre id="outputData">여기에 결과가 표시됩니다.</pre>
+
+  <script src="script.js"></script>
+</body>
+</html>
