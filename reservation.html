@@ -65,15 +65,35 @@
 
       function parseReservation(text) {
         const lines = text.split('\n');
+        let reservationNumber = lines.find(line => line.includes('예약번호'));
+        if(reservationNumber) reservationNumber = reservationNumber.replace('예약번호','').replace(/[:\s]+/g,'').trim();
+
+        let reservationName = lines.find(line => line.includes('예약자'));
+        if(reservationName) reservationName = reservationName.replace('예약자','').replace(/[:\s]+/g,'').trim();
+
+        let phoneNumber = lines.find(line => line.includes('전화번호'));
+        if(phoneNumber) phoneNumber = phoneNumber.replace('전화번호','').replace(/[:\s]+/g,'').trim();
+
+        let usagePeriod = lines.find(line => line.includes('이용기간'));
+        if(usagePeriod) usagePeriod = usagePeriod.replace('이용기간','').trim();
+
+        let paymentAmount = lines.find(line => line.includes('결제금액'));
+        if(paymentAmount) paymentAmount = paymentAmount.replace('결제금액','').replace(/[:\s]+/g,'').trim();
+
         const data = {
-          예약번호: lines.find(line => line.includes('예약번호'))?.split(/[:\s]+/)[1] || '',
-          예약자: lines.find(line => line.includes('예약자'))?.split(/[:\s]+/)[1] || '',
-          전화번호: lines.find(line => line.includes('전화번호'))?.split(/[:\s]+/)[1] || '',
+          예약번호: reservationNumber || '',
+          예약자: reservationName || '',
+          전화번호: phoneNumber || '',
           이용객실: ['대형 카라반','복층 우드캐빈','파티룸','몽골텐트'].find(room => text.includes(room)) || '',
-          이용기간: lines.find(line => line.includes('이용기간'))?.replace('이용기간', '').trim() || '',
-          결제금액: lines.find(line => line.includes('결제금액'))?.split(/[:\s]+/)[1] || '',
+          이용기간: usagePeriod || '',
+          수량: lines.find(line => line.includes('수량'))?.replace('수량', '').trim() || '',
+          옵션: '',
+          총이용인원: lines.find(line => line.includes('총 이용 인원 정보'))?.replace('총 이용 인원 정보', '').trim() || '',
+          입실시간: lines.find(line => line.includes('입실 시간 선택'))?.replace('입실 시간 선택', '').trim() || '',
+          결제금액: paymentAmount || '',
           예약플랫폼: text.includes('야놀자') ? '야놀자' : text.includes('여기어때') ? '여기어때' : '네이버'
         };
+
         return data;
       }
 
