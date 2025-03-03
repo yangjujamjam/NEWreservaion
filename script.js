@@ -26,11 +26,11 @@ function parseNaverReservation(text) {
   const totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   const optionLines = lines.slice(optionsStartIndex + 1, totalPeopleIndex).filter(Boolean);
 
-  // 불필요 옵션 필터링
   const unwantedOptions = [
     '인원수를 꼭 체크해주세요.',
     '수영장 및 외부시설 안내',
     '객실 시설 안내',
+    '당일캠핑 안내',
     'Please make sure to check the number of people.',
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
@@ -38,11 +38,24 @@ function parseNaverReservation(text) {
 
   const filteredOptions = optionLines.filter(line => !unwantedOptions.some(unwanted => line.includes(unwanted)));
 
+  let siteLine = lines.find(line => line.includes('사이트'));
+  let 이용객실 = '';
+
+  if (siteLine) {
+    const rooms = ['대형카라반', '복층우드캐빈', '파티룸', '몽골텐트'];
+    const normalizedSiteLine = siteLine.replace(/\s+/g, '');
+
+    이용객실 = rooms.find(room => normalizedSiteLine.includes(room));
+
+    if (이용객실 === '대형카라반') 이용객실 = '대형 카라반';
+    if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
+  }
+
   return {
     예약번호: getValue('예약번호'),
     예약자: getValue('예약자'),
     전화번호: getValue('전화번호'),
-    이용객실: ['대형 카라반','복층 우드캐빈','파티룸','몽골텐트'].find(room => text.includes(room)) || '',
+    이용객실,
     이용기간: getValue('이용기간'),
     수량: getValue('수량'),
     옵션: filteredOptions.join(', '),
@@ -52,6 +65,7 @@ function parseNaverReservation(text) {
     예약플랫폼: '네이버'
   };
 }
+
 
 
 function parseYanoljaReservation(text) {
