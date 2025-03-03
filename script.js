@@ -99,9 +99,43 @@ function parseNaverReservation(text) {
 
 
 function parseYanoljaReservation(text) {
-  // 야놀자 예약정보 파싱 로직 (다음 단계에서 작성)
-  return {};
+  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+
+  const 예약번호 = lines[3]; // 양주 잼잼 다음 줄이 예약번호
+  const 객실라인 = lines.find(line => line.includes('카라반') || line.includes('우드캐빈') || line.includes('파티룸') || line.includes('몽골'));
+  const 이용객실 = 객실라인.replace(/\(.*\)/, '').trim();
+
+  const 금액라인 = lines.find(line => line.includes('원'));
+  const 결제금액 = 금액라인 ? 금액라인.replace('원', '').replace(/,/g, '').trim() + '원' : '';
+
+  const 예약자라인 = lines.find(line => line.includes('/'));
+  const [예약자, 전화번호] = 예약자라인.split('/').map(v => v.trim());
+
+  // 날짜 처리
+  const 체크인라인 = lines.find(line => line.includes('~'));
+  const 체크아웃라인 = lines[lines.indexOf(체크인라인) + 1];
+
+  const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
+  const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
+
+  const 이용기간 = `${체크인라인.split(' ')[0]} ~ ${체크아웃라인.split(' ')[0]}`;
+  const 입실시간 = `[숙박] ${입실시간Match} 입실 / ${퇴실시간Match} 퇴실`;
+
+  return {
+    예약번호,
+    예약자,
+    전화번호,
+    이용객실,
+    이용기간,
+    수량: '', // 없음
+    옵션: '', // 없음
+    총이용인원: '대인2', // 야놀자는 기본 대인2
+    입실시간,
+    결제금액,
+    예약플랫폼: '야놀자'
+  };
 }
+
 
 function parseHereReservation(text) {
   // 여기어때 예약정보 파싱 로직 (다음 단계에서 작성)
