@@ -101,7 +101,7 @@ function parseNaverReservation(text) {
 function parseYanoljaReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
-  const 예약번호 = lines[3]; // 양주 잼잼 다음 줄
+  const 예약번호 = lines[3];
   const 객실라인 = lines.find(line => line.includes('카라반') || line.includes('우드캐빈') || line.includes('파티룸') || line.includes('몽골'));
   const 이용객실 = 객실라인.replace(/\(.*\)/, '').trim();
 
@@ -111,11 +111,10 @@ function parseYanoljaReservation(text) {
   const 예약자라인 = lines.find(line => line.includes('/'));
   const [예약자, 전화번호] = 예약자라인.split('/').map(v => v.trim());
 
-  // 날짜 및 시간 처리
   const 체크인라인 = lines.find(line => line.includes('~'));
   const 체크아웃라인 = lines[lines.indexOf(체크인라인) + 1];
 
-  const 이용유형 = lines[1]; // "<숙박>" or "<대실>" 체크
+  const 이용유형 = lines[1];
   let 이용기간 = '';
   let 입실시간 = '';
 
@@ -125,13 +124,11 @@ function parseYanoljaReservation(text) {
   };
 
   if (이용유형.includes('대실')) {
-    // 대실 (당일캠핑, 데이유즈)
-    이용기간 = formatDate(체크인라인.split(' ')[0]); // 단일 날짜로 처리
+    이용기간 = formatDate(체크인라인.split(' ')[0]);
     const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/)[0];
     const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/)[0];
     입실시간 = `${입실시간Match}~${퇴실시간Match}`;
   } else {
-    // 숙박
     이용기간 = `${formatDate(체크인라인.split(' ')[0])}~${formatDate(체크아웃라인.split(' ')[0])}`;
     const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/)[0];
     const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/)[0];
@@ -144,9 +141,9 @@ function parseYanoljaReservation(text) {
     전화번호,
     이용객실,
     이용기간,
-    수량: '', // 야놀자는 수량 없음
-    옵션: '', // 야놀자는 옵션 없음
-    총이용인원: '대인2', // 기본값 대인2
+    수량: '1',  // ✅ 수정된 부분 (기본값 '1')
+    옵션: '',
+    총이용인원: '대인2',
     입실시간,
     결제금액,
     예약플랫폼: '야놀자'
