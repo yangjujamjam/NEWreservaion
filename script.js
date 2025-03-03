@@ -173,13 +173,30 @@ function parseHereReservation(text) {
   const 입실일시라인 = lines.find(line => line.includes('입실일시:'));
   const 퇴실일시라인 = lines.find(line => line.includes('퇴실일시:'));
 
-  const formatDate = (dateStr) => {
+  // 예약한 날짜 추출 (YYMMDD 형식)
+  const 예약날짜Match = 예약번호.match(/^(\d{2})(\d{2})(\d{2})/);
+  const 예약연도 = Number('20' + 예약날짜Match[1]);
+  const 예약월 = Number(예약날짜Match[2]);
+  const 예약일 = Number(예약날짜Match[3]);
+  const 예약날짜 = new Date(예약연도, 예약월 - 1, 예약일);
+
+  // 날짜 포맷 함수 (연도 추론 포함)
+  const formatDate = (dateStr, refDate) => {
     const [m, d, day] = dateStr.match(/(\d+)\/(\d+)\s*\((.)\)/).slice(1);
-    const year = new Date().getFullYear(); // 현재 연도를 사용하거나 명시적으로 지정 가능
+    let year = refDate.getFullYear();
+
+    const targetDate = new Date(year, Number(m) - 1, Number(d));
+    if (targetDate < refDate) {
+      year += 1; // 예약한 날짜보다 이전 날짜라면 다음 해로 설정
+    }
+
     return `${year}. ${Number(m)}. ${Number(d)}.(${day})`;
   };
 
-  const 이용기간 = `${formatDate(입실일시라인)}~${formatDate(퇴실일시라인)}`;
+  // 날짜 추론 적용
+  const 입실날짜 = formatDate(입실일시라인, 예약날짜);
+  const 퇴실날짜 = formatDate(퇴실일시라인, 예약날짜);
+  const 이용기간 = `${입실날짜}~${퇴실날짜}`;
 
   const 입실시간Match = 입실일시라인.match(/\d{2}:\d{2}/)[0];
   const 퇴실시간Match = 퇴실일시라인.match(/\d{2}:\d{2}/)[0];
@@ -191,14 +208,15 @@ function parseHereReservation(text) {
     전화번호,
     이용객실: 객실정보,
     이용기간,
-    수량: '1', // 기본값 1로 설정
+    수량: '1', // 기본값
     옵션: '', // 옵션 없음
-    총이용인원: '대인2', // 기본값으로 설정
+    총이용인원: '대인2', // 기본값
     입실시간,
     결제금액,
     예약플랫폼: '여기어때'
   };
 }
+
 
 
 function processReservation() {
