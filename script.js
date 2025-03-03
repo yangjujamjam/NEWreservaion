@@ -22,27 +22,41 @@ function parseNaverReservation(text) {
     return line ? line.replace(keyword, '').trim() : '';
   };
 
+  // 방문자 처리 로직 추가
+  let visitorLine = lines.find(line => line.includes('방문자'));
+  let 예약자 = '';
+  let 전화번호 = '';
+
+  if (visitorLine) {
+    const visitorMatch = visitorLine.match(/방문자\s*(.+)\((.+)\)/);
+    if (visitorMatch) {
+      예약자 = visitorMatch[1].trim();
+      전화번호 = visitorMatch[2].trim();
+    }
+  } else {
+    예약자 = getValue('예약자');
+    전화번호 = getValue('전화번호');
+  }
+
+  // 객실 이름 파싱
   let siteLine = lines.find(line => line.includes('사이트'));
   let 이용객실 = '';
-
   if (siteLine) {
     const rooms = ['대형카라반', '복층우드캐빈', '파티룸', '몽골텐트'];
     const normalizedSiteLine = siteLine.replace(/\s+/g, '');
-
     이용객실 = rooms.find(room => normalizedSiteLine.includes(room));
 
     if (이용객실 === '대형카라반') 이용객실 = '대형 카라반';
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // 옵션 추출 로직 수정
+  // 옵션 처리 로직
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
     optionsEndIndex = lines.findIndex(line => line.includes('유입경로'));
   }
   const optionLines = lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean);
-
   const unwantedOptions = [
     '인원수를 꼭 체크해주세요.',
     '수영장 및 외부시설 안내',
@@ -52,17 +66,16 @@ function parseNaverReservation(text) {
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
   ];
-
   const filteredOptions = optionLines.filter(line => !unwantedOptions.some(unwanted => line.includes(unwanted)));
 
-  // 총 이용 인원 정보 수정
+  // 총 이용 인원 정보 파싱
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
   if (totalPeopleIndex !== -1 && totalPeopleIndex + 1 < lines.length) {
     총이용인원 = lines[totalPeopleIndex + 1].trim();
   }
 
-  // 입실 시간 선택 수정
+  // 입실 시간 파싱
   let checkInTimeIndex = lines.findIndex(line => line.includes('입실 시간 선택'));
   let 입실시간 = '';
   if (checkInTimeIndex !== -1 && checkInTimeIndex + 1 < lines.length) {
@@ -71,8 +84,8 @@ function parseNaverReservation(text) {
 
   return {
     예약번호: getValue('예약번호'),
-    예약자: getValue('예약자'),
-    전화번호: getValue('전화번호'),
+    예약자,
+    전화번호,
     이용객실,
     이용기간: getValue('이용기간'),
     수량: getValue('수량'),
