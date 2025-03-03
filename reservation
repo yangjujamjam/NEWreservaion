@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>예약업무 관리</title>
+  <link rel="stylesheet" href="style.css">
+  <script>
+    const gasUrl = 'https://script.google.com/macros/s/your_script_url/exec'; // 배포 후 URL로 변경 필요
+
+    const excludedOptions = [
+      '인원수를 꼭 체크해주세요.', '수영장 및 외부시설 안내', '객실 시설 안내',
+      'Please make sure to check the number of people.',
+      'Information on swimming pools and external facilities',
+      'Room Facilities Guide'
+    ];
+
+    function detectPlatform(text) {
+      if (text.includes("야놀자")) return "야놀자";
+      if (text.includes("여기어때")) return "여기어때";
+      return "네이버";
+    }
+
+    function parseReservation(text) {
+      const platform = detectPlatform(text);
+      let res = { 예약플랫폼: platform };
+
+      if (platform === "네이버") {
+        res.예약번호 = text.match(/예약번호\s*(\d+)/)?.[1] || "";
+        res.예약자 = text.includes("방문자") ?
+          text.match(/방문자\s*(.+)\(/)?.[1].trim() :
+          text.match(/예약자\s*(.+)/)?.[1].trim();
+        res.전화번호 = text.includes("방문자") ?
+          text.match(/방문자.+?\(([\d\-]+)\)/)?.[1] :
+          text.match(/전화번호\s*(.+)/)?.[1];
+        res.이용객실 = ["대형 카라반","복층 우드캐빈","파티룸","몽골텐트"].find(v => text.includes(v)) || "";
+        res.이용기간 = text.match(/이용기간\s*(.+)/)?.[1] || "";
+        res.수량 = text.match(/수량\s*(\d+)/)?.[1] || "";
+        res.총이용인원 = text.match(/총 이용 인원 정보.+\n(.+)/)?.[1].trim() || "";
+        res.입실시간 = text.match(/입실 시간 선택.+\n(.+)/)?.[1].trim() || "";
+        res.결제금액 = text.match(/결제금액\s*(.+원)/)?.[1] || "";
+        res.옵션 = text.split("옵션")[1]?.split(/요청사항|유입경로/)[0]
+          .split('\n').filter(line => !excludedOptions.some(w => line.includes(w)))
+          .join("\n").trim();
+      } else if (platform === "야놀자") {
+        const lines = text.split('\n');
+        res.예약번호 = lines[3];
+        [res.예약자, res.전화번호] = lines[7].split('/').map(x=>x.trim());
+        res.이용객실 = ["대형 카라반","복층 우드캐빈","파티룸","몽골텐트"].find(v => text.includes(v));
+        res.결제금액 = lines[5];
+        res.총이용인원 = "대인2";
+        res.수량 = "";
+        if(text.includes("<숙박>")){
+          res.이용기간 = lines[8].split(' ')[0] + "~" + lines[9].split(' ')[0];
+          res.입실시간 = "[숙박] 15시 입실 / 11시 퇴실";
+        }else{
+          res.이용기간 = lines[8].split(' ')[0];
+          res.입실시간 = lines[8].match(/\d{2}:\d{2}/)[0] + " ~ " + lines[9].match(/\d{2}:\d{2}/)[0];
+        }
+        res.옵션 = "";
+      } else if (platform === "여기어때") {
+        res.예약번호 = text.match(/예약번호:\s*(.+)/)?.[1];
+        res.예약자 = text.match(/예약자명 :\s*(.+)/)?.[1];
+        res.전화번호 = text.match(/안심번호:\s*(.+)/)?.[1];
+        res.이용객실 = ["대형 카라반","복층 우드캐빈","파티룸","몽골텐트"].find(v => text.includes(v));
+        res.결제금액 = text.match(/판매금액:\s*(.+원)/)?.[1];
+        res.총이용인원 = "대인2";
+        res.이용기간 = text.match(/입실일시:\s*(.+?)~/)?.[1].trim() + "~" +
+                      text.match(/퇴실일시:\s*(.+?)\(/)?.[1].trim();
+        res.입실시간 = "[숙박] 15시 입실 / 11시 퇴실";
+        res.옵션 = "";
+      }
+      return res;
+    }
+
+    function sendToSheet(){
+      const result = parseReservation(document.getElementById('inputData').value);
+      fetch(gasUrl + '?' + new URLSearchParams(result))
+        .then(r => r.text()).then(msg => alert(msg));
+    }
+  </script>
+  <script>
+    // script.js 파일 내용을 여기에 복사하여 붙여넣으세요.
+/* script.js */
+
+const inputData = document.getElementById('inputData');
+const outputData = document.getElementById('outputData');
+const outputData2 = document.getElementById('outputData2');
+const buttons = document.querySelectorAll('.buttons button');
+const copyBtn = document.getElementById('copyBtn');
+const btn5 = document.getElementById('btn5');
+
+// 경고 메시지 생성
+const warningMessage = document.createElement('div');
+warningMessage.textContent = '수량과 날짜를 확인하세요';
+warningMessage.style.display = 'none'; // 초기에는 표시하지 않음
+warningMessage.style.position = 'relative';
+warningMessage.style.marginLeft = '10px';
+warningMessage.style.padding = '10px';
+warningMessage.style.backgroundColor = 'red';
+warningMessage.style.color = 'white';
+warningMessage.style.fontSize = '16px';
+warningMessage.style.borderRadius = '5px';
+warningMessage.style.fontWeight = 'bold';
+warningMessage.style.animation = 'blink-animation 1.5s infinite'; // 깜빡이는 애니메이션
+
+// btn5 버튼 오른쪽에 경고 메시지 삽입
+btn5.insertAdjacentElement('afterend', warningMessage);
+
+// 수량과 날짜 확인 함수
+function checkQuantityAndDate(text) {
+  const lines = text.split('\n');
+  let quantity = 0;
+  let days = 0;
+
+  // 수량과 날짜 파악
+  lines.forEach(line => {
+    if (line.includes('수량')) {
+      const match = line.match(/\d+/); // 수량에 있는 숫자를 찾음
+      if (match) {
+        quantity = parseInt(match[0]);
+      }
+    }
+    if (line.includes('박')) {
+      // 예: "2박 3일"
+      const match = line.match(/(\d+)박\s*(\d+)일/);
+      if (match) {
+        days = parseInt(match[1]);
+      }
+    }
+  });
+
+  // 조건 만족 시 경고 메시지 표시
+  if (quantity >= 2 || days >= 2) {
+    warningMessage.style.display = 'inline-block'; // 경고 메시지 표시
+  } else {
+    warningMessage.style.display = 'none'; // 조건 미충족 시 경고 숨김
+  }
+}
+
+// 버튼 클릭 시마다 수량과 날짜 확인
+buttons.forEach(button => {
+  button.addEventListener('click', () => {
+    // 엑셀복사, 예약내역저장, 결과복사 버튼은 필터링/포맷을 안 함
+    if (
+      button.id !== 'copyBtn' &&
+      button.id !== 'excelCopyBtn' &&
+      button.id !== 'excelYanolja' &&
+      button.id !== 'excelHere' &&
+      button.id !== 'saveReservationBtn'
+    ) {
+      const filteredText = filterText(inputData.value);
+      checkQuantityAndDate(filteredText);
+      const formattedText = formatText(filteredText, button.id);
+      outputData.textContent = formattedText;
+    }
+  });
+});
+
+// "결과 복사" 버튼
+copyBtn.addEventListener('click', () => {
+  const textToCopy = outputData.textContent;
+  copyToClipboard(textToCopy);
+});
+
+function copyToClipboard(text) {
+  const tempTextArea = document.createElement('textarea');
+  tempTextArea.value = text;
+  document.body.appendChild(tempTextArea);
+  tempTextArea.select();
+  document.execCommand('copy');
+  document.body.removeChild(tempTextArea);
+  alert('결과가 복사되었습니다!');
+}
+
+/**
+ * 불필요한 키워드를 필터링해주는 함수
+ */
+function filterText(text) {
+  // 먼저 줄 단위로 분할
+  let lines = text.split('\n');
+
+  // 기존에 삭제할 키워드 목록
+  const filterKeywords = [
+    '예약번호', '예약유형', '이메일', '예약내역', '유입경로', '예약자입력정보',
+    '( 예 : 대인2, 소인1, 유아1 )', '※종일권,야간권은 입실시간만 맞추어주세요.',
+    '결제예상정보', '결제정보', '결제상태', 'NPay주문번호', '결제수단'
+  ];
+  // filterKeywords에 해당하는 줄은 삭제
+  lines = lines.filter(line =>
+    line.trim() !== '' &&
+    !filterKeywords.some(keyword => line.includes(keyword))
+  );
+
+  // 삭제할 옵션 관련 문구 목록 (해당 문구가 포함된 줄은 삭제)
+  const unwantedOptionTexts = [
+    "인원수를 꼭 체크해주세요",
+    "수영장 및 외부시설 안내",
+    "파티룸 이용 전화상담필수",
+    "객실 시설 안내",
+    "당일캠핑 안내",
+    "무통장입금 안내"
+  ];
+  lines = lines.filter(line =>
+    !unwantedOptionTexts.some(phrase => line.includes(phrase))
+  );
+
+  // (선택사항) 옵션 ~ 요청사항 사이의 줄 재정리
+  const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
+  const optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
+  if (optionsStartIndex !== -1 && optionsEndIndex !== -1) {
+    const optionsLines = lines
+      .slice(optionsStartIndex + 1, optionsEndIndex)
+      .filter(line => line.trim() !== '');
+    lines.splice(optionsStartIndex + 1, optionsEndIndex - optionsStartIndex - 1, ...optionsLines);
+  }
+
+  // (선택사항) 요청사항 ~ 유입경로 사이의 줄 재정리
+  const requestStartIndex = lines.findIndex(line => line.includes('요청사항'));
+  const requestEndIndex = lines.findIndex(line => line.includes('유입경로'));
+  if (requestStartIndex !== -1 && requestEndIndex !== -1) {
+    const requestLines = lines
+      .slice(requestStartIndex, requestEndIndex)
+      .filter(line => line.trim() !== '');
+    lines.splice(requestStartIndex, requestEndIndex - requestStartIndex, ...requestLines);
+  }
+
+  return lines.join('\n');
+}
+
+/**
+ * 최종 안내문 포맷팅
+ * buttonId에 따라 다른 안내문 + 파싱 로직
+ */
+function formatText(text, buttonId) {
+  // 우선, 라인으로 분할
+  const lines = text.split('\n\n'); 
+  let checkInTime = "";
+  const siteLine = lines.find(line => line.includes('사이트'));
+  if (siteLine) {
+    const match = siteLine.match(/\[늦은입실\s*(\d+)시\]/);
+    if (match) {
+      checkInTime = match[1];
+    }
+  }
+
+  // 버튼 아이디별 분기
+  switch (buttonId) {
+    // --------------------------------------------------------------------------------
+    // 무통장
+    // --------------------------------------------------------------------------------
+    case 'btn1':
+      return `고객님 예약 신청해 주셔서 
+진심으로 감사드립니다. 
+
+${text}
+
+*추가 옵션 설정을 정확하게 선택해 주셔야 되며 체크인 시 현장 결제도 가능합니다. (인원추가, 시간연장, 얼리체크인, 레이트체크아웃 / 바베큐, 불멍, 온수풀, 고기세트 별도)
+
+*숙박은 “15시”부터 입실 가능하며 수영은 13시부터 이용하실 수 있습니다. 
+얼리체크인을 원하실 경우 카톡으로 별도 문의주세요. 
+
+▶계좌번호  우리 1005 504 540028 (주) 유연음
+
+※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.
+`;
+    // --------------------------------------------------------------------------------
+    // 숙박
+    // --------------------------------------------------------------------------------
+    case 'btn2':
+      text = text.replace('결제예상금액', '결제금액');
+      return `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+${text}
+
+*기준인원 2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다. 
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다. 
+*대형풀 무료 이용 / 온수풀 유료 이용 
+
+*숙박은 “15시”부터 입실 가능하며 수영장 이용은 13시부터 이용하실 수 있습니다. 
+얼리체크인/레이트체크아웃을 원하실 경우 카톡 또는 문자로 별도 문의주세요. 
+
+☆쿠폰 (이용완료 후에 사용 가능)
+-택시비 최대 10000원 지원 쿠폰
+-재방문 고객 10000원 할인 쿠폰
+
+체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다. 
+
+(광고) 
+양손 가볍게, 잼잼 바베큐 키트 출시🍖
+https://litt.ly/jamjam_bbq
+`;
+    // --------------------------------------------------------------------------------
+    // 당일캠핑
+    // --------------------------------------------------------------------------------
+    case 'btn3':
+      return `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+*기본 이용시간은 6시간이며 예약해주신 방문시간을 엄수해 주세요.
+
+${text}
+
+*2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다.
+ 
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다. 
+
+*대형풀 무료 이용 / 온수풀 유료 이용 
+
+*예약 시 시간연장 신청을 안 할 경우에는 추가 시간연장이 불가할 수 있습니다. 당일 일정에 따라 입실 후에도 시간연장이 가능할 수 있으니 별도 문의 바랍니다.
+
+*빠른 입실을 원하시면 카톡 또는 문자로 가능 여부를 문의하시기 바랍니다. 시간연장은 30분, 1시간 단위로 가능하며 종일권( ~22시), 야간권(22시~ ) 상품도 있으니 참고바랍니다.
+
+
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.
+
+(광고) 
+양손 가볍게, 잼잼 바베큐 키트 출시🍖
+https://litt.ly/jamjam_bbq
+`;
+    // --------------------------------------------------------------------------------
+    // 늦은 입실
+    // --------------------------------------------------------------------------------
+    case 'btn4':
+      return `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+${text}
+
+*늦은입실 상품이라 입실시간은 ${checkInTime}시, 퇴실시간은 익일 11시이며
+대형수영장 이용시간은 당일 21시까지입니다. 
+
+*기준인원 2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다. 
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다. 
+*대형풀 무료, 온수풀 유료
+
+☆쿠폰 
+(이용완료 후에 쿠폰 사용이 가능합니다.)
+
+-택시비 최대 10000원 지원 쿠폰
+-재방문 고객 10000원 할인 쿠폰
+
+체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
+
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다. 
+
+(광고) 
+양손 가볍게, 잼잼 바베큐 키트 출시🍖
+https://litt.ly/jamjam_bbq
+`;
+    // --------------------------------------------------------------------------------
+    // 빠른 입실
+    // --------------------------------------------------------------------------------
+    case 'btn5':
+      return `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+${text}
+
+*빠른입실은 “9시”부터 입실 가능하며 수영장 이용은 13시부터 이용하실 수 있습니다. 
+얼리체크인/레이트체크아웃을 원하실 경우 카톡 또는 문자로 별도 문의주세요. 
+
+*기준인원 2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다. 
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다. 
+*대형풀 무료 이용 / 온수풀 유료 이용 
+
+☆쿠폰 (이용완료 후에 사용 가능)
+-택시비 최대 10000원 지원 쿠폰
+-재방문 고객 10000원 할인 쿠폰
+
+체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다. 
+
+(광고) 
+양손 가볍게, 잼잼 바베큐 키트 출시🍖
+https://litt.ly/jamjam_bbq
+`;
+    // --------------------------------------------------------------------------------
+    // 야놀자
+    // --------------------------------------------------------------------------------
+    case 'btn6': {
+      const details = parseYanoljaText(inputData.value);
+      return `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+야놀자로 예약하셨다면
+여기로 성함과 전화번호를 꼭 남겨주세요!
+
+${details}
+
+*기준인원 2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다.
+
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다.
+*대형풀 무료 이용 / 온수풀 유료 이용
+
+*대실 이용시간은 6시간이며 예약해주신 방문시간을 엄수해 주세요.
+*숙박은 “15시”부터 입실 가능하며 수영장 이용은 13시부터 이용하실 수 있습니다.
+
+얼리체크인/레이트체크아웃을 원하실 경우 카톡 또는 문자로 별도 문의주세요.
+
+체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.
+
+(광고)
+양손 가볍게, 잼잼 바베큐 키트 출시🍖
+https://litt.ly/jamjam_bbq
+`;
+    }
+    // --------------------------------------------------------------------------------
+    // 여기어때
+    // --------------------------------------------------------------------------------
+    case 'btn8': {
+      const details = parseHereText(inputData.value);
+      return `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+여기어때로 예약하셨다면
+여기로 성함과 전화번호를 꼭 남겨주세요!
+
+${details}
+
+*기준인원 2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다.
+
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다.
+*대형풀 무료 이용 / 온수풀 유료 이용
+
+*숙박은 “15시”부터 입실 가능하며 수영장 이용은 13시부터 이용하실 수 있습니다.
+얼리체크인/레이트체크아웃을 원하실 경우 카톡 또는 문자로 별도 문의주세요.
+
+☆쿠폰 (이용완료 후에 사용 가능)
+-택시비 최대 10000원 지원 쿠폰
+-재방문 고객 10000원 할인 쿠폰
+
+체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.
+
+(광고)
+양손 가볍게, 잼잼 바베큐 키트 출시🍖
+https://litt.ly/jamjam_bbq
+`;
+    }
+    // --------------------------------------------------------------------------------
+    default:
+      return text;
+  }
+}
+
+/**
+ * 야놀자 텍스트 파싱
+ * (체크인 줄에 '~'가 있으면, 바로 다음 줄을 체크아웃으로 처리)
+ */
+function parseYanoljaText(rawText) {
+  // 예시:
+  // 야놀자 미리예약
+  // <숙박>
+  // 양주 잼잼
+  // 2501132103480008
+  //
+  // (오픈 할인) 대형 카라반
+  // 168,000원
+  //
+  // 서민정 / 050350553647
+  // 2025-01-16(목) 15:00~
+  // 2025-01-17(금) 11:00 (1박)
+  // 도보방문
+
+  let roomType = "";
+  let price = "";
+  let name = "";
+  let phone = "";
+  let checkIn = "";
+  let checkOut = "";
+  let useType = ""; // <숙박> or <대실>
+
+  const lines = rawText
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l !== '');
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    // <숙박> / <대실> 구분
+    if (line.startsWith('<') && line.endsWith('>')) {
+      useType = line.replace(/[<>]/g, '');
+    }
+    // 금액 (끝에 "원"이 있을 가능성)
+    else if (line.match(/원$/)) {
+      price = line;
+    }
+    // 예약자 / 전화번호
+    else if (line.includes('/') && line.includes(' ')) {
+      const parts = line.split('/');
+      if (parts.length >= 2) {
+        name = parts[0].trim();
+        phone = parts[1].trim();
+      }
+    }
+    // 체크인 (현재 줄에 '~'가 있으면 체크인)
+    else if (line.includes('~')) {
+      checkIn = line;
+      if (i + 1 < lines.length) {
+        checkOut = lines[i + 1];
+      }
+    }
+    // 객실타입 (카라반, 복층, 파티룸, 몽골 등)
+    else if (
+      line.includes('카라반') ||
+      line.includes('복층') ||
+      line.includes('파티룸') ||
+      line.includes('몽골')
+    ) {
+      roomType = line;
+    }
+  }
+
+  if (!checkOut) {
+    checkOut = "체크아웃 시간은 별도 확인";
+  }
+
+  return `- 이용타입: ${useType}
+- 객실타입: ${roomType}
+- 예약자: ${name}
+- 전화번호: ${phone}
+- 체크인: ${checkIn}
+- 체크아웃: ${checkOut}
+- 결제금액: ${price}
+- (기준 인원: 대인2)`;
+}
+
+/**
+ * 여기어때 텍스트 파싱
+ */
+function parseHereText(rawText) {
+  // 예시:
+  // [여기어때] 미리예약 - 숙박
+  // 예약번호: 25011300000D48YE1
+  //
+  // 객실정보: 양주 잼잼 / 대형 카라반
+  //
+  // 판매금액: 268,000원
+  // 입실일시: 1/18 (토) 15:00 ~
+  // 퇴실일시: 1/19 (일) 11:00 (1박)
+  //
+  // + 고객정보 +
+  // 예약자명 : 한수정
+  // 안심번호: 050440377886
+  // ...
+  let roomType = "";
+  let price = "";
+  let name = "";
+  let phone = "";
+  let checkIn = "";
+  let checkOut = "";
+
+  const lines = rawText.split('\n').map(l => l.trim()).filter(l => l);
+
+  lines.forEach(line => {
+    if (line.startsWith('객실정보:')) {
+      roomType = line.replace('객실정보:', '').trim();
+    } else if (line.startsWith('판매금액:')) {
+      price = line.replace('판매금액:', '').trim();
+    } else if (line.startsWith('예약자명 :')) {
+      name = line.replace('예약자명 :', '').trim();
+    } else if (line.startsWith('안심번호:')) {
+      phone = line.replace('안심번호:', '').trim();
+    } else if (line.startsWith('입실일시:')) {
+      checkIn = line.replace('입실일시:', '').trim();
+    } else if (line.startsWith('퇴실일시:')) {
+      checkOut = line.replace('퇴실일시:', '').trim();
+    }
+  });
+
+  return `- 객실정보: ${roomType}
+- 예약자: ${name}
+- 전화번호: ${phone}
+- 입실일시: ${checkIn}
+- 퇴실일시: ${checkOut}
+- 결제금액: ${price}
+- (기준 인원: 대인2, 이용타입: 숙박)`;
+}
+
+    // 이 공간에 실제 script.js 파일의 모든 코드를 붙여넣으면 됩니다.
+  </script>
+</head>
+<body>
+  <h1>예약업무 관리</h1>
+  <textarea id="inputData" placeholder="예약 텍스트를 입력하세요"></textarea>
+  <div class="buttons">
+    <button id="btn1">예약안내문자(무통장)</button>
+    <button id="btn2">예약확정문자(숙박)</button>
+    <button id="btn3">예약확정문자(당일캠핑)</button>
+    <button id="btn4">예약확정문자(늦은 입실)</button>
+    <button id="btn5">예약확정문자(빠른 입실)</button>
+    <button id="btn6">예약확정문자(야놀자)</button>
+    <button id="btn8">예약확정문자(여기어때)</button>
+  </div>
+  <div class="button-container">
+    <button id="copyBtn">결과 복사</button>
+    <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
+  </div>
+  <pre id="outputData">결과가 여기에 출력됩니다.</pre>
+</body>
+</html>
