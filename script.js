@@ -15,9 +15,44 @@ function parseReservation(text) {
 }
 
 function parseNaverReservation(text) {
-  // 네이버 예약정보 파싱 로직 (다음 단계에서 작성)
-  return {};
+  const lines = text.split('\n').map(line => line.trim());
+
+  const getValue = (keyword) => {
+    const line = lines.find(l => l.includes(keyword));
+    return line ? line.replace(keyword, '').trim() : '';
+  };
+
+  const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
+  const totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
+  const optionLines = lines.slice(optionsStartIndex + 1, totalPeopleIndex).filter(Boolean);
+
+  // 불필요 옵션 필터링
+  const unwantedOptions = [
+    '인원수를 꼭 체크해주세요.',
+    '수영장 및 외부시설 안내',
+    '객실 시설 안내',
+    'Please make sure to check the number of people.',
+    'Information on swimming pools and external facilities',
+    'Room Facilities Guide'
+  ];
+
+  const filteredOptions = optionLines.filter(line => !unwantedOptions.some(unwanted => line.includes(unwanted)));
+
+  return {
+    예약번호: getValue('예약번호'),
+    예약자: getValue('예약자'),
+    전화번호: getValue('전화번호'),
+    이용객실: ['대형 카라반','복층 우드캐빈','파티룸','몽골텐트'].find(room => text.includes(room)) || '',
+    이용기간: getValue('이용기간'),
+    수량: getValue('수량'),
+    옵션: filteredOptions.join(', '),
+    총이용인원: getValue('총 이용 인원 정보'),
+    입실시간: getValue('입실 시간 선택'),
+    결제금액: getValue('결제금액'),
+    예약플랫폼: '네이버'
+  };
 }
+
 
 function parseYanoljaReservation(text) {
   // 야놀자 예약정보 파싱 로직 (다음 단계에서 작성)
