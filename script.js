@@ -153,9 +153,53 @@ function parseYanoljaReservation(text) {
 
 
 function parseHereReservation(text) {
-  // 여기어때 예약정보 파싱 로직 (다음 단계에서 작성)
-  return {};
+  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+
+  const 예약번호라인 = lines.find(line => line.includes('예약번호:'));
+  const 예약번호 = 예약번호라인.split(':')[1].trim();
+
+  const 객실정보라인 = lines.find(line => line.includes('객실정보:'));
+  const 객실정보 = 객실정보라인.split('/')[1].trim();
+
+  const 판매금액라인 = lines.find(line => line.includes('판매금액:'));
+  const 결제금액 = 판매금액라인.split(':')[1].trim();
+
+  const 예약자라인 = lines.find(line => line.includes('예약자명 :'));
+  const 예약자 = 예약자라인.split(':')[1].trim();
+
+  const 안심번호라인 = lines.find(line => line.includes('안심번호:'));
+  const 전화번호 = 안심번호라인.split(':')[1].trim();
+
+  const 입실일시라인 = lines.find(line => line.includes('입실일시:'));
+  const 퇴실일시라인 = lines.find(line => line.includes('퇴실일시:'));
+
+  const formatDate = (dateStr) => {
+    const [m, d, day] = dateStr.match(/(\d+)\/(\d+)\s*\((.)\)/).slice(1);
+    const year = new Date().getFullYear(); // 현재 연도를 사용하거나 명시적으로 지정 가능
+    return `${year}. ${Number(m)}. ${Number(d)}.(${day})`;
+  };
+
+  const 이용기간 = `${formatDate(입실일시라인)}~${formatDate(퇴실일시라인)}`;
+
+  const 입실시간Match = 입실일시라인.match(/\d{2}:\d{2}/)[0];
+  const 퇴실시간Match = 퇴실일시라인.match(/\d{2}:\d{2}/)[0];
+  const 입실시간 = `[숙박] ${입실시간Match} 입실 / ${퇴실시간Match} 퇴실`;
+
+  return {
+    예약번호,
+    예약자,
+    전화번호,
+    이용객실: 객실정보,
+    이용기간,
+    수량: '1', // 기본값 1로 설정
+    옵션: '', // 옵션 없음
+    총이용인원: '대인2', // 기본값으로 설정
+    입실시간,
+    결제금액,
+    예약플랫폼: '여기어때'
+  };
 }
+
 
 function processReservation() {
   const text = document.getElementById('inputData').value;
