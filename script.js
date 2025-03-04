@@ -1,5 +1,22 @@
 const gasUrl = 'https://script.google.com/macros/s/AKfycbxP3x6-OxrpYC8-78bIzHumTS9cEEbNpTBEdKzcjwR_drgOTuEiCNEHA4KyMqQWIUuQ/exec'; // GAS 배포 후 URL 입력
 
+function verifyPassword() {
+  const enteredPassword = document.getElementById('passwordInput').value.trim();
+  
+  fetch(gasUrl + '?password=' + encodeURIComponent(enteredPassword))
+    .then(r => r.text())
+    .then(msg => {
+      if (msg === "비밀번호가 틀렸습니다.") {
+        alert(msg);
+      } else {
+        document.getElementById('passwordContainer').style.display = 'none';
+        document.querySelectorAll('header, h1, textarea, .buttons, .button-container, #outputData')
+          .forEach(el => el.style.display = 'block');
+      }
+    })
+    .catch(err => alert('오류 발생: ' + err));
+}
+
 function detectPlatform(text) {
   if (text.includes("야놀자")) return "야놀자";
   if (text.includes("여기어때")) return "여기어때";
