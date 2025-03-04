@@ -2,154 +2,72 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>예약 업무 관리</title>
+  <title>예약업무 관리</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* 비밀번호 입력 모달 스타일 */
-    #passwordContainer {
-      position: fixed; top:0; left:0; right:0; bottom:0;
-      display: flex; justify-content: center; align-items: center;
-      background-color: #f0f0f0; z-index: 10000;
-    }
-    #passwordInput {
-      padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size:16px;
-    }
-    #passwordSubmit {
-      padding:10px; cursor:pointer; margin-left:5px; font-size:16px;
-    }
-
-    /* 양식 수정 모달 스타일 */
-    .modal {
-      display: none; position: fixed; z-index: 2000; left:0; top:0;
-      width:100%; height:100%; background:rgba(0,0,0,0.5); overflow:auto;
-    }
-
-    .modal-content {
-      background-color: #fff; margin: 10% auto; padding:20px;
-      width: 80%; border-radius: 8px;
-    }
-
-    .close {
-      float:right; cursor:pointer; font-size:28px;
-    }
-
-    .modal-content textarea {
-      width:100%; height:100px; margin-bottom:10px;
-    }
-  </style>
 </head>
-
 <body>
-<!-- 비밀번호 입력화면 -->
-<div id="passwordContainer">
-  <input type="password" id="passwordInput" placeholder="비밀번호를 입력하세요">
-  <button id="passwordSubmit" onclick="verifyPassword()">확인</button>
-</div>
 
-<!-- 메인 화면 (기본적으로 숨김상태) -->
-<header class="top-menu" style="display:none;">
-  <nav>
-    <ul>
-      <li><a href="index.html">예약업무</a></li>
-      <li><a href="#">예약관리</a></li>
-      <li><a href="#">예약캘린더</a></li>
-    </ul>
-  </nav>
-</header>
+  <header class="top-menu">
+    <nav>
+      <ul>
+        <li><a href="예약업무.html">예약업무</a></li>
+        <li><a href="예약관리.html">예약관리</a></li>
+        <li><a href="예약캘린더.html">예약캘린더</a></li>
+      </ul>
+    </nav>
+  </header>
 
-<h1 style="display:none;">예약 업무 관리</h1>
+  <h1>예약업무 관리</h1>
 
-<textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요" style="display:none;"></textarea>
+  <textarea id="inputData" placeholder="예약 텍스트를 입력하세요"></textarea>
 
-<div class="buttons" style="display:none;">
-  <button onclick="processReservation()">파싱 결과 보기</button>
-  <button onclick="generateReservationMessage()">안내문자 양식적용</button>
-  <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
-</div>
-
-<div class="button-container" style="display:none;">
-  <button onclick="openTemplateModal()">양식 변경하기</button>
-</div>
-
-<pre id="outputData" style="display:none;">여기에 결과가 표시됩니다.</pre>
-
-<!-- 양식수정 모달창 -->
-<div id="templateModal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="closeTemplateModal()">&times;</span>
-    <h3>안내문자 양식 수정</h3>
-
-    <label>무통장 양식:</label>
-    <textarea id="templateBank"></textarea>
-
-    <label>네이버 숙박 양식:</label>
-    <textarea id="templateNaverStay"></textarea>
-
-    <label>네이버 당일 양식:</label>
-    <textarea id="templateNaverDay"></textarea>
-
-    <label>야놀자 양식:</label>
-    <textarea id="templateYanolja"></textarea>
-
-    <label>여기어때 양식:</label>
-    <textarea id="templateHere"></textarea>
-
-    <button onclick="saveTemplates()">양식 저장하기</button>
+  <div class="button-container">
+    <button onclick="generateReservationMessage()">안내문자 양식적용</button>
+    <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
+    <button onclick="openTemplateModal()">양식 변경하기</button>
   </div>
-</div>
 
-<!-- 결과 출력 -->
-<script src="script.js"></script>
+  <pre id="outputData">결과가 여기에 출력됩니다.</pre>
 
-<script>
-  // 비밀번호 검증 로직
-  function verifyPassword() {
-    const enteredPassword = document.getElementById('passwordInput').value.trim();
-    fetch(gasUrl + '?password=' + enteredPassword)
-      .then(r => r.text())
-      .then(msg => {
-        if (msg === "비밀번호 확인 완료") {
-          document.getElementById('passwordContainer').style.display = 'none';
-          document.querySelectorAll('header, h1, textarea, .buttons, .button-container, #outputData')
-            .forEach(el => el.style.display = 'block');
-        } else {
-          alert('비밀번호가 틀렸습니다.');
-        }
-      })
-      .catch(err => alert('오류 발생: ' + err));
-  }
+  <!-- 양식 변경 모달창 -->
+  <div id="templateModal" class="modal" style="display:none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeTemplateModal()">&times;</span>
+      <h2>양식 변경하기</h2>
+      <textarea id="templateInput" rows="15" cols="80"></textarea>
+      <button onclick="saveTemplate()">저장하기</button>
+    </div>
+  </div>
 
-  // 양식 수정 모달 열기
-  function openTemplateModal() {
-    document.getElementById('templateBank').value = localStorage.getItem('templateBank') || '';
-    document.getElementById('templateNaverStay').value = localStorage.getItem('templateNaverStay') || '';
-    document.getElementById('templateNaverDay').value = localStorage.getItem('templateNaverDay') || '';
-    document.getElementById('templateYanolja').value = localStorage.getItem('templateYanolja') || '';
-    document.getElementById('templateHere').value = localStorage.getItem('templateHere') || '';
+  <script src="script.js"></script>
+  <script>
+    // 양식 변경 모달 열기
+    function openTemplateModal() {
+      document.getElementById('templateInput').value = localStorage.getItem('reservationTemplate') || '';
+      document.getElementById('templateModal').style.display = 'block';
+    }
 
-    document.getElementById('templateModal').style.display = 'block';
-  }
+    // 양식 변경 모달 닫기
+    function closeTemplateModal() {
+      document.getElementById('templateModal').style.display = 'none';
+    }
 
-  function closeTemplateModal() {
-    document.getElementById('templateModal').style.display = 'none';
-  }
+    // 양식 변경 저장
+    function saveTemplate() {
+      const newTemplate = document.getElementById('templateInput').value;
+      localStorage.setItem('reservationTemplate', newTemplate);
+      alert('양식이 저장되었습니다.');
+      closeTemplateModal();
+    }
 
-  function saveTemplates() {
-    localStorage.setItem('templateBank', document.getElementById('templateBank').value);
-    localStorage.setItem('templateNaverStay', document.getElementById('templateNaverStay').value);
-    localStorage.setItem('templateNaverDay', document.getElementById('templateNaverDay').value);
-    localStorage.setItem('templateYanolja', document.getElementById('templateYanolja').value);
-    localStorage.setItem('templateHere', document.getElementById('templateHere').value);
-
-    alert('양식이 저장되었습니다.');
-    closeTemplateModal();
-  }
-
-  // 엔터로도 비밀번호 확인 가능하게
-  document.getElementById('passwordInput').addEventListener('keypress', e => {
-    if (e.key === 'Enter') verifyPassword();
-  });
-</script>
+    // 모달 외부 클릭 시 닫기
+    window.onclick = function(event) {
+      const modal = document.getElementById('templateModal');
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+  </script>
 
 </body>
 </html>
