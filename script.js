@@ -77,18 +77,29 @@ function parseNaverReservation(text) {
   if (checkInTimeIndex !== -1 && checkInTimeIndex + 1 < lines.length) {
     입실시간 = lines[checkInTimeIndex + 1].trim();
   }
-  
+
   const 이용기간 = getValue('이용기간');
-  let 이용타입 = '숙박';
+  let 이용타입 = '숙박'; // 기본값 설정
+
   if (siteLine.includes('늦은입실')) {
     const lateMatch = siteLine.match(/늦은입실\s*(\d+)시/);
     if (lateMatch) 이용타입 = `늦은 입실 ${lateMatch[1]}시`;
   } else if (siteLine.includes('빠른입실')) {
-    이용타입 = '숙박-체크인시간 꼭 지켜주세요';
+    이용타입 = '빠른 입실 - 체크인시간 꼭 지켜주세요';
   } else if (이용기간.includes('당일') || 이용기간.includes('시간')) {
-    이용타입 = 이용기간.includes('4시간') ? '당일캠핑 4시간' : '당일캠핑 6시간';
+    if (이용기간.includes('4시간')) {
+      이용타입 = '당일캠핑 4시간';
+    } else if (이용기간.includes('6시간')) {
+      이용타입 = '당일캠핑 6시간';
+    } else {
+      이용타입 = '당일캠핑';
+    }
+  } else {
+    이용타입 = '숙박';
   }
 
+
+  
   return {
     예약번호: getValue('예약번호'),
     예약자,
