@@ -1,4 +1,4 @@
-const gasUrl = 'https://script.google.com/macros/s/AKfycbzRvkXlVoOazsIc-CHecAuImyxAtC1ZrNjXbxYdfw4p9jcoorTlurGT1eynzaj_dU0/exec'; // GAS 배포 후 URL 입력
+const gasUrl = 'https://script.google.com/macros/s/AKfycbxP3x6-OxrpYC8-78bIzHumTS9cEEbNpTBEdKzcjwR_drgOTuEiCNEHA4KyMqQWIUuQ/exec'; // GAS 배포 후 URL 입력
 
 function detectPlatform(text) {
   if (text.includes("야놀자")) return "야놀자";
@@ -116,19 +116,19 @@ function parseYanoljaReservation(text) {
 
   const formatDate = date => {
     const [y, m, d, day] = date.match(/(\d{4})-(\d{2})-(\d{2})\((.)\)/).slice(1);
-    return ${Number(y)}. ${Number(m)}. ${Number(d)}.(${day});
+    return `${Number(y)}. ${Number(m)}. ${Number(d)}.(${day})`;
   };
 
   if (이용유형.includes('대실')) {
     이용기간 = formatDate(체크인라인.split(' ')[0]);
     const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/)[0];
     const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/)[0];
-    입실시간 = ${입실시간Match}~${퇴실시간Match};
+    입실시간 = `${입실시간Match}~${퇴실시간Match}`;
   } else {
-    이용기간 = ${formatDate(체크인라인.split(' ')[0])}~${formatDate(체크아웃라인.split(' ')[0])};
+    이용기간 = `${formatDate(체크인라인.split(' ')[0])}~${formatDate(체크아웃라인.split(' ')[0])}`;
     const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/)[0];
     const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/)[0];
-    입실시간 = [숙박] ${입실시간Match} 입실 / ${퇴실시간Match} 퇴실;
+    입실시간 = `[숙박] ${입실시간Match} 입실 / ${퇴실시간Match} 퇴실`;
   }
 
   return {
@@ -186,17 +186,17 @@ function parseHereReservation(text) {
       year += 1; // 예약한 날짜보다 이전 날짜라면 다음 해로 설정
     }
 
-    return ${year}. ${Number(m)}. ${Number(d)}.(${day});
+    return `${year}. ${Number(m)}. ${Number(d)}.(${day})`;
   };
 
   // 날짜 추론 적용
   const 입실날짜 = formatDate(입실일시라인, 예약날짜);
   const 퇴실날짜 = formatDate(퇴실일시라인, 예약날짜);
-  const 이용기간 = ${입실날짜}~${퇴실날짜};
+  const 이용기간 = `${입실날짜}~${퇴실날짜}`;
 
   const 입실시간Match = 입실일시라인.match(/\d{2}:\d{2}/)[0];
   const 퇴실시간Match = 퇴실일시라인.match(/\d{2}:\d{2}/)[0];
-  const 입실시간 = [숙박] ${입실시간Match} 입실 / ${퇴실시간Match} 퇴실;
+  const 입실시간 = `[숙박] ${입실시간Match} 입실 / ${퇴실시간Match} 퇴실`;
 
   return {
     예약번호,
@@ -226,13 +226,13 @@ function createMessage(type) {
   let message = '';
 
   switch(type) {
-    case 1: message = 무통장 예약 안내\n${JSON.stringify(data)}; break;
-    case 2: message = 숙박 예약 확정\n${JSON.stringify(data)}; break;
-    case 3: message = 당일캠핑 예약 확정\n${JSON.stringify(data)}; break;
-    case 4: message = 늦은 입실 예약 확정\n${JSON.stringify(data)}; break;
-    case 5: message = 빠른 입실 예약 확정\n${JSON.stringify(data)}; break;
-    case 6: message = 야놀자 예약 확정\n${JSON.stringify(data)}; break;
-    case 7: message = 여기어때 예약 확정\n${JSON.stringify(data)}; break;
+    case 1: message = `무통장 예약 안내\n${JSON.stringify(data)}`; break;
+    case 2: message = `숙박 예약 확정\n${JSON.stringify(data)}`; break;
+    case 3: message = `당일캠핑 예약 확정\n${JSON.stringify(data)}`; break;
+    case 4: message = `늦은 입실 예약 확정\n${JSON.stringify(data)}`; break;
+    case 5: message = `빠른 입실 예약 확정\n${JSON.stringify(data)}`; break;
+    case 6: message = `야놀자 예약 확정\n${JSON.stringify(data)}`; break;
+    case 7: message = `여기어때 예약 확정\n${JSON.stringify(data)}`; break;
   }
 
   navigator.clipboard.writeText(message).then(() => alert('안내문 복사됨'));
@@ -245,10 +245,18 @@ function copyResult() {
 
 function sendToSheet() {
   const data = parseReservation(document.getElementById('inputData').value);
-  fetch(gasUrl + '?' + new URLSearchParams(data))
+  const params = new URLSearchParams({
+  ...data,
+  옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
+  });
+
+  fetch(gasUrl + '?' + params)
     .then(r => r.text())
-    .then(msg => alert(msg));
+    .then(msg => alert(msg))
+    .catch(err => alert('전송 중 오류 발생: ' + err));
 }
+
+
 
 function generateReservationMessage() {
   const rawText = document.getElementById('inputData').value;
@@ -256,22 +264,22 @@ function generateReservationMessage() {
   let message = '';
 
   // 파싱된 내용을 보기 좋게 구성하는 공통함수
-  const formattedParsedData = 
+  const formattedParsedData = `
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
 - 전화번호: ${data.전화번호}
 - 이용객실: ${data.이용객실}
 - 이용기간: ${data.이용기간}
 - 수량: ${data.수량}
-- 옵션: ${data.옵션 || '없음'}
+- 옵션: ${data.옵션 ? data.옵션.replace(/, /g, '\n') : '없음'}
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}
-- 예약플랫폼: ${data.예약플랫폼};
+- 예약플랫폼: ${data.예약플랫폼}`;
 
   // 무통장 (네이버 무통장 신청인 경우)
   if (rawText.includes('무통장할인')) {
-    message = 고객님 예약 신청해 주셔서 진심으로 감사드립니다.
+    message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
 
 ${formattedParsedData}
 
@@ -283,11 +291,11 @@ ${formattedParsedData}
 
 ▶계좌번호  우리 1005 504 540028 (주) 유연음
 
-※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.;
+※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
   } 
   // 네이버 당일캠핑
   else if (data.예약플랫폼 === '네이버' && data.이용기간 && !data.이용기간.includes('~')) {
-    message = [양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+    message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
 *기본 이용시간은 6시간이며 예약해주신 방문시간을 엄수해 주세요.
 
@@ -307,11 +315,11 @@ ${formattedParsedData}
 
 (광고) 
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
-https://litt.ly/jamjam_bbq;
+https://litt.ly/jamjam_bbq`;
   } 
   // 네이버 숙박
   else if (data.예약플랫폼 === '네이버') {
-    message = [양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+    message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
 ${formattedParsedData}
 
@@ -331,11 +339,11 @@ ${formattedParsedData}
 
 (광고) 
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
-https://litt.ly/jamjam_bbq;
+https://litt.ly/jamjam_bbq`;
   }
   // 야놀자
   else if (data.예약플랫폼 === '야놀자') {
-    message = [양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+    message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
 야놀자로 예약하셨다면
 여기로 성함과 전화번호를 꼭 남겨주세요!
@@ -357,11 +365,11 @@ ${formattedParsedData}
 
 (광고)
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
-https://litt.ly/jamjam_bbq;
+https://litt.ly/jamjam_bbq`;
   }
   // 여기어때
   else if (data.예약플랫폼 === '여기어때') {
-    message = [양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+    message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
 여기어때로 예약하셨다면
 여기로 성함과 전화번호를 꼭 남겨주세요!
@@ -385,10 +393,106 @@ ${formattedParsedData}
 
 (광고)
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
-https://litt.ly/jamjam_bbq;
+https://litt.ly/jamjam_bbq`;
   }
 
   // 최종 결과를 화면에 표시 및 클립보드에 복사
   document.getElementById('outputData').textContent = message;
   navigator.clipboard.writeText(message).then(() => alert('안내문자가 클립보드에 복사되었습니다.'));
+}
+
+// 모달창 열기
+function openTemplateModal() {
+  document.getElementById('templateBank').value = localStorage.getItem('templateBank') || defaultTemplates.bank;
+  document.getElementById('templateNaverStay').value = localStorage.getItem('templateNaverStay') || defaultTemplates.naverStay;
+  document.getElementById('templateNaverDay').value = localStorage.getItem('templateNaverDay') || defaultTemplates.naverDay;
+  document.getElementById('templateYanolja').value = localStorage.getItem('templateYanolja') || defaultTemplates.yanolja;
+  document.getElementById('templateHere').value = localStorage.getItem('templateHere') || defaultTemplates.here;
+
+  document.getElementById('templateModal').style.display = 'block';
+}
+
+// 모달창 닫기
+function closeTemplateModal() {
+  document.getElementById('templateModal').style.display = 'none';
+}
+
+// 기본 양식 설정
+const defaultTemplates = {
+  bank: `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
+
+[[파싱된 내용]]
+
+*추가 옵션 설정을 정확하게 선택해 주셔야 되며 체크인 시 현장 결제도 가능합니다.
+(인원추가, 시간연장, 얼리체크인, 레이트체크아웃 / 바베큐, 불멍, 온수풀, 고기세트 별도)
+
+*숙박은 “15시”부터 입실 가능하며 수영은 13시부터 이용하실 수 있습니다.
+얼리체크인을 원하실 경우 카톡으로 별도 문의주세요.
+
+▶계좌번호  우리 1005 504 540028 (주) 유연음
+
+※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`,
+  
+  naverStay: `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+[[파싱된 내용]]
+
+*기준인원 2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다.
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다.
+*대형풀 무료 이용 / 온수풀 유료 이용
+
+*숙박은 “15시”부터 입실 가능하며 수영장 이용은 13시부터 이용하실 수 있습니다.
+얼리체크인/레이트체크아웃을 원하실 경우 카톡 또는 문자로 별도 문의주세요.
+
+☆쿠폰 (이용완료 후에 사용 가능)
+-택시비 최대 10000원 지원 쿠폰
+-재방문 고객 10000원 할인 쿠폰
+
+체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.
+
+(광고) 
+양손 가볍게, 잼잼 바베큐 키트 출시🍖
+https://litt.ly/jamjam_bbq`,
+
+  naverDay: `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+*기본 이용시간은 6시간이며 예약해주신 방문시간을 엄수해 주세요.
+
+[[파싱된 내용]]
+
+*2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다.
+
+*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다.
+
+*대형풀 무료 이용 / 온수풀 유료 이용
+
+예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.`,
+
+  yanolja: `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+야놀자로 예약하셨다면
+여기로 성함과 전화번호를 꼭 남겨주세요!
+
+[[파싱된 내용]]`,
+
+  here: `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
+
+여기어때로 예약하셨다면
+여기로 성함과 전화번호를 꼭 남겨주세요!
+
+[[파싱된 내용]]`
+  
+};
+
+// 양식 저장하기
+function saveTemplates() {
+  localStorage.setItem('templateBank', document.getElementById('templateBank').value);
+  localStorage.setItem('templateNaverStay', document.getElementById('templateNaverStay').value);
+  localStorage.setItem('templateNaverDay', document.getElementById('templateNaverDay').value);
+  localStorage.setItem('templateYanolja', document.getElementById('templateYanolja').value);
+  localStorage.setItem('templateHere', document.getElementById('templateHere').value);
+
+  alert('양식이 저장되었습니다.');
+  closeTemplateModal();
 }
