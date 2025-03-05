@@ -249,13 +249,22 @@ function sendToSheet() {
   ...data,
   옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
   });
+  
+  const isBankTransfer = document.getElementById('inputData').value.includes('무통장') ||
+                         document.getElementById('inputData').value.includes('결제예상금액');
+  
+  if (isBankTransfer) data.예약플랫폼 = '네이버무통장';  
 
-  fetch(gasUrl + '?' + params)
-    .then(r => r.text())
-    .then(msg => alert(msg))
-    .catch(err => alert('전송 중 오류 발생: ' + err));
+  fetch(gasUrl, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.text())
+  .then(msg => alert(msg))
+  .catch(err => alert('오류 발생: '+err));
 }
-
 
 
 function generateReservationMessage() {
