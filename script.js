@@ -520,8 +520,8 @@ function removeRoom(btn){
   btn.parentElement.remove();
 }
 
-// 수기 입력 폼 내용을 textarea와 같은 형태로 변환하여 파싱 처리
-function manualReservationParsing(){
+// 수기 입력 데이터를 textarea에 적용하여 기존 파싱 로직과 연동
+function manualReservationParsing() {
   const reservationNumber = new Date().getTime();
   const reservationName = document.getElementById('manualReservationName').value;
   const phoneNumber = document.getElementById('phoneNumber').value;
@@ -546,7 +546,7 @@ function manualReservationParsing(){
 
   rooms = rooms.slice(0, -2); // 마지막 쉼표 제거
 
-  const parsedResult = `
+  const formattedData = `
 예약번호: ${reservationNumber}
 예약자: ${reservationName}
 전화번호: ${phoneNumber}
@@ -554,15 +554,15 @@ function manualReservationParsing(){
 이용기간: ${period}
 수량: ${totalQuantity}
 옵션: ${options}
-총 이용 인원: ${totalGuests}
+총 이용인원: ${totalGuests}
 입실시간: ${checkinTime}
 결제금액: ${payment}
-예약플랫폼: ${platform}
-`.trim();
+예약플랫폼: ${platform}`.trim();
 
-  document.getElementById('inputData').value = parsedResult;
-  
-  // 자동으로 기존의 파싱결과 함수도 호출하여 결과를 보여줌
+  // textarea(inputData)에 직접 적용하여 기존 함수와 연동
+  document.getElementById('inputData').value = formattedData;
+
+  // 기존 함수 호출하여 결과값 갱신
   processReservation();
 }
 
