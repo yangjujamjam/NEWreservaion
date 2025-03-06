@@ -21,47 +21,10 @@
   <h1>예약 업무 관리</h1>
 
   <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
-  <!-- 수기 입력 폼 추가 (기존 textarea 아래 추가하세요) -->
-<div class="manualReservationForm">
-  <input type="text" id="reservationNumber" placeholder="예약번호(수기 입력 가능)">
-  <input type="text" id="reserver" placeholder="예약자 이름">
-  <input type="text" id="phoneNumber" placeholder="전화번호">
-
-  <div id="roomContainer">
-  <div class="roomSelection">
-    <select class="roomType" onchange="updateRoomCountOptions(this)">
-      <option>대형 카라반</option>
-      <option>복층 우드캐빈</option>
-      <option>파티룸</option>
-      <option>몽골텐트</option>
-    </select>
-    <select class="roomCount"></select>
-    <button onclick="removeRoom(this)">삭제</button>
-  </div>
-</div>
-<button onclick="addRoom()">객실 추가</button>
-
-
-  <input type="text" id="usePeriod" placeholder="이용기간 (yyyy. m. d.(a)~yyyy. m. d.(a))">
-  <input type="text" id="options" placeholder="옵션">
-  <input type="text" id="totalGuests" placeholder="총 이용 인원">
-  <input type="text" id="checkinTime" placeholder="입실 시간">
-  <input type="text" id="paymentAmount" placeholder="결제 금액">
-
-  <select id="reservationPlatform">
-    <option>전화예약</option>
-    <option>네이버톡톡</option>
-    <option>카카오문의</option>
-    <option>인스타그램</option>
-    <option>기타</option>
-  </select>
-</div>
-
 
   <!-- 버튼 부분 -->
 <div class="buttons">
   <button onclick="processReservation()">파싱 결과 보기</button>
-  <button onclick="manualReservationParsing()">수기입력 파싱 결과 보기</button>
   <button onclick="generateReservationMessage()">안내문자 양식적용</button>
   <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
 </div>
