@@ -522,44 +522,40 @@ function removeRoom(btn){
 
 // 수기 입력된 내용을 textarea에 전달하고 파싱결과 보기 실행
 function manualReservationParsing() {
-  const reservationNumber = document.getElementById('reservationNumber').value;
+  const reservationNumber = document.getElementById('reservationNumber')?.value || '';
   const reserver = document.getElementById('reserver').value;
   const phoneNumber = document.getElementById('phoneNumber').value;
   const usePeriod = document.getElementById('usePeriod').value;
-  const options = document.getElementById('options').value || '없음';
   const totalGuests = document.getElementById('totalGuests').value;
   const checkinTime = document.getElementById('checkinTime').value;
-  const payment = document.getElementById('payment').value;
-  const platform = document.getElementById('platform').value;
+  const paymentAmount = document.getElementById('paymentAmount').value;
+  const reservationPlatform = document.getElementById('reservationPlatform').value;
 
-  let rooms = "";
+  let rooms = [];
   let totalQuantity = 0;
 
   document.querySelectorAll('.room-selection').forEach(selection => {
     const roomType = selection.querySelector('.roomType').value;
-    const roomCount = parseInt(selection.querySelector('.roomCount').value, 10);
-    rooms += `${roomType} ${roomCount}개, `;
-    if(roomType !== '파티룸') {
-      totalQuantity += Number(roomCount);
-    }
+    const roomQty = parseInt(selection.querySelector('.roomCount').value, 10);
+    rooms.push(`${roomType} ${roomType === '파티룸' ? '(무료대여)' : `${roomType} ${roomType === '파티룸' ? '' : roomType + roomType.includes('카라반') ? '개' : ''} ${roomType !== '파티룸' ? roomType : ''} ${roomType !== '파티룸' ? roomType : ''}${roomType !== '파티룸' ? roomType : ''}`.trim()}`);
+    if(roomType !== '파티룸') totalQuantity += roomType.includes('카라반') ? roomType : 1;
   });
 
-  const manualText = `
-예약번호: ${reservationNumber}
-예약자: ${reserver}
-전화번호: ${phoneNumber}
-이용객실: ${rooms}
-이용기간: ${usePeriod}
-수량: ${totalQuantity}
-옵션: 없음
-총 이용 인원: ${document.getElementById('totalGuests').value}
-입실 시간: ${document.getElementById('checkinTime').value}
-결제금액: ${payment}
-예약플랫폼: ${platform}`;
+  const data = {
+    예약번호: reservationNumber,
+    예약자: reserver,
+    전화번호: phoneNumber,
+    이용객실: rooms.join(", "),
+    이용기간: usePeriod,
+    수량: totalQuantity.toString(),
+    옵션: document.getElementById('options').value || '없음',
+    총이용인원: document.getElementById('totalGuests').value,
+    입실시간: checkinTime.value,
+    결제금액: paymentAmount.value,
+    예약플랫폼: reservationPlatform
+  };
 
-  document.getElementById('inputData').value = manualData;
-  
-  processReservation();  // 기존 기능 호출
+  document.getElementById('outputData').textContent = JSON.stringify(data, null, 2);
 }
 
 
