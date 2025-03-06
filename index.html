@@ -23,7 +23,8 @@
   <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
   <!-- 수기 입력 폼 추가 (기존 textarea 아래 추가하세요) -->
 <div class="manualReservationForm">
-  <input type="text" id="manualReservationName" placeholder="예약자 이름">
+  <input type="text" id="reservationNumber" placeholder="예약번호(수기 입력 가능)">
+  <input type="text" id="reserver" placeholder="예약자 이름">
   <input type="text" id="phoneNumber" placeholder="전화번호">
 
   <div id="roomContainer">
@@ -34,11 +35,8 @@
         <option>파티룸</option>
         <option>몽골텐트</option>
       </select>
-      <select class="roomQty">
-        <option>1</option><option>2</option><option>3</option>
-        <option>4</option><option>5</option><option>6</option>
-        <option>7</option><option>8</option><option>9</option>
-        <option>10</option><option>11</option><option>12</option>
+      <select class="roomCount">
+        ${Array.from({length:12},(_,i)=>`<option>${i+1}</option>`).join('')}
       </select>
       <button onclick="removeRoom(this)">삭제</button>
     </div>
@@ -59,8 +57,6 @@
     <option>인스타그램</option>
     <option>기타</option>
   </select>
-
-  <button onclick="addRoomReservation()">수기입력 내용 적용하기</button>
 </div>
 
 
