@@ -500,7 +500,7 @@ function saveTemplates() {
 function addRoom() {
   const roomContainer = document.getElementById('roomContainer');
   const roomDiv = document.createElement('div');
-  roomDiv.className = 'roomSelection';
+  roomDiv.className = 'room-selection';
   roomDiv.innerHTML = `
     <select class="roomType">
       <option>대형 카라반</option>
@@ -509,23 +509,26 @@ function addRoom() {
       <option>몽골텐트</option>
     </select>
     <select class="roomCount">
-      ${Array.from({length:12},(_,i)=>`<option>${i+1}</option>`).join('')}
+      <option>1</option><option>2</option><option>3</option>
+      <option>4</option><option>5</option><option>6</option>
+      <option>7</option><option>8</option><option>9</option>
+      <option>10</option><option>11</option><option>12</option>
     </select>
     <button onclick="removeRoom(this)">삭제</button>
   `;
   document.getElementById('roomContainer').appendChild(roomDiv);
 }
 
-function removeRoom(btn){
-  btn.parentElement.remove();
+function removeRoom(button) {
+  button.parentElement.remove();
 }
 
-// 수기 입력된 내용을 textarea에 전달하고 파싱결과 보기 실행
 function manualReservationParsing() {
   const reservationNumber = document.getElementById('reservationNumber')?.value || '';
   const reserver = document.getElementById('reserver').value;
   const phoneNumber = document.getElementById('phoneNumber').value;
   const usePeriod = document.getElementById('usePeriod').value;
+  const options = document.getElementById('options').value || '없음';
   const totalGuests = document.getElementById('totalGuests').value;
   const checkinTime = document.getElementById('checkinTime').value;
   const paymentAmount = document.getElementById('paymentAmount').value;
@@ -536,26 +539,29 @@ function manualReservationParsing() {
 
   document.querySelectorAll('.room-selection').forEach(selection => {
     const roomType = selection.querySelector('.roomType').value;
-    const roomQty = parseInt(selection.querySelector('.roomCount').value, 10);
-    rooms.push(`${roomType} ${roomType === '파티룸' ? '(무료대여)' : `${roomType} ${roomType === '파티룸' ? '' : roomType + roomType.includes('카라반') ? '개' : ''} ${roomType !== '파티룸' ? roomType : ''} ${roomType !== '파티룸' ? roomType : ''}${roomType !== '파티룸' ? roomType : ''}`.trim()}`);
-    if(roomType !== '파티룸') totalQuantity += roomType.includes('카라반') ? roomType : 1;
+    const roomQty = parseInt(selection.querySelector('.roomQty').value, 10);
+    rooms.push(`${roomType} ${roomQty}개`);
+
+    if (roomType !== '파티룸' && roomType !== '몽골텐트') {
+      totalQuantity += roomQty;
+    }
   });
 
-  const data = {
+  const parsedData = {
     예약번호: reservationNumber,
     예약자: reserver,
     전화번호: phoneNumber,
-    이용객실: rooms.join(", "),
+    이용객실: rooms.join(', '),
     이용기간: usePeriod,
     수량: totalQuantity.toString(),
-    옵션: document.getElementById('options').value || '없음',
-    총이용인원: document.getElementById('totalGuests').value,
-    입실시간: checkinTime.value,
+    옵션: options,
+    총이용인원: totalGuests,
+    입실시간: checkinTime,
     결제금액: paymentAmount.value,
-    예약플랫폼: reservationPlatform
+    예약플랫폼: reservationPlatform.value
   };
 
-  document.getElementById('outputData').textContent = JSON.stringify(data, null, 2);
+  document.getElementById('outputData').textContent = JSON.stringify(parsedData, null, 2);
 }
 
 
