@@ -520,36 +520,47 @@ function removeRoom(btn){
   btn.parentElement.remove();
 }
 
-// 수기입력 내용을 기존 textarea(inputData)에 적용
-function addRoomReservation() {
-  const name = document.getElementById('reservationName').value;
-  const phone = document.getElementById('phoneNumber').value;
+// 수기 입력 폼 내용을 textarea와 같은 형태로 변환하여 파싱 처리
+function manualReservationParsing(){
+  const reservationNumber = document.getElementById('reservationNumber').value || new Date().getTime();
+  const reservationName = document.getElementById('manualReservationName').value;
+  const phoneNumber = document.getElementById('phoneNumber').value;
   const period = document.getElementById('usePeriod').value;
-  const options = document.getElementById('options').value;
+  const options = document.getElementById('options').value || '없음';
   const totalGuests = document.getElementById('totalGuests').value;
   const checkinTime = document.getElementById('checkinTime').value;
   const payment = document.getElementById('paymentAmount').value;
   const platform = document.getElementById('reservationPlatform').value;
 
-  const roomSelections = document.querySelectorAll('.roomSelection');
-  let rooms = [];
-  roomSelections.forEach(sel => {
+  const selections = document.querySelectorAll('.roomSelection');
+  let rooms = "";
+  let totalQuantity = 0;
+
+  selections.forEach(sel => {
     const roomType = sel.querySelector('.roomType').value;
-    const roomCount = sel.querySelector('.roomQty').value;
-    rooms.push(`${roomType} ${roomCount}개`);
+    const roomCount = sel.querySelector('.roomCount').value;
+
+    rooms += `${roomType} ${roomCount}개, `;
+    if(roomType !== '파티룸' && roomType !== '몽골텐트') totalQuantity += parseInt(roomCount);
   });
 
-  const manualInput = `
-예약자: ${name}
-전화번호: ${phone}
-이용객실: ${rooms.join(', ')}
+  rooms = rooms.slice(0, -2); // 마지막 쉼표 제거
+
+  const parsedResult = `
+예약번호: ${reservationNumber}
+예약자: ${reservationName}
+전화번호: ${phoneNumber}
+이용객실: ${rooms}
 이용기간: ${period}
+수량: ${totalQuantity}
 옵션: ${options}
-총 이용인원: ${totalGuests}
+총 이용 인원: ${totalQuantity}
 입실시간: ${checkinTime}
 결제금액: ${payment}
-예약플랫폼: ${platform}`;
+예약플랫폼: ${platform}
+`.trim();
 
-  document.getElementById('inputData').value = manualInput;
+  document.getElementById('inputData').value = parsedResult;
 }
+
 
