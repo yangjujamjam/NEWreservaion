@@ -6,6 +6,7 @@
   <title>예약 업무 관리</title>
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 
 <body>
@@ -21,48 +22,7 @@
 
   <h1>예약 업무 관리</h1>
 
-  <div style="display:flex; gap:20px;">
-    <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
-
-    <div id="manualForm">
-      <input type="text" id="reservationNumber" placeholder="예약번호 (수기 입력 가능)">
-      <input type="text" id="reservationName" placeholder="예약자">
-      <input type="text" id="phoneNumber" placeholder="전화번호">
-
-      <div id="roomContainer">
-        <div class="roomSelection">
-          <select class="roomType">
-            <option value="대형 카라반">대형 카라반</option>
-            <option value="복층 우드캐빈">복층 우드캐빈</option>
-            <option value="파티룸">파티룸</option>
-            <option value="몽골텐트">몽골텐트</option>
-          </select>
-          <select class="roomQuantity">
-            <option>1</option><option>2</option><option>3</option><option>4</option>
-            <option>5</option><option>6</option><option>7</option><option>8</option>
-            <option>9</option><option>10</option><option>11</option><option>12</option>
-          </select>
-          <button onclick="removeRoomSelection(this)">삭제</button>
-        </div>
-      </div>
-
-      <button onclick="addRoomSelection()">객실 추가</button>
-
-      <input type="text" id="period" placeholder="이용기간 (yyyy. m. d.(a)~yyyy. m. d.(a))">
-      <input type="text" id="totalQuantity" placeholder="수량" readonly>
-      <input type="text" id="option" placeholder="옵션">
-      <input type="text" id="totalPeople" placeholder="총 이용 인원">
-      <input type="text" id="checkinTime" placeholder="입실시간">
-      <input type="text" id="payment" placeholder="결제금액">
-      <select id="platform">
-        <option>전화예약</option>
-        <option>네이버톡톡</option>
-        <option>카카오문의</option>
-        <option>인스타그램</option>
-        <option>기타</option>
-      </select>
-    </div>
-  </div>
+  <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
 
   <div class="buttons">
     <button onclick="processReservation()">파싱 결과 보기</button>
@@ -78,21 +38,66 @@
     <div class="modal-content">
       <span class="close" onclick="closeTemplateModal()">&times;</span>
       <h3>안내문자 양식 수정</h3>
-      <label>무통장 양식:</label><textarea id="templateBank"></textarea>
-      <label>네이버 숙박 양식:</label><textarea id="templateNaverStay"></textarea>
+      <label>무통장 양식:</label>
+      <textarea id="templateBank"></textarea>
+
+      <label>네이버 숙박 양식:</label>
+      <textarea id="templateNaverStay"></textarea>
+
       <label>네이버 당일 양식:</label>
       <textarea id="templateNaverDay"></textarea>
+
       <label>야놀자 양식:</label>
       <textarea id="templateYanolja"></textarea>
+
       <label>여기어때 양식:</label>
       <textarea id="templateHere"></textarea>
+
       <button onclick="saveTemplates()">양식 저장하기</button>
     </div>
   </div>
 
   <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <!-- 수기예약 추가 영역 -->
+  <div id="manualForm">
+    <input type="text" id="reservationNumber" placeholder="예약번호(수기 입력 가능)">
+    <input type="text" id="reservationName" placeholder="예약자">
+    <input type="text" id="phone" placeholder="전화번호">
+
+    <div id="roomContainer">
+      <div class="roomSelection">
+        <select class="roomType">
+          <option>대형 카라반</option>
+          <option>복층 우드캐빈</option>
+          <option>파티룸</option>
+          <option>몽골텐트</option>
+        </select>
+        <select class="roomQty">
+          <option>1</option><option>2</option><option>3</option>
+          <option>4</option><option>5</option><option>6</option>
+          <option>7</option><option>8</option><option>9</option>
+          <option>10</option><option>11</option><option>12</option>
+        </select>
+        <button onclick="addRoomSelection()">객실 추가</button>
+    </div>
+  </div>
+
+  <input type="text" id="period" placeholder="이용기간 (yyyy. m. d.(a)~yyyy. m. d.(a))">
+  <input type="text" id="totalQuantity" placeholder="수량 (자동계산)" readonly>
+  <input type="text" id="options" placeholder="옵션">
+  <input type="text" id="totalPeople" placeholder="총 이용 인원">
+  <input type="text" id="checkinTime" placeholder="입실 시간">
+  <input type="text" id="payment" placeholder="결제금액">
+
+  <select id="platform">
+    <option>전화예약</option>
+    <option>네이버톡톡</option>
+    <option>카카오문의</option>
+    <option>인스타그램</option>
+    <option>기타</option>
+  </select>
+
   <script src="script.js"></script>
 </body>
 
