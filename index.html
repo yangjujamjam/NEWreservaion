@@ -28,21 +28,19 @@
   <input type="text" id="phoneNumber" placeholder="전화번호">
 
   <div id="roomContainer">
-    <div class="room-selection">
-      <select class="roomType">
-        <option>대형 카라반</option>
-        <option>복층 우드캐빈</option>
-        <option>파티룸</option>
-        <option>몽골텐트</option>
-      </select>
-      <select class="roomCount">
-        ${Array.from({length:12},(_,i)=>`<option>${i+1}</option>`).join('')}
-      </select>
-      <button onclick="removeRoom(this)">삭제</button>
-    </div>
+  <div class="roomSelection">
+    <select class="roomType" onchange="updateRoomCountOptions(this)">
+      <option>대형 카라반</option>
+      <option>복층 우드캐빈</option>
+      <option>파티룸</option>
+      <option>몽골텐트</option>
+    </select>
+    <select class="roomCount"></select>
+    <button onclick="removeRoom(this)">삭제</button>
   </div>
+</div>
+<button onclick="addRoom()">객실 추가</button>
 
-  <button onclick="addRoom()">객실 추가</button>
 
   <input type="text" id="usePeriod" placeholder="이용기간 (yyyy. m. d.(a)~yyyy. m. d.(a))">
   <input type="text" id="options" placeholder="옵션">
