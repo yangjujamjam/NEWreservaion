@@ -496,3 +496,60 @@ function saveTemplates() {
   alert('양식이 저장되었습니다.');
   closeTemplateModal();
 }
+
+function addRoom() {
+  const roomContainer = document.getElementById('roomContainer');
+  const roomDiv = document.createElement('div');
+  roomDiv.className = 'roomSelection';
+  roomDiv.innerHTML = `
+    <select class="roomType">
+      <option>대형 카라반</option>
+      <option>복층 우드캐빈</option>
+      <option>파티룸</option>
+      <option>몽골텐트</option>
+    </select>
+    <select class="roomCount">
+      ${Array.from({length:12},(_,i)=>`<option>${i+1}</option>`).join('')}
+    </select>
+    <button onclick="removeRoom(this)">삭제</button>
+  `;
+  document.getElementById('roomContainer').appendChild(roomDiv);
+}
+
+function removeRoom(btn){
+  btn.parentElement.remove();
+}
+
+// 수기입력 내용을 기존 textarea(inputData)에 적용
+function addRoomReservation() {
+  const name = document.getElementById('reservationName').value;
+  const phone = document.getElementById('phoneNumber').value;
+  const period = document.getElementById('usePeriod').value;
+  const options = document.getElementById('options').value;
+  const totalGuests = document.getElementById('totalGuests').value;
+  const checkinTime = document.getElementById('checkinTime').value;
+  const payment = document.getElementById('paymentAmount').value;
+  const platform = document.getElementById('reservationPlatform').value;
+
+  const roomSelections = document.querySelectorAll('.roomSelection');
+  let rooms = [];
+  roomSelections.forEach(sel => {
+    const roomType = sel.querySelector('.roomType').value;
+    const roomCount = sel.querySelector('.roomQty').value;
+    rooms.push(`${roomType} ${roomCount}개`);
+  });
+
+  const manualInput = `
+예약자: ${name}
+전화번호: ${phone}
+이용객실: ${rooms.join(', ')}
+이용기간: ${period}
+옵션: ${options}
+총 이용인원: ${totalGuests}
+입실시간: ${checkinTime}
+결제금액: ${payment}
+예약플랫폼: ${platform}`;
+
+  document.getElementById('inputData').value = manualInput;
+}
+
