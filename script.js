@@ -497,35 +497,68 @@ function saveTemplates() {
   closeTemplateModal();
 }
 
+// 객실에 따른 수량옵션 업데이트 함수
+function updateRoomCountOptions(roomTypeSelectElement) {
+  const roomCountSelect = roomTypeSelect.nextElementSibling;
+  const selectedRoomType = roomTypeSelect.value;
+
+  let maxCount = 12;
+  if (selectedRoom === '대형 카라반') maxCount = 12;
+  else if (selectedRoom === '복층 우드캐빈') maxCount = 6;
+  else if (selectedRoom === '파티룸') maxCount = 2;
+  else if (selectedRoom === '몽골텐트') maxCount = 1;
+
+  roomCount.innerHTML = '';
+  for (let i = 1; i <= maxCount; i++) {
+    roomCount.innerHTML += `<option>${i}</option>`;
+  }
+}
+
+// 객실 추가하기 함수 수정본
 function addRoom() {
   const roomContainer = document.getElementById('roomContainer');
-  const roomDiv = document.createElement('div');
-  roomDiv.className = 'room-selection';
-  roomDiv.innerHTML = `
-    <select class="roomType">
+  const newRoomDiv = document.createElement('div');
+  newRoomDiv.className = 'roomSelection';
+
+  newRoomDiv.innerHTML = `
+    <select class="roomType" onchange="updateRoomCountOptions(this)">
       <option>대형 카라반</option>
       <option>복층 우드캐빈</option>
       <option>파티룸</option>
       <option>몽골텐트</option>
     </select>
-    <select class="roomCount">
-      <option>1</option><option>2</option><option>3</option>
-      <option>4</option><option>5</option><option>6</option>
-      <option>7</option><option>8</option><option>9</option>
-      <option>10</option><option>11</option><option>12</option>
-    </select>
+    <select class="roomCount"></select>
     <button onclick="removeRoom(this)">삭제</button>
   `;
-  document.getElementById('roomContainer').appendChild(roomDiv);
+
+  roomContainer.appendChild(newRoomDiv);
+  updateRoomCountOptions(newRoomDiv.querySelector('.roomType'));
 }
 
-function removeRoom(button) {
-  button.parentElement.remove();
+// 객실 선택 시 수량 업데이트
+function updateRoomCountOptions(selectElement) {
+  const roomType = selectElement.value;
+  const roomCountSelect = selectElement.nextElementSibling;
+
+  let maxCount = 12;  // 기본값
+  if (roomType === '복층 우드캐빈') maxCount = 6;
+  else if (roomType === '파티룸') maxCount = 2;
+  else if (roomType === '몽골텐트') maxCount = 1;
+
+  roomCountSelect.innerHTML = '';
+  for (let i = 1; i <= maxCount; i++) {
+    roomCountSelect.innerHTML += `<option>${i}</option>`;
+  }
 }
 
+// 객실 삭제 함수
+function removeRoom(btn) {
+  btn.parentElement.remove();
+}
+
+// 수기입력 파싱 함수
 function manualReservationParsing() {
-  const reservationNumber = document.getElementById('reservationNumber')?.value || '';
-  const reserver = document.getElementById('reserver').value;
+  const reservationName = document.getElementById('manualReservationName').value;
   const phoneNumber = document.getElementById('phoneNumber').value;
   const usePeriod = document.getElementById('usePeriod').value;
   const options = document.getElementById('options').value || '없음';
@@ -534,31 +567,28 @@ function manualReservationParsing() {
   const paymentAmount = document.getElementById('paymentAmount').value;
   const reservationPlatform = document.getElementById('reservationPlatform').value;
 
-  let rooms = [];
+  let 이용객실 = '';
   let totalQuantity = 0;
 
-  document.querySelectorAll('.room-selection').forEach(selection => {
+  document.querySelectorAll('.roomSelection').forEach(selection => {
     const roomType = selection.querySelector('.roomType').value;
-    const roomQty = parseInt(selection.querySelector('.roomQty').value, 10);
-    rooms.push(`${roomType} ${roomQty}개`);
-
-    if (roomType !== '파티룸' && roomType !== '몽골텐트') {
-      totalQuantity += roomQty;
-    }
+    const roomCount = parseInt(selection.querySelector('.roomCount').value, 10);
+    이용객실 += `${roomType} ${roomCount}개 `;
+    totalQuantity += roomCount;
   });
 
   const parsedData = {
-    예약번호: reservationNumber,
+    예약번호: new Date().toLocaleString('ko-KR'), // 수기입력 날짜시간으로 대체
     예약자: reserver,
     전화번호: phoneNumber,
-    이용객실: rooms.join(', '),
+    이용객실: 이용객실.trim(),
     이용기간: usePeriod,
-    수량: totalQuantity.toString(),
+    수량: totalQuantity,
     옵션: options,
     총이용인원: totalGuests,
     입실시간: checkinTime,
-    결제금액: paymentAmount.value,
-    예약플랫폼: reservationPlatform.value
+    결제금액: paymentAmount,
+    예약플랫폼: document.getElementById('reservationPlatform').value
   };
 
   document.getElementById('outputData').textContent = JSON.stringify(parsedData, null, 2);
