@@ -522,7 +522,7 @@ function removeRoom(btn){
 
 // 수기 입력 폼 내용을 textarea와 같은 형태로 변환하여 파싱 처리
 function manualReservationParsing(){
-  const reservationNumber = document.getElementById('reservationNumber').value || new Date().getTime();
+  const reservationNumber = new Date().getTime();
   const reservationName = document.getElementById('manualReservationName').value;
   const phoneNumber = document.getElementById('phoneNumber').value;
   const period = document.getElementById('usePeriod').value;
@@ -554,13 +554,16 @@ function manualReservationParsing(){
 이용기간: ${period}
 수량: ${totalQuantity}
 옵션: ${options}
-총 이용 인원: ${totalQuantity}
+총 이용 인원: ${totalGuests}
 입실시간: ${checkinTime}
 결제금액: ${payment}
 예약플랫폼: ${platform}
 `.trim();
 
   document.getElementById('inputData').value = parsedResult;
+  
+  // 자동으로 기존의 파싱결과 함수도 호출하여 결과를 보여줌
+  processReservation();
 }
 
 
