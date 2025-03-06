@@ -520,50 +520,46 @@ function removeRoom(btn){
   btn.parentElement.remove();
 }
 
-// 수기 입력 데이터를 textarea에 적용하여 기존 파싱 로직과 연동
+// 수기 입력된 내용을 textarea에 전달하고 파싱결과 보기 실행
 function manualReservationParsing() {
-  const reservationNumber = new Date().getTime();
-  const reservationName = document.getElementById('manualReservationName').value;
+  const reservationNumber = document.getElementById('reservationNumber').value;
+  const reserver = document.getElementById('reserver').value;
   const phoneNumber = document.getElementById('phoneNumber').value;
-  const period = document.getElementById('usePeriod').value;
+  const usePeriod = document.getElementById('usePeriod').value;
   const options = document.getElementById('options').value || '없음';
   const totalGuests = document.getElementById('totalGuests').value;
   const checkinTime = document.getElementById('checkinTime').value;
-  const payment = document.getElementById('paymentAmount').value;
-  const platform = document.getElementById('reservationPlatform').value;
+  const payment = document.getElementById('payment').value;
+  const platform = document.getElementById('platform').value;
 
-  const selections = document.querySelectorAll('.roomSelection');
   let rooms = "";
   let totalQuantity = 0;
 
-  selections.forEach(sel => {
-    const roomType = sel.querySelector('.roomType').value;
-    const roomCount = sel.querySelector('.roomCount').value;
-
+  document.querySelectorAll('.room-selection').forEach(selection => {
+    const roomType = selection.querySelector('.roomType').value;
+    const roomCount = parseInt(selection.querySelector('.roomCount').value, 10);
     rooms += `${roomType} ${roomCount}개, `;
-    if(roomType !== '파티룸' && roomType !== '몽골텐트') totalQuantity += parseInt(roomCount);
+    if(roomType !== '파티룸') {
+      totalQuantity += Number(roomCount);
+    }
   });
 
-  rooms = rooms.slice(0, -2); // 마지막 쉼표 제거
-
-  const formattedData = `
+  const manualText = `
 예약번호: ${reservationNumber}
-예약자: ${reservationName}
+예약자: ${reserver}
 전화번호: ${phoneNumber}
 이용객실: ${rooms}
-이용기간: ${period}
+이용기간: ${usePeriod}
 수량: ${totalQuantity}
-옵션: ${options}
-총 이용인원: ${totalGuests}
-입실시간: ${checkinTime}
+옵션: 없음
+총 이용 인원: ${document.getElementById('totalGuests').value}
+입실 시간: ${document.getElementById('checkinTime').value}
 결제금액: ${payment}
-예약플랫폼: ${platform}`.trim();
+예약플랫폼: ${platform}`;
 
-  // textarea(inputData)에 직접 적용하여 기존 함수와 연동
-  document.getElementById('inputData').value = formattedData;
-
-  // 기존 함수 호출하여 결과값 갱신
-  processReservation();
+  document.getElementById('inputData').value = manualData;
+  
+  processReservation();  // 기존 기능 호출
 }
 
 
