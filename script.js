@@ -539,3 +539,91 @@ function calculateTotalQuantity() {
 
 // 수량 자동 계산 지속적으로 실행
 setInterval(calculateTotalQuantity, 1000);
+
+// 수기 입력 데이터 파싱하여 textarea에 출력
+function processReservation() {
+  const parsedText = parseManualReservation();
+  document.getElementById('outputData').innerText = parsedText;
+}
+
+// 안내문자 양식 적용(수기용)
+function generateReservationMessage() {
+  const parsedText = parseManualReservation();
+  const finalMessage = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬\n\n${parsedText}\n\n*기준인원 2인 기준 요금이며 인원추가 미선택 시 현장에서 추가결제해 주셔야 합니다.\n\n*옵션(바베큐, 불멍, 고기세트)은 별도이며 체크인 시 현장 결제도 가능합니다.\n*대형풀 무료 이용 / 온수풀 유료 이용\n\n*대실 이용시간은 6시간이며 예약해주신 방문시간을 엄수해 주세요.\n*숙박은 “15시”부터 입실 가능하며 수영장 이용은 13시부터 이용하실 수 있습니다.\n\n얼리체크인/레이트체크아웃을 원하실 경우 카톡 또는 문자로 별도 문의주세요.\n\n체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^\n예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.`;
+
+  document.getElementById('outputData').innerText = finalMessage;
+}
+
+// 수기 입력 데이터를 스프레드시트로 보내기
+function sendToSheet() {
+  const reservation = parseManualReservationForSheet();
+
+  google.script.run.withSuccessHandler(()=>{
+    alert('예약이 정상적으로 저장되었습니다.');
+  }).doPost(reservation);
+}
+
+// 수기 입력 폼에서 데이터 파싱하기 (결과보기 & 안내문자용)
+function parseManualReservation(){
+  const reservationNumber = document.getElementById('reservationNumber').value || '-';
+  const reservationName = document.getElementById('reservationName').value;
+  const phoneNumber = document.getElementById('phoneNumber').value;
+  const period = document.getElementById('period').value;
+  const totalQuantity = document.getElementById('totalQuantity').value;
+  const option = document.getElementById('option').value || '없음';
+  const totalPeople = document.getElementById('totalPeople').value;
+  const checkinTime = document.getElementById('checkinTime').value;
+  const payment = document.getElementById('payment').value;
+  const platform = document.getElementById('platform').value;
+
+  const selections = document.querySelectorAll('.roomSelection');
+  let rooms = "";
+  selections.forEach(sel => {
+    const roomType = sel.querySelector('.roomType').value;
+    const roomQty = sel.querySelector('.roomQuantity').value;
+    rooms += `${roomType} ${roomQty}개\n`;
+  });
+
+  return `예약번호: ${reservationNumber}\n예약자: ${reservationName}\n전화번호: ${phoneNumber}\n이용객실:\n${rooms}이용기간: ${period}\n수량: ${totalQuantity}\n옵션: ${option}\n총이용인원: ${totalPeople}\n입실시간: ${checkinTime}\n결제금액: ${payment}\n예약플랫폼: ${platform}`;
+}
+
+// 수기 입력 데이터를 스프레드시트용으로 변환
+function parseManualReservationForSheet(){
+  const now = new Date().toLocaleString();
+  const reservationNumber = document.getElementById('reservationNumber').value || now;
+  const reservationName = document.getElementById('reservationName').value;
+  const phoneNumber = document.getElementById('phoneNumber').value;
+  const period = document.getElementById('period').value;
+  const totalQuantity = document.getElementById('totalQuantity').value;
+  const option = document.getElementById('option').value || '';
+  const totalPeople = document.getElementById('totalPeople').value;
+  const checkinTime = document.getElementById('checkinTime').value;
+  const payment = document.getElementById('payment').value;
+  const platform = document.getElementById('platform').value;
+
+  const selections = document.querySelectorAll('.roomSelection');
+  let rooms = "";
+  selections.forEach(sel => {
+    const roomType = sel.querySelector('.roomType').value;
+    const roomQty = sel.querySelector('.roomQuantity').value;
+    rooms += `${roomType} ${roomQty}개, `;
+  });
+
+  rooms = rooms.slice(0, -2); //마지막 쉼표 제거
+
+  return {
+    예약번호: reservationNumber,
+    예약자: reservationName,
+    전화번호: phoneNumber,
+    이용객실: rooms,
+    이용기간: period,
+    수량: totalQuantity,
+    옵션: option,
+    총이용인원: totalPeople,
+    입실시간: checkinTime,
+    결제금액: payment,
+    예약플랫폼: platform,
+    입력일시: now
+  };
+}
+
