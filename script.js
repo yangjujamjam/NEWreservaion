@@ -244,12 +244,22 @@ function copyResult() {
 }
 
 function sendToSheet() {
-  const data = parseReservation(document.getElementById('inputData').value);
+  // 1. 원본 텍스트를 가져옵니다.
+  const rawText = document.getElementById('inputData').value;
+  
+  // 2. 원본 텍스트를 파싱하여 예약 데이터를 data 객체로 생성합니다.
+  const data = parseReservation(rawText);
+  
+  // 3. 원본 텍스트에서 "무통장" 키워드가 포함되어 있는지 확인하고, 결과를 data 객체에 추가합니다.
+  data.무통장여부 = rawText.indexOf("무통장") !== -1;
+  
+  // 4. URLSearchParams를 생성할 때 data 객체를 포함시킵니다.
   const params = new URLSearchParams({
-  ...data,
-  옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
+    ...data,
+    옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
   });
 
+  // 5. GAS 엔드포인트로 데이터를 전송합니다.
   fetch(gasUrl + '?' + params)
     .then(r => r.text())
     .then(msg => alert(msg))
