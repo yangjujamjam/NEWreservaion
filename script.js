@@ -496,3 +496,44 @@ function saveTemplates() {
   alert('양식이 저장되었습니다.');
   closeTemplateModal();
 }
+
+// 객실 추가 및 삭제
+function addRoomSelection(){
+  const container = document.getElementById('roomContainer');
+  const roomHTML = `
+    <div class="roomSelection">
+      <select class="roomType">
+        <option value="대형 카라반">대형 카라반</option>
+        <option value="복층 우드캐빈">복층 우드캐빈</option>
+        <option value="파티룸">파티룸</option>
+        <option value="몽골텐트">몽골텐트</option>
+      </select>
+      <select class="roomQuantity">
+        <option>1</option><option>2</option><option>3</option><option>4</option>
+        <option>5</option><option>6</option><option>7</option><option>8</option>
+        <option>9</option><option>10</option><option>11</option><option>12</option>
+      </select>
+      <button onclick="removeRoomSelection(this)">삭제</button>
+    `;
+  container.appendChild(newDiv);
+}
+
+function removeRoomSelection(btn){
+  btn.parentNode.remove();
+}
+
+// 수량 자동 계산 (파티룸 제외)
+function calculateTotalQuantity(){
+  const selections = document.querySelectorAll('.roomSelection');
+  let total = 0;
+  selections.forEach(selection => {
+    const roomType = selection.querySelector('.roomType').value;
+    const qty = parseInt(selection.querySelector('.roomQuantity').value);
+    if(roomType !== '파티룸'){
+      total += Number(selection.querySelector('.roomQuantity').value);
+    }
+  });
+  document.getElementById('totalQuantity').value = total;
+}
+
+setInterval(calculateTotalQuantity, 1000);
