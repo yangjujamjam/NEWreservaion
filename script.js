@@ -244,16 +244,17 @@ function copyResult() {
 }
 
 function sendToSheet() {
-  // 1. 원본 텍스트를 가져옵니다.
+  // 1. 원본 텍스트(rawText)를 가져옵니다.
   const rawText = document.getElementById('inputData').value;
   
-  // 2. 원본 텍스트를 파싱하여 예약 데이터를 data 객체로 생성합니다.
+  // 2. 원본 텍스트를 파싱하여 data 객체를 생성합니다.
   const data = parseReservation(rawText);
   
-  // 3. 원본 텍스트에서 "무통장" 키워드가 포함되어 있는지 확인하고, 결과를 data 객체에 추가합니다.
-  data.무통장여부 = rawText.indexOf("무통장") !== -1;
+  // 3. 원본 텍스트에서 "무통장" 또는 "결제예상금액"이 있는지 확인합니다.
+  // 둘 중 하나라도 있으면 무통장여부를 true로 설정합니다.
+  data.무통장여부 = (rawText.indexOf("무통장") !== -1) || (rawText.indexOf("결제예상금액") !== -1);
   
-  // 4. URLSearchParams를 생성할 때 data 객체를 포함시킵니다.
+  // 4. data 객체를 URLSearchParams로 변환 (옵션 필드에 줄바꿈 처리)
   const params = new URLSearchParams({
     ...data,
     옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
