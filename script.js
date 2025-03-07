@@ -86,10 +86,11 @@ function parseNaverReservation(text) {
   const 결제예상금액 = getValue('결제예상금액');
   const 결제금액 = getValue('결제금액');
 
-  // 네이버 예약에 한해서,
-  // 결제예상금액이 있으면 무통장으로 판단(무통장여부를 true로 설정),
-  // 결제금액이 있으면 무통장여부는 공란("")
+  // 네이버 예약인 경우, 결제예상금액이 있으면 무통장 예약으로 판단
   const 무통장여부 = 결제예상금액 ? true : "";
+  
+  // 무통장여부가 true이면 예약플랫폼을 '네이버무통장'으로, 아니면 '네이버'로 설정
+  const 예약플랫폼 = 무통장여부 ? '네이버무통장' : '네이버';
 
   return {
     예약번호: getValue('예약번호'),
@@ -102,10 +103,11 @@ function parseNaverReservation(text) {
     총이용인원,
     입실시간,
     결제금액: 결제금액 || 결제예상금액,
-    예약플랫폼: '네이버',
+    예약플랫폼: 예약플랫폼,
     무통장여부: 무통장여부
   };
 }
+
 
 
 function parseYanoljaReservation(text) {
