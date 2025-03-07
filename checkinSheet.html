@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>입실표</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>입실표</h1>
+<p>
+  <input type="date" id="selectedDate">
+  <button onclick="fetchCheckinData()">조회</button>
+</p>
+
+<div id="resultArea"></div>
+
+<script>
+  // 1) 구글 웹 앱 URL (배포 후 나온 "exec" URL)
+  const gasUrl = "https://script.google.com/macros/s/AKfycbxKgkiJs1SjWTOrjQZnmkzMaQbYo0n1XshBXrukCTWtLV0z6W8sjFPrah2Cqgakl_zb/exec";
+
+  // 2) 조회 버튼 클릭 시 실행
+  async function fetchCheckinData() {
+    const dateInput = document.getElementById('selectedDate').value;
+    if (!dateInput) {
+      alert("날짜를 선택해주세요.");
+      return;
+    }
+
+    try {
+      // mode=checkin, date=YYYY-MM-DD
+      const response = await fetch(`${gasUrl}?mode=checkin&date=${dateInput}`);
+      if (!response.ok) {
+        throw new Error("Network response was not OK");
+      }
+      const data = await response.json();
+      renderCheckinTable(data);
+    } catch (err) {
+      console.error(err);
+      alert("데이터를 불러오는 중 오류가 발생했습니다.");
+    }
+  }
+
+  // 3) 받은 데이터를 테이블로 렌더링
+  function renderCheckinTable(data) {
+    const resultArea = document.getElementById('resultArea');
+
+    if (!data || data.length === 0) {
+      resultArea.innerHTML = "<p>해당 날짜의 입실자가 없습니다.</p>";
+      return;
+    }
+
+    let html = "<table>";
+    html += "<thead><tr>"
+         + "<th>예약자</th>"
+         + "<th>예약플랫폼</th>"
+         + "<th>숙박/당일</th>"
+         + "<th>총 이용 인원</th>"
+         + "<th>결제금액</th>"
+         + "<th>옵션</th>"
+         + "</tr></thead><tbody>";
+
+    data.forEach(item => {
+      html += "<tr>"
+            + `<td>${item.예약자 || ''}</td>`
+            + `<td>${item.예약플랫폼 || ''}</td>`
+            + `<td>${item.숙박당일구분 || ''}</td>`
+            + `<td>${item.총이용인원 || ''}</td>`
+            + `<td>${item.결제금액 || ''}</td>`
+            + `<td>${item.옵션 || ''}</td>`
+            + "</tr>";
+    });
+
+    html += "</tbody></table>";
+    resultArea.innerHTML = html;
+  }
+</script>
+</body>
+</html>
