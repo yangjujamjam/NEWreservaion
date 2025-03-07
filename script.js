@@ -1,4 +1,4 @@
-const gasUrl = 'https://script.google.com/macros/s/AKfycbxP3x6-OxrpYC8-78bIzHumTS9cEEbNpTBEdKzcjwR_drgOTuEiCNEHA4KyMqQWIUuQ/exec'; // GAS 배포 후 URL 입력
+const gasUrl = 'https://script.google.com/macros/s/AKfycbyWgJ77LSr7gbVvpwSyBIyn5wX-TA8DmTrz5qppqtN6FEovsN0_rFixzcFjHwuVP_GB/exec'; // GAS 배포 후 URL 입력
 
 function detectPlatform(text) {
   if (text.includes("야놀자")) return "야놀자";
@@ -7,18 +7,11 @@ function detectPlatform(text) {
 }
 
 function parseReservation(text) {
-  let data;
   const platform = detectPlatform(text);
-  if (platform === "네이버") {
-    data = parseNaverReservation(text);
-  } else if (platform === "야놀자") {
-    data = parseYanoljaReservation(text);
-  } else if (platform === "여기어때") {
-    data = parseHereReservation(text);
-  }
-  // 원본 텍스트에서 "결제예상금액" 또는 "무통장"이 있는지 확인해서 무통장여부 설정
-  data.무통장여부 = (text.indexOf("결제예상금액") !== -1) || (text.indexOf("무통장") !== -1);
-  return data;
+  
+  if (platform === "네이버") return parseNaverReservation(text);
+  if (platform === "야놀자") return parseYanoljaReservation(text);
+  if (platform === "여기어때") return parseHereReservation(text);
 }
 
 function parseNaverReservation(text) {
@@ -251,16 +244,10 @@ function copyResult() {
 }
 
 function sendToSheet() {
-  // 원본 텍스트를 가져옵니다.
-  const rawText = document.getElementById('inputData').value;
-  
-  // 파싱된 data 객체를 생성합니다. (여기서 무통장여부가 포함됩니다.)
-  const data = parseReservation(rawText);
-  
-  // URLSearchParams를 생성할 때 data 객체를 포함시킵니다.
+  const data = parseReservation(document.getElementById('inputData').value);
   const params = new URLSearchParams({
-    ...data,
-    옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
+  ...data,
+  옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
   });
 
   fetch(gasUrl + '?' + params)
