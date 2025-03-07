@@ -17,15 +17,16 @@ function parseReservation(text) {
 function parseNaverReservation(text) {
   const lines = text.split('\n').map(line => line.trim());
 
+  // 특정 키워드가 포함된 줄에서 값을 추출하는 헬퍼 함수
   const getValue = (keyword) => {
     const line = lines.find(l => l.includes(keyword));
     return line ? line.replace(keyword, '').trim() : '';
   };
 
+  // 예약자와 전화번호 추출
   let visitorLine = lines.find(line => line.includes('방문자'));
   let 예약자 = '';
   let 전화번호 = '';
-
   if (visitorLine) {
     const visitorMatch = visitorLine.match(/방문자\s*(.+)\((.+)\)/);
     if (visitorMatch) {
@@ -37,17 +38,18 @@ function parseNaverReservation(text) {
     전화번호 = getValue('전화번호');
   }
 
+  // 사이트(이용객실) 정보 추출
   let siteLine = lines.find(line => line.includes('사이트'));
   let 이용객실 = '';
   if (siteLine) {
     const rooms = ['대형카라반', '복층우드캐빈', '파티룸', '몽골텐트'];
     const normalizedSiteLine = siteLine.replace(/\s+/g, '');
     이용객실 = rooms.find(room => normalizedSiteLine.includes(room));
-
     if (이용객실 === '대형카라반') 이용객실 = '대형 카라반';
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
+  // 옵션 정보 추출 (필터링 처리)
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
@@ -66,17 +68,28 @@ function parseNaverReservation(text) {
   ];
   const filteredOptions = optionLines.filter(line => !unwantedOptions.some(unwanted => line.includes(unwanted)));
 
+  // 총 이용 인원 정보 추출
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
   if (totalPeopleIndex !== -1 && totalPeopleIndex + 1 < lines.length) {
     총이용인원 = lines[totalPeopleIndex + 1].trim();
   }
 
+  // 입실 시간 추출
   let checkInTimeIndex = lines.findIndex(line => line.includes('입실 시간 선택'));
   let 입실시간 = '';
   if (checkInTimeIndex !== -1 && checkInTimeIndex + 1 < lines.length) {
     입실시간 = lines[checkInTimeIndex + 1].trim();
   }
+
+  // 결제 관련 정보 추출
+  const 결제예상금액 = getValue('결제예상금액');
+  const 결제금액 = getValue('결제금액');
+
+  // 네이버 예약에 한해서,
+  // 결제예상금액이 있으면 무통장으로 판단(무통장여부를 true로 설정),
+  // 결제금액이 있으면 무통장여부는 공란("")
+  const 무통장여부 = 결제예상금액 ? true : "";
 
   return {
     예약번호: getValue('예약번호'),
@@ -88,8 +101,9 @@ function parseNaverReservation(text) {
     옵션: filteredOptions.join(', '),
     총이용인원,
     입실시간,
-    결제금액: getValue('결제금액') || getValue('결제예상금액'), // 👈 수정된 부분
-    예약플랫폼: '네이버'
+    결제금액: 결제금액 || 결제예상금액,
+    예약플랫폼: '네이버',
+    무통장여부: 무통장여부
   };
 }
 
