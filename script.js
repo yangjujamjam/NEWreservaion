@@ -1,4 +1,4 @@
-const gasUrl = 'https://script.google.com/macros/s/AKfycbxXrjrYRyrN1sfwqFcEHaEtRKQJpNGvzAvuo9TgFxbLwIYU-XBGuWj9lahTQZ2GtCkU/exec'; // GAS 배포 후 URL 입력
+const gasUrl = 'https://script.google.com/macros/s/AKfycbxP3x6-OxrpYC8-78bIzHumTS9cEEbNpTBEdKzcjwR_drgOTuEiCNEHA4KyMqQWIUuQ/exec'; // GAS 배포 후 URL 입력
 
 function detectPlatform(text) {
   if (text.includes("야놀자")) return "야놀자";
