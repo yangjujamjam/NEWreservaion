@@ -443,21 +443,47 @@ function processReservation() {
 /** 스프레드시트 전송 */
 function sendToSheet() {
   let data;
+  
+  // [1] 현재 활성 탭(수기입력 or 붙여넣기)에 따라 data 가져오기
   if (isManualTabActive()) {
+    // 수기작성 모드
     data = getManualReservationData();
   } else {
+    // 붙여넣기 모드
     const text = document.getElementById('inputData').value;
     data = parseReservation(text);
   }
+
+  // [2] 서버에서 인식할 파라미터 구성
+  //     GAS doGet(e)에서 e.parameter.예약번호 / e.parameter.예약자 ... 식으로 받을 예정
+  //     (옵션은 쉼표를 줄바꿈으로 바꾸어 보내면, 스프레드시트에서 보기 편함)
   const params = new URLSearchParams({
-    ...data,
-    옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
+    예약번호:      data.예약번호       || "",
+    예약자:       data.예약자        || "",
+    전화번호:     data.전화번호      || "",
+    이용객실:     data.이용객실      || "",
+    이용기간:     data.이용기간      || "",
+    수량:         data.수량          || "",
+    옵션:         data.옵션 ? data.옵션.replace(/, /g, '\n') : "",
+    총이용인원:   data.총이용인원    || "",
+    입실시간:     data.입실시간      || "",
+    결제금액:     data.결제금액      || "",
+    예약플랫폼:   data.예약플랫폼    || ""
+    // 필요 시 무통장여부 등 다른 필드도 추가 가능
   });
 
-  fetch(gasUrl + '?' + params)
-    .then(r => r.text())
-    .then(msg => alert(msg))
-    .catch(err => alert('전송 중 오류 발생: ' + err));
+  // [3] 최종 URL = gasUrl + '?예약번호=...&예약자=...&...'
+  const finalUrl = gasUrl + '?' + params.toString();
+
+  // [4] fetch로 GET 요청
+  fetch(finalUrl)
+    .then(response => response.text())
+    .then(msg => {
+      alert(msg);  // 예) "예약이 성공적으로 저장되었습니다."
+    })
+    .catch(err => {
+      alert('전송 중 오류 발생: ' + err);
+    });
 }
 
 /** 안내문자 양식 적용 및 클립보드 복사 */
