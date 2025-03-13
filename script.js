@@ -10,6 +10,8 @@ const gasUrl = 'https://script.google.com/macros/s/AKfycbwB7l5EvanthaYH-p43oB-vr
  * ========================================= */
 window.onload = function() {
   checkAuth();
+  // 기본 탭은 '붙여넣기'로 보여주기
+  showTab('paste');
 };
 
 /**
@@ -75,20 +77,48 @@ async function fetchPasswordFromGAS() {
 }
 
 /** =========================================
- *  [3] 예약 정보 파싱 로직
+ *  [3] '붙여넣기'와 '수기작성' 탭 전환 로직
  * ========================================= */
+function showTab(tabName) {
+  const pasteTab = document.getElementById('tabPaste');
+  const manualTab = document.getElementById('tabManual');
+
+  const pasteBtn = document.getElementById('tabPasteBtn');
+  const manualBtn = document.getElementById('tabManualBtn');
+
+  if (tabName === 'paste') {
+    pasteTab.style.display = 'block';
+    manualTab.style.display = 'none';
+    pasteBtn.classList.add('active');
+    manualBtn.classList.remove('active');
+  } else {
+    pasteTab.style.display = 'none';
+    manualTab.style.display = 'block';
+    pasteBtn.classList.remove('active');
+    manualBtn.classList.add('active');
+  }
+}
+
+/** =========================================
+ *  [4] 예약 정보 파싱 로직 (붙여넣기 용)
+ * ========================================= */
+// 플랫폼 감지
 function detectPlatform(text) {
   if (text.includes("야놀자")) return "야놀자";
   if (text.includes("여기어때")) return "여기어때";
   return "네이버";
 }
 
+// 텍스트 파싱 진입점
 function parseReservation(text) {
   const platform = detectPlatform(text);
   
   if (platform === "네이버") return parseNaverReservation(text);
   if (platform === "야놀자") return parseYanoljaReservation(text);
   if (platform === "여기어때") return parseHereReservation(text);
+
+  // 혹시 구분 못 하면 기본 네이버로 반환
+  return parseNaverReservation(text);
 }
 
 /** ---------- 네이버 파싱 함수 ---------- */
@@ -133,7 +163,10 @@ function parseNaverReservation(text) {
   if (optionsEndIndex === -1) {
     optionsEndIndex = lines.findIndex(line => line.includes('유입경로'));
   }
-  const optionLines = lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean);
+  const optionLines = optionsStartIndex !== -1
+    ? lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean)
+    : [];
+  
   const unwantedOptions = [
     '인원수를 꼭 체크해주세요.',
     '수영장 및 외부시설 안내',
@@ -144,7 +177,7 @@ function parseNaverReservation(text) {
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
   ];
-  const filteredOptions = optionLines.filter(line => 
+  const filteredOptions = optionLines.filter(line =>
     !unwantedOptions.some(unwanted => line.includes(unwanted))
   );
 
@@ -219,7 +252,7 @@ function parseYanoljaReservation(text) {
   let 입실시간 = '';
 
   const formatDate = date => {
-    // YYYY-MM-DD(요일) 형태
+    // YYYY-MM-DD(요일) 형태 → YYYY. M. D.(요일)
     const match = date.match(/(\d{4})-(\d{2})-(\d{2})\((.)\)/);
     if (!match) return date;
     const [y, m, d, day] = match.slice(1);
@@ -227,6 +260,7 @@ function parseYanoljaReservation(text) {
   };
 
   if (이용유형.includes('대실')) {
+    // 대실
     if (체크인라인) {
       이용기간 = formatDate(체크인라인.split(' ')[0]);
       const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
@@ -258,7 +292,8 @@ function parseYanoljaReservation(text) {
     총이용인원: '대인2',
     입실시간,
     결제금액,
-    예약플랫폼: '야놀자'
+    예약플랫폼: '야놀자',
+    무통장여부: ''
   };
 }
 
@@ -343,24 +378,77 @@ function parseHereReservation(text) {
     총이용인원: '대인2',
     입실시간,
     결제금액,
-    예약플랫폼: '여기어때'
+    예약플랫폼: '여기어때',
+    무통장여부: ''
   };
 }
 
 /** =========================================
- *  [4] 버튼 / 기능 함수
+ *  [5] 수기작성 모드에서의 데이터 구성
+ * ========================================= */
+
+/** 날짜/시각 기반 예약번호 생성 (YYYYMMDDHHmmss) */
+function generateReservationNumber() {
+  const d = new Date();
+  const YYYY = d.getFullYear().toString();
+  const MM = String(d.getMonth() + 1).padStart(2, '0');
+  const DD = String(d.getDate()).padStart(2, '0');
+  const HH = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  return YYYY + MM + DD + HH + mm + ss;
+}
+
+/** 수기작성 폼의 값들을 하나의 객체로 반환 */
+function getManualReservationData() {
+  return {
+    예약번호: generateReservationNumber(),            // 자동생성
+    예약자: document.getElementById('manualGuest').value.trim(),
+    전화번호: document.getElementById('manualPhone').value.trim(),
+    이용객실: document.getElementById('manualRoom').value.trim(),
+    이용기간: document.getElementById('manualPeriod').value.trim(),
+    수량: document.getElementById('manualCount').value.trim(),
+    옵션: document.getElementById('manualOption').value.trim(),
+    총이용인원: document.getElementById('manualTotalPeople').value.trim(),
+    입실시간: document.getElementById('manualCheckinTime').value.trim(),
+    결제금액: document.getElementById('manualPayment').value.trim(),
+    예약플랫폼: '수기입력',       // 수기작성 탭은 항상 '수기입력'
+    무통장여부: true             // 대부분 무통장이므로 true 처리
+  };
+}
+
+/** 현재 활성 탭이 '수기작성'인지 판별 */
+function isManualTabActive() {
+  return document.getElementById('tabManual').style.display === 'block';
+}
+
+/** =========================================
+ *  [6] 버튼 / 기능 함수
  * ========================================= */
 
 /** 파싱 결과 보기 */
 function processReservation() {
-  const text = document.getElementById('inputData').value;
-  const data = parseReservation(text);
+  let data;
+  if (isManualTabActive()) {
+    // 수기작성 탭
+    data = getManualReservationData();
+  } else {
+    // 붙여넣기 탭
+    const text = document.getElementById('inputData').value;
+    data = parseReservation(text);
+  }
   document.getElementById('outputData').textContent = JSON.stringify(data, null, 2);
 }
 
 /** 스프레드시트 전송 */
 function sendToSheet() {
-  const data = parseReservation(document.getElementById('inputData').value);
+  let data;
+  if (isManualTabActive()) {
+    data = getManualReservationData();
+  } else {
+    const text = document.getElementById('inputData').value;
+    data = parseReservation(text);
+  }
   const params = new URLSearchParams({
     ...data,
     옵션: data.옵션 ? data.옵션.replace(/, /g, '\n') : ''
@@ -374,8 +462,17 @@ function sendToSheet() {
 
 /** 안내문자 양식 적용 및 클립보드 복사 */
 function generateReservationMessage() {
-  const rawText = document.getElementById('inputData').value;
-  const data = parseReservation(rawText);
+  let data;
+  let rawText = '';
+
+  if (isManualTabActive()) {
+    data = getManualReservationData();
+    // 수기작성 시에는 전체 텍스트가 따로 없으므로 rawText는 비워두겠습니다.
+  } else {
+    rawText = document.getElementById('inputData').value;
+    data = parseReservation(rawText);
+  }
+
   let message = '';
 
   // 파싱 내용 정리
@@ -393,7 +490,7 @@ function generateReservationMessage() {
 - 예약플랫폼: ${data.예약플랫폼}`;
 
   // 무통장
-  if (rawText.includes('무통장할인') || data.예약플랫폼 === '네이버무통장') {
+  if (rawText.includes('무통장할인') || data.예약플랫폼 === '네이버무통장' || data.무통장여부 === true) {
     message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
 
 ${formattedParsedData}
@@ -508,7 +605,9 @@ https://litt.ly/jamjam_bbq`;
     .then(() => alert('안내문자가 클립보드에 복사되었습니다.'));
 }
 
-/** 모달 열기 */
+/** =========================================
+ *  [7] 모달 (양식 수정) 관련
+ * ========================================= */
 function openTemplateModal() {
   document.getElementById('templateBank').value = localStorage.getItem('templateBank') || defaultTemplates.bank;
   document.getElementById('templateNaverStay').value = localStorage.getItem('templateNaverStay') || defaultTemplates.naverStay;
@@ -519,12 +618,11 @@ function openTemplateModal() {
   document.getElementById('templateModal').style.display = 'block';
 }
 
-/** 모달 닫기 */
 function closeTemplateModal() {
   document.getElementById('templateModal').style.display = 'none';
 }
 
-/** 기본 양식 */
+/** 기본 안내문자 양식 */
 const defaultTemplates = {
   bank: `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
 
