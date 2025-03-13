@@ -1,7 +1,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbwB7l5EvanthaYH-p43oB-vrb3SOj3EH2og485LqY3hWU_TAdfzoLeafvBMUwl3iKza/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbxKhh3JZpdomhO8x0rkGyA33-F75x0W6S3zBBMVVGOEpw8ggs3Q_SWgha0j2LQlixg_/exec';
 // ↑ 여기로 교체하세요 (새로운 GAS 웹 앱 URL)
 // ?mode=password 요청 시, { password: 'A1셀값' } 형태로 응답
 
