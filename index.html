@@ -29,7 +29,58 @@
 
   <h1>예약 업무 관리</h1>
 
-  <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
+  <!-- 탭 영역 -->
+  <div class="tab-menu">
+    <button id="tabPasteBtn" onclick="showTab('paste')">붙여넣기</button>
+    <button id="tabManualBtn" onclick="showTab('manual')">수기작성</button>
+  </div>
+
+  <!-- 붙여넣기 탭 -->
+  <div id="tabPaste" class="tab-content">
+    <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
+  </div>
+
+  <!-- 수기작성 탭 -->
+  <div id="tabManual" class="tab-content">
+    <table class="manual-table">
+      <tr>
+        <th>예약자</th>
+        <td><input type="text" id="manualGuest" /></td>
+      </tr>
+      <tr>
+        <th>전화번호</th>
+        <td><input type="text" id="manualPhone" /></td>
+      </tr>
+      <tr>
+        <th>이용객실</th>
+        <td><input type="text" id="manualRoom" /></td>
+      </tr>
+      <tr>
+        <th>이용기간</th>
+        <td><input type="text" id="manualPeriod" placeholder="예) 2025. 3. 13.(목) ~ 2025. 3. 14.(금)" /></td>
+      </tr>
+      <tr>
+        <th>수량</th>
+        <td><input type="text" id="manualCount" value="1" /></td>
+      </tr>
+      <tr>
+        <th>옵션</th>
+        <td><textarea id="manualOption" placeholder="옵션들을 쉼표(,)로 구분 또는 줄바꿈을 활용하여 입력하세요"></textarea></td>
+      </tr>
+      <tr>
+        <th>총이용인원</th>
+        <td><input type="text" id="manualTotalPeople" placeholder="예) 대인2 소인2" /></td>
+      </tr>
+      <tr>
+        <th>입실시간</th>
+        <td><input type="text" id="manualCheckinTime" placeholder="예) 15시~21시" /></td>
+      </tr>
+      <tr>
+        <th>결제금액</th>
+        <td><input type="text" id="manualPayment" placeholder="예) 178,000원" /></td>
+      </tr>
+    </table>
+  </div>
 
   <!-- 버튼 부분 -->
   <div class="buttons">
