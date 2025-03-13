@@ -53,11 +53,6 @@
       </tr>
       <tr>
         <th>이용객실</th>
-        <td><input type="text" id="manualRoom" /></td>
-      </tr>
-      <!-- 이용기간: 인풋 + 달력(아래 보이게) -->
-      <tr>
-        <th>이용기간</th>
         <td>
           <!-- 기존 input 대신 select -->
           <select id="manualRoom">
@@ -67,6 +62,14 @@
             <option value="파티룸">파티룸</option>
             <option value="몽골텐트">몽골텐트</option>
           </select>
+        </td>
+      </tr>
+      <!-- 이용기간: 인풋 + 달력(아래 보이게) -->
+      <tr>
+        <th>이용기간</th>
+        <td>
+          <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 13.(목) ~ 2025. 3. 14.(금)" />
+          <div id="calendarContainer"></div>
         </td>
       </tr>
       <tr>
