@@ -84,8 +84,50 @@ pre {
 
 /* #app는 JS에서 show/hide 제어 */
 #app {
-  /* 기본적으로 숨기고 싶다면 
-     display: none; 
-     JS에서 인증 후 보이게 
-  */
+  /* 처음에는 미로그인 상태이면 JS에서 hidden 처리 */
+}
+
+/* 탭 메뉴 스타일 */
+.tab-menu {
+  margin-bottom: 10px;
+}
+
+.tab-menu button {
+  padding: 10px 15px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.tab-menu button.active {
+  background-color: #5cb85c;
+  color: #fff;
+}
+
+/* 탭 내용 기본 숨김 처리 */
+.tab-content {
+  display: none;
+}
+
+/* 테이블 형태 수기작성 폼 */
+.manual-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+.manual-table th {
+  width: 120px;
+  background-color: #eee;
+  text-align: left;
+  padding: 8px;
+}
+
+.manual-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.manual-table input[type="text"],
+.manual-table textarea {
+  width: 95%;
 }
