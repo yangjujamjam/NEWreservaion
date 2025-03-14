@@ -184,6 +184,14 @@ pre {
 .room-row select {
   margin-right: 5px;
 }
+
+#loginScreen {
+  display: block;  /* 처음 로그인 화면은 보임 */
+}
+
+#app {
+  display: none;   /* 예약 업무 관리 페이지는 처음엔 안 보임 */
+}
 .room-row button {
   margin-left: 10px;
 }
