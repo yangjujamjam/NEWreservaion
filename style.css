@@ -84,7 +84,7 @@ pre {
 
 /* #app는 JS에서 show/hide 제어 */
 #app {
-  /* 로그인 전: display:none; */
+  /* 기본적으로 display:none; */
 }
 
 /* 탭 메뉴 스타일 */
@@ -181,17 +181,4 @@ pre {
 
 .range {
   background-color: #b2e2b2 !important;
-}
-
-/* ----- 객실 행 (room-row) ----- */
-.room-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.room-row select {
-  margin-right: 5px;
-}
-.room-row button {
-  margin-left: 10px;
 }
