@@ -84,7 +84,7 @@ pre {
 
 /* #app는 JS에서 show/hide 제어 */
 #app {
-  /* 기본적으로 display:none; -> JS에서 인증 후 보이게 해도 됨 */
+  /* 기본적으로 display:none; -> JS에서 인증 후 보이게 */
 }
 
 /* 탭 메뉴 스타일 */
@@ -128,11 +128,12 @@ pre {
 }
 
 .manual-table input[type="text"],
-.manual-table textarea {
+.manual-table textarea,
+.manual-table select {
   width: 95%;
 }
 
-/* ---------- 달력 스타일 ---------- */
+/* 달력 */
 #calendarContainer {
   margin-top: 10px;
   width: 100%;
@@ -180,4 +181,15 @@ pre {
 
 .range {
   background-color: #b2e2b2 !important;
+}
+
+/* 객실 행 */
+.room-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.room-row select {
+  margin-right: 10px;
 }
