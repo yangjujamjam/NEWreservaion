@@ -51,16 +51,26 @@
         <th>전화번호</th>
         <td><input type="text" id="manualPhone" /></td>
       </tr>
-    </table>
-
-    <!-- [객실 선택 영역] 전화번호 아래, 이용기간 위 -->
-    <h3>객실 선택</h3>
-    <div id="roomsContainer">
-      <!-- + 객실추가 버튼으로 여러 줄이 생성됨 -->
-    </div>
-    <button onclick="addRoomRow()">+ 객실추가</button>
-
-    <table class="manual-table">
+      <tr>
+        <th>이용객실</th>
+        <td>
+          <select id="manualRoom" onchange="onRoomChange()">
+            <option value="">(객실선택)</option>
+            <option value="대형 카라반">대형 카라반</option>
+            <option value="복층 우드캐빈">복층 우드캐빈</option>
+            <option value="파티룸">파티룸</option>
+            <option value="몽골텐트">몽골텐트</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <th>수량</th>
+        <td>
+          <!-- 동적으로 옵션 채우기 -->
+          <select id="manualRoomCount" onchange="onRoomCountChange()"></select>
+          <input type="hidden" id="manualCount" value="1" />
+        </td>
+      </tr>
       <tr>
         <th>이용기간</th>
         <td>
