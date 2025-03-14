@@ -600,3 +600,17 @@ function sameDay(d1,d2){
       && d1.getMonth()===d2.getMonth()
       && d1.getDate()===d2.getDate();
 }
+
+function toggleOptionText(checkboxElem) {
+  const targetId = checkboxElem.dataset.target; // ex) "#optText1"
+  const textField = document.querySelector(targetId);
+  if (!textField) return;
+
+  if (checkboxElem.checked) {
+    textField.disabled = false;  // 체크되면 활성화
+    textField.focus();           // 바로 입력 가능
+  } else {
+    textField.value = '';        // 체크 해제 시 입력 내용 제거
+    textField.disabled = true;   // 비활성화
+  }
+}
