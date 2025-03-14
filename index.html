@@ -66,7 +66,9 @@
       <tr>
         <th>수량</th>
         <td>
-          <!-- 동적으로 옵션 채우기 -->
+          <h3>객실 추가하기</h3>
+            <div id="roomsContainer"><!-- 여기에 동적 row 생성 --></div>
+            <button onclick="addRoomRow()">+ 객실추가</button>
           <select id="manualRoomCount" onchange="onRoomCountChange()"></select>
           <input type="hidden" id="manualCount" value="1" />
         </td>
