@@ -35,12 +35,12 @@
     <button id="tabManualBtn" onclick="showTab('manual')">수기작성</button>
   </div>
 
-  <!-- [붙여넣기 탭] -->
+  <!-- 붙여넣기 탭 -->
   <div id="tabPaste" class="tab-content">
     <textarea id="inputData" placeholder="여기에 예약정보 텍스트를 붙여넣으세요"></textarea>
   </div>
 
-  <!-- [수기작성 탭] -->
+  <!-- 수기작성 탭 -->
   <div id="tabManual" class="tab-content">
     <table class="manual-table">
       <tr>
@@ -53,10 +53,10 @@
       </tr>
     </table>
 
-    <!-- [객실 선택 영역] 전화번호 아래, 이용기간 위 -->
+    <!-- (새로 추가) 여러 객실을 추가/삭제할 수 있는 영역 -->
     <h3>객실 선택</h3>
     <div id="roomsContainer">
-      <!-- + 객실추가 버튼으로 여러 줄이 생성됨 -->
+      <!-- “객실추가” 버튼으로 여러 줄을 생성 -->
     </div>
     <button onclick="addRoomRow()">+ 객실추가</button>
 
@@ -64,7 +64,7 @@
       <tr>
         <th>이용기간</th>
         <td>
-          <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 14.(금) ~ 2025. 3. 16.(일)" />
+          <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 14.(금) ~ 2025. 3. 15.(토)" />
           <div id="calendarContainer"></div>
         </td>
       </tr>
