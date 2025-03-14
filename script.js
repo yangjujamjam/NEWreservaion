@@ -569,15 +569,11 @@ function generateReservationMessage() {
 
   if (isManualTabActive()) {
     data = getManualReservationData();
-    // 수기작성 시에는 전체 텍스트가 따로 없으므로 rawText는 비워두겠습니다.
   } else {
     rawText = document.getElementById('inputData').value;
     data = parseReservation(rawText);
   }
 
-  let message = '';
-
-  // 파싱 내용 정리
   const formattedParsedData = `
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
@@ -591,6 +587,7 @@ function generateReservationMessage() {
 - 결제금액: ${data.결제금액}
 - 예약플랫폼: ${data.예약플랫폼}`;
 
+  let message = '';
   // 무통장
   if (rawText.includes('무통장할인') || data.예약플랫폼 === '네이버무통장' || data.무통장여부 === true) {
     message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
@@ -607,7 +604,7 @@ ${formattedParsedData}
 
 ※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
   }
-  // 네이버 당일캠핑 (기간에 '~' 없는 경우)
+  // 네이버 당일
   else if (data.예약플랫폼 === '네이버' && data.이용기간 && !data.이용기간.includes('~')) {
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
@@ -707,21 +704,6 @@ https://litt.ly/jamjam_bbq`;
     .then(() => alert('안내문자가 클립보드에 복사되었습니다.'));
 }
 
-/** =========================================
- *  [7] 모달 (양식 수정) 관련
- * ========================================= */
-function openTemplateModal(){
-  document.getElementById('templateModal').style.display='block';
-}
-function closeTemplateModal(){
-  document.getElementById('templateModal').style.display='none';
-}
-const defaultTemplates={
-  // (기존)
-};
-function saveTemplates(){
-  // (기존)
-}
 
 /** =========================================
  *  [8] isManualTabActive
