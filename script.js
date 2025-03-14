@@ -550,7 +550,7 @@ async function sendSingleRow(d){
     결제금액:   d.결제금액 || "",
     예약플랫폼: d.예약플랫폼||""
   });
-  const url= gasUrl + '?' + params.toString();
+  const url = reservationUrl + '?' + params.toString();
   try{
     const res= await fetch(url);
     const msg= await res.text();
