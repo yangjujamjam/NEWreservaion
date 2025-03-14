@@ -47,8 +47,8 @@ async function doLogin() {
 
 async function fetchPasswordFromGAS(){
   try {
-    const r= await fetch(gasUrl+'?mode=password');
-    const data= await r.json(); // { password: '...' }
+    const r = await fetch(passUrl + '?mode=password'); 
+    const data = await r.json();
     return data.password;
   } catch(err){
     console.error(err);
