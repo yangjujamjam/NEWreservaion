@@ -1,8 +1,8 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycby2D33Ulsl5aQOjaDyLv5vePU1F9vGlSXe9Z5JhV2hLGY9Uofu4fjNQXFoGSpYs2oI5/exec';
-// ↑ 새 GAS 웹 앱 URL로 교체
+const passUrl = 'https://script.google.com/macros/s/AKfycbwB7l5EvanthaYH-p43oB-vrb3SOj3EH2og485LqY3hWU_TAdfzoLeafvBMUwl3iKza/exec';
+const reservationUrl = 'https://script.google.com/macros/s/AKfycby2D33Ulsl5aQOjaDyLv5vePU1F9vGlSXe9Z5JhV2hLGY9Uofu4fjNQXFoGSpYs2oI5/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시점 초기 처리
