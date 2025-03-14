@@ -1,3 +1,199 @@
+body {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+textarea {
+  width: 100%;
+  height: 150px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+button {
+  margin: 5px;
+  padding: 8px 15px;
+}
+
+pre {
+  background-color: #f4f4f4;
+  padding: 10px;
+  margin-top: 20px;
+}
+
+.top-menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.top-menu ul li {
+  display: inline;
+  margin-right: 10px;
+}
+
+/* 모달 */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0; 
+  top: 0;
+  width: 100%; 
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+  background-color: #fff;
+  margin: 10% auto;
+  padding: 20px;
+  border-radius: 5px;
+  width: 80%;
+}
+
+.modal-content textarea {
+  width: 100%;
+  height: 100px;
+  margin-bottom: 10px;
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: black;
+}
+
+/* ---- 로그인 화면 (loginScreen) ---- */
+#loginScreen {
+  margin: 0 auto;
+  max-width: 300px;
+  text-align: center;
+}
+
+#loginScreen input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+}
+
+/* #app는 JS에서 show/hide 제어 */
+#app {
+  /* 기본적으로 display:none; -> JS에서 인증 후 보이게 */
+}
+
+/* 탭 메뉴 스타일 */
+.tab-menu {
+  margin-bottom: 10px;
+}
+
+.tab-menu button {
+  padding: 10px 15px;
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.tab-menu button.active {
+  background-color: #5cb85c;
+  color: #fff;
+}
+
+/* 탭 내용 기본 숨김 처리 */
+.tab-content {
+  display: none;
+}
+
+/* 테이블 형태 수기작성 폼 */
+.manual-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 10px;
+}
+
+.manual-table th {
+  width: 120px;
+  background-color: #eee;
+  text-align: left;
+  padding: 8px;
+}
+
+.manual-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+}
+
+.manual-table input[type="text"],
+.manual-table textarea,
+.manual-table select {
+  width: 95%;
+}
+
+/* 달력 */
+#calendarContainer {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 350px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.calendar-header button {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calendar-day {
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.calendar-day:hover {
+  background-color: #eee;
+}
+
+.inactive {
+  color: #ccc;
+  pointer-events: none;
+}
+
+.selected {
+  background-color: #5cb85c !important;
+  color: #fff;
+}
+
+.range {
+  background-color: #b2e2b2 !important;
+}
+
+/* 객실 행 */
+.room-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.room-row select {
+  margin-right: 10px;
+}
+
 /* "객실 선택" 전체 컨테이너 스타일 */
 .room-selection {
   border: 1px solid #ccc;       /* 테두리 */
