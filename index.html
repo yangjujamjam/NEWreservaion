@@ -42,235 +42,50 @@
 
   <!-- 수기작성 탭 -->
   <div id="tabManual" class="tab-content">
-  <table class="manual-table">
-    <tr>
-      <th>예약자</th>
-      <td><input type="text" id="manualGuest" /></td>
-    </tr>
-    <tr>
-      <th>전화번호</th>
-      <td><input type="text" id="manualPhone" /></td>
-    </tr>
-    <tr>
-      <th>이용기간</th>
-      <td>
-        <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 14.(금) ~ 2025. 3. 16.(일)" />
-        <div id="calendarContainer"></div>
-      </td>
-    </tr>
-    <tr>
-      <th>총이용인원</th>
-      <td><input type="text" id="manualTotalPeople" placeholder="예) 대인2 소인2" /></td>
-    </tr>
-    <tr>
-      <th>입실시간</th>
-      <td><input type="text" id="manualCheckinTime" placeholder="예) 15시" /></td>
-    </tr>
-    <tr>
-      <th>결제금액</th>
-      <td><input type="text" id="manualPayment" placeholder="예) 178,000원" /></td>
-    </tr>
-    <tr>
-      <th>옵션</th>
-      <td>
-        <div class="option-group">
-          <!-- (숙박) 인원 추가 / 대인 -->
-          <label class="option-item">
-            <input 
-              type="checkbox" 
-              class="optionCheckbox" 
-              data-target="#optText1" 
-              data-label="(숙박) 인원 추가 / 대인"
-              onchange="toggleOptionText(this)"
-            />
-            (숙박) 인원 추가 / 대인
-            <input 
-              type="text" 
-              id="optText1" 
-              class="optionText" 
-              placeholder="예) 2명"
-              disabled
-            />
-          </label>
+    <table class="manual-table">
+      <tr>
+        <th>예약자</th>
+        <td><input type="text" id="manualGuest" /></td>
+      </tr>
+      <tr>
+        <th>전화번호</th>
+        <td><input type="text" id="manualPhone" /></td>
+      </tr>
+    </table>
 
-          <!-- (숙박) 인원 추가 / 소인 -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText2"
-              data-label="(숙박) 인원 추가 / 소인"
-              onchange="toggleOptionText(this)"
-            />
-            (숙박) 인원 추가 / 소인
-            <input 
-              type="text" 
-              id="optText2" 
-              class="optionText"
-              placeholder="예) 1명"
-              disabled
-            />
-          </label>
-
-          <!-- (당일캠핑) 인원 추가 / 대인 -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText3"
-              data-label="(당일캠핑) 인원 추가 / 대인"
-              onchange="toggleOptionText(this)"
-            />
-            (당일캠핑) 인원 추가 / 대인
-            <input 
-              type="text" 
-              id="optText3" 
-              class="optionText"
-              disabled
-            />
-          </label>
-
-          <!-- (당일캠핑) 인원추가 / 소인 -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText4"
-              data-label="(당일캠핑) 인원추가 / 소인"
-              onchange="toggleOptionText(this)"
-            />
-            (당일캠핑) 인원추가 / 소인
-            <input 
-              type="text" 
-              id="optText4" 
-              class="optionText"
-              disabled
-            />
-          </label>
-
-          <!-- 사계절 실내 온수풀 (인당) -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText5"
-              data-label="사계절 실내 온수풀 (인당)"
-              onchange="toggleOptionText(this)"
-            />
-            사계절 실내 온수풀 (인당)
-            <input 
-              type="text" 
-              id="optText5" 
-              class="optionText"
-              disabled
-            />
-          </label>
-
-          <!-- 참숯+그릴 -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText6"
-              data-label="참숯+그릴"
-              onchange="toggleOptionText(this)"
-            />
-            참숯+그릴
-            <input 
-              type="text" 
-              id="optText6" 
-              class="optionText"
-              disabled
-            />
-          </label>
-
-          <!-- 불멍 (화로대 + 장작) -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText7"
-              data-label="불멍 (화로대 + 장작)"
-              onchange="toggleOptionText(this)"
-            />
-            불멍 (화로대 + 장작)
-            <input 
-              type="text" 
-              id="optText7" 
-              class="optionText"
-              disabled
-            />
-          </label>
-
-          <!-- 참숯그릴+불멍 세트 (추천) -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText8"
-              data-label="참숯그릴+불멍 세트 (추천)"
-              onchange="toggleOptionText(this)"
-            />
-            참숯그릴+불멍 세트 (추천)
-            <input 
-              type="text" 
-              id="optText8" 
-              class="optionText"
-              disabled
-            />
-          </label>
-
-          <!-- (추천) 잼잼 한돈 바베큐 세트 (1인) -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText9"
-              data-label="(추천) 잼잼 한돈 바베큐 세트 (1인)"
-              onchange="toggleOptionText(this)"
-            />
-            (추천) 잼잼 한돈 바베큐 세트 (1인)
-            <input 
-              type="text" 
-              id="optText9" 
-              class="optionText"
-              disabled
-            />
-          </label>
-
-          <!-- 두 손 가벼운 패키지(고기X) -->
-          <label class="option-item">
-            <input 
-              type="checkbox"
-              class="optionCheckbox"
-              data-target="#optText10"
-              data-label="두 손 가벼운 패키지(고기X)"
-              onchange="toggleOptionText(this)"
-            />
-            두 손 가벼운 패키지(고기X)
-            <input 
-              type="text" 
-              id="optText10" 
-              class="optionText"
-              disabled
-            />
-          </label>
-        </div>
-      </td>
-    </tr>
-    <!-- ▲ 옵션 끝 -->
-  </table>
-
-  <!-- 객실 선택 영역을 하나의 그룹(컨테이너)으로 감싸기 -->
-  <div class="room-selection">
+    <!-- (새로 추가) 여러 객실을 추가/삭제할 수 있는 영역 -->
     <h3>객실 선택</h3>
-    <!-- 스크롤이 필요한 영역 -->
     <div id="roomsContainer">
-      <!-- 여기에 '객실 행'들이 동적으로 추가됩니다 -->
+      <!-- “객실추가” 버튼으로 여러 줄을 생성 -->
     </div>
-    <button id="addRoomBtn" onclick="addRoomRow()">+ 객실추가</button>
+    <button onclick="addRoomRow()">+ 객실추가</button>
+
+    <table class="manual-table">
+      <tr>
+        <th>이용기간</th>
+        <td>
+          <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 14.(금) ~ 2025. 3. 15.(토)" />
+          <div id="calendarContainer"></div>
+        </td>
+      </tr>
+      <tr>
+        <th>총이용인원</th>
+        <td><input type="text" id="manualTotalPeople" placeholder="예) 대인2 소인2" /></td>
+      </tr>
+      <tr>
+        <th>입실시간</th>
+        <td><input type="text" id="manualCheckinTime" placeholder="예) 15시" /></td>
+      </tr>
+      <tr>
+        <th>결제금액</th>
+        <td><input type="text" id="manualPayment" placeholder="예) 178,000원" /></td>
+      </tr>
+      <tr>
+        <th>옵션</th>
+        <td><textarea id="manualOption" placeholder="옵션을 입력하세요 (예: 고기세트, 얼리체크인 등)"></textarea></td>
+      </tr>
+    </table>
   </div>
-</div>
 
   <!-- 버튼 부분 -->
   <div class="buttons">
