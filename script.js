@@ -739,17 +739,137 @@ let firstSelectedDate=null;
 let secondSelectedDate=null;
 
 function buildCalendar(){
-  // (기존 코드)
+  const container= document.getElementById('calendarContainer');
+  container.innerHTML='';
+  const headerDiv= document.createElement('div');
+  headerDiv.className='calendar-header';
+  // prev/next
+  const prevBtn= document.createElement('button');
+  prevBtn.textContent='<';
+  prevBtn.onclick=()=>{
+    currentMonth--;
+    if(currentMonth<0){currentMonth=11; currentYear--;}
+    buildCalendar();
+  };
+  const nextBtn= document.createElement('button');
+  nextBtn.textContent='>';
+  nextBtn.onclick=()=>{
+    currentMonth++;
+    if(currentMonth>11){currentMonth=0; currentYear++;}
+    buildCalendar();
+  };
+  const monthYearSpan= document.createElement('span');
+  monthYearSpan.textContent=`${currentYear}년 ${currentMonth+1}월`;
+  headerDiv.appendChild(prevBtn);
+  headerDiv.appendChild(monthYearSpan);
+  headerDiv.appendChild(nextBtn);
+  container.appendChild(headerDiv);
+
+  // grid
+  const dayNames=['일','월','화','수','목','금','토'];
+  const gridDiv= document.createElement('div');
+  gridDiv.className='calendar-grid';
+  dayNames.forEach(d=>{
+    const dayHeader= document.createElement('div');
+    dayHeader.className='calendar-day inactive';
+    dayHeader.style.fontWeight='bold';
+    dayHeader.textContent=d;
+    gridDiv.appendChild(dayHeader);
+  });
+  const firstDay= new Date(currentYear,currentMonth,1).getDay();
+  const lastDate= new Date(currentYear, currentMonth+1,0).getDate();
+  for(let i=0;i<firstDay;i++){
+    const blank= document.createElement('div');
+    blank.className='calendar-day inactive';
+    gridDiv.appendChild(blank);
+  }
+  for(let date=1; date<=lastDate; date++){
+    const dayDiv= document.createElement('div');
+    dayDiv.className='calendar-day';
+    dayDiv.textContent=date;
+    const thisDate= new Date(currentYear, currentMonth, date);
+    dayDiv.onclick= ()=> onDateClick(thisDate);
+    gridDiv.appendChild(dayDiv);
+  }
+  container.appendChild(gridDiv);
+  highlightSelectedDates();
 }
+
 function onDateClick(dateObj){
-  // (기존 코드)
+  if(!firstSelectedDate){
+    firstSelectedDate=dateObj;
+    secondSelectedDate=null;
+  } else if(!secondSelectedDate){
+    const same= sameDay(dateObj, firstSelectedDate);
+    if(same){ secondSelectedDate=null; }
+    else {
+      if(dateObj<firstSelectedDate){
+        secondSelectedDate= firstSelectedDate;
+        firstSelectedDate= dateObj;
+      } else {
+        secondSelectedDate= dateObj;
+      }
+    }
+  } else {
+    firstSelectedDate=dateObj; secondSelectedDate=null;
+  }
+  highlightSelectedDates();
+  updatePeriodInput();
 }
+
 function highlightSelectedDates(){
-  // (기존 코드)
+  const container= document.getElementById('calendarContainer');
+  const days= container.getElementsByClassName('calendar-day');
+  for(let i=0;i<days.length;i++){
+    days[i].classList.remove('selected','range');
+  }
+  if(firstSelectedDate){
+    for(let i=0;i<days.length;i++){
+      const cell= days[i];
+      if(cell.classList.contains('inactive')) continue;
+      const dayNum=Number(cell.textContent);
+      if(isNaN(dayNum)) continue;
+
+      const cellDate= new Date(currentYear, currentMonth, dayNum);
+      if(sameDay(cellDate, firstSelectedDate) && !secondSelectedDate){
+        cell.classList.add('selected');
+      } else if(secondSelectedDate){
+        const minD= (firstSelectedDate<secondSelectedDate? firstSelectedDate:secondSelectedDate);
+        const maxD= (firstSelectedDate<secondSelectedDate? secondSelectedDate:firstSelectedDate);
+        if(cellDate>=minD && cellDate<=maxD){
+          if(sameDay(cellDate,minD)||sameDay(cellDate,maxD)){
+            cell.classList.add('selected');
+          } else {
+            cell.classList.add('range');
+          }
+        }
+      }
+    }
+  }
 }
 function updatePeriodInput(){
-  // (기존 코드)
+  const periodInput= document.getElementById('manualPeriod');
+  if(!firstSelectedDate){
+    periodInput.value='';
+    return;
+  }
+  const getKDay=d=>{
+    const dn=['일','월','화','수','목','금','토'];
+    return dn[d.getDay()];
+  };
+  const fmt=d=>{
+    return `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.(${getKDay(d)})`;
+  };
+  if(!secondSelectedDate){
+    periodInput.value=fmt(firstSelectedDate);
+  } else {
+    let start= (firstSelectedDate<secondSelectedDate? firstSelectedDate:secondSelectedDate);
+    let end  = (firstSelectedDate<secondSelectedDate? secondSelectedDate:firstSelectedDate);
+    periodInput.value= `${fmt(start)}~${fmt(end)}`;
+  }
 }
 function sameDay(d1,d2){
-  // (기존 코드)
+  return d1.getFullYear()===d2.getFullYear()
+      && d1.getMonth()===d2.getMonth()
+      && d1.getDate()===d2.getDate();
 }
