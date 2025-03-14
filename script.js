@@ -1,8 +1,8 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const passUrl = 'https://script.google.com/macros/s/AKfycbwB7l5EvanthaYH-p43oB-vrb3SOj3EH2og485LqY3hWU_TAdfzoLeafvBMUwl3iKza/exec';
-const reservationUrl = 'https://script.google.com/macros/s/AKfycby2D33Ulsl5aQOjaDyLv5vePU1F9vGlSXe9Z5JhV2hLGY9Uofu4fjNQXFoGSpYs2oI5/exec';
+const passUrl = 'https://script.google.com/macros/s/AKfycbwgQahS2cgLrRPFHdIg2VaE4CL7UA1Cvx7-40-fnG1MxWb0o7AD1ItO5rZ2lslBGV9I/exec';
+const reservationUrl = 'https://script.google.com/macros/s/AKfycbwgQahS2cgLrRPFHdIg2VaE4CL7UA1Cvx7-40-fnG1MxWb0o7AD1ItO5rZ2lslBGV9I/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시점 초기 처리
