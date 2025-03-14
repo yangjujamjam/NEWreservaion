@@ -215,6 +215,7 @@ function gatherManualData() {
   const totalPeople = document.getElementById('manualTotalPeople').value.trim();
   const checkinTime = document.getElementById('manualCheckinTime').value.trim();
   const payment = document.getElementById('manualPayment').value.trim();
+  const optionString = gatherSelectedOptions();
 
   // 객실 데이터
   const container = document.getElementById('roomsContainer');
@@ -246,7 +247,7 @@ function gatherManualData() {
       이용객실: roomVal,
       이용기간: period,
       수량: countVal || '1',
-      옵션: '', // 필요하다면 추가
+      옵션: optionString,
       총이용인원: totalPeople,
       입실시간: checkinTime,
       결제금액: payment,
@@ -257,6 +258,30 @@ function gatherManualData() {
   });
 
   return resultArray;
+}
+
+function gatherSelectedOptions() {
+  const checkboxes = document.querySelectorAll('.optionCheckbox');
+  const selectedItems = [];
+
+  checkboxes.forEach(chk => {
+    if (chk.checked) {
+      const labelText = chk.dataset.label || ""; 
+      const textId    = chk.dataset.target; 
+      const inputEl   = document.querySelector(textId);
+      const userInput = (inputEl && !inputEl.disabled) 
+                          ? inputEl.value.trim() 
+                          : "";
+      // "옵션명(입력값)" 꼴로 만듦. 입력값이 없으면 그냥 옵션명만.
+      const finalStr = userInput 
+                       ? `${labelText} (${userInput})` 
+                       : labelText;
+      selectedItems.push(finalStr);
+    }
+  });
+
+  // 쉼표로 구분 or 줄바꿈으로 구분 등 원하는 대로
+  return selectedItems.join(', ');
 }
 
 /** 예약번호(14자리) + 1자리 인덱스 → 최종 15자리 */
