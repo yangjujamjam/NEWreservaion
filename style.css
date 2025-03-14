@@ -84,7 +84,7 @@ pre {
 
 /* #app는 JS에서 show/hide 제어 */
 #app {
-  /* 기본적으로 display:none; */
+  /* 기본적으로 display:none; -> JS에서 인증 후 보이게 */
 }
 
 /* 탭 메뉴 스타일 */
@@ -133,65 +133,63 @@ pre {
   width: 95%;
 }
 
-/* 달력 (기존과 동일) */
+/* 달력 */
 #calendarContainer {
   margin-top: 10px;
   width: 100%;
   max-width: 350px;
 }
+
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 5px;
 }
+
 .calendar-header button {
   padding: 5px 10px;
   cursor: pointer;
 }
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 3px;
 }
+
 .calendar-day {
   text-align: center;
   padding: 5px 0;
   border-radius: 4px;
   cursor: pointer;
 }
+
 .calendar-day:hover {
   background-color: #eee;
 }
+
 .inactive {
   color: #ccc;
   pointer-events: none;
 }
+
 .selected {
   background-color: #5cb85c !important;
   color: #fff;
 }
+
 .range {
   background-color: #b2e2b2 !important;
 }
 
-/* 객실 행 (.room-row) */
+/* 객실 행 */
 .room-row {
   display: flex;
   align-items: center;
   margin-bottom: 8px;
 }
+
 .room-row select {
-  margin-right: 5px;
-}
-
-#loginScreen {
-  display: block;  /* 처음 로그인 화면은 보임 */
-}
-
-#app {
-  display: none;   /* 예약 업무 관리 페이지는 처음엔 안 보임 */
-}
-.room-row button {
-  margin-left: 10px;
+  margin-right: 10px;
 }
