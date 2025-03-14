@@ -564,17 +564,97 @@ async function sendSingleRow(d){
 }
 
 function generateReservationMessage() {
-  let data;
   let rawText = '';
 
   if (isManualTabActive()) {
-    data = getManualReservationData();
-  } else {
-    rawText = document.getElementById('inputData').value;
-    data = parseReservation(rawText);
-  }
+    // [A] 여러 객실 모드
+    const dataArr = gatherManualData();  // ← 기존 getManualReservationData() 대신 사용
+    if (!dataArr.length) {
+      alert("객실 정보가 없습니다.");
+      return;
+    }
 
-  const formattedParsedData = `
+    // 첫 객실 데이터 (예약자, 전화번호 등은 공통)
+    const first = dataArr[0];
+
+    // 객실+수량 합치기 (예: "대형 카라반 2, 복층 우드캐빈 2")
+    const roomsString = dataArr.map(item => {
+      const n = parseInt(item.수량 || '0', 10);
+      return `${item.이용객실} ${n}`;
+    }).join(', ');
+
+    // 수량 합
+    const totalCount = dataArr.reduce((acc, cur) => acc + parseInt(cur.수량 || '0', 10), 0);
+
+    // 옵션이 비어 있으면 '없음' 처리
+    const finalOption = first.옵션 ? first.옵션 : '없음';
+
+    // 하나로 묶은 "가상" 데이터 객체 (안내문자용)
+    const combinedData = {
+      예약번호: first.예약번호,
+      예약자: first.예약자,
+      전화번호: first.전화번호,
+      이용객실: roomsString,        // 여러 객실 합침
+      이용기간: first.이용기간,
+      수량: String(totalCount),     // 합산 수량
+      옵션: finalOption,
+      총이용인원: first.총이용인원,
+      입실시간: first.입실시간,
+      결제금액: first.결제금액,
+      예약플랫폼: first.예약플랫폼,
+      무통장여부: first.무통장여부  // true/false
+    };
+
+    // 아래는 기존 안내문자 생성 로직과 동일. rawText는 수기작성 시 빈 문자열
+    let message = '';
+    const formattedParsedData = `
+- 예약번호: ${combinedData.예약번호}
+- 예약자: ${combinedData.예약자}
+- 전화번호: ${combinedData.전화번호}
+- 이용객실: ${combinedData.이용객실}
+- 이용기간: ${combinedData.이용기간}
+- 수량: ${combinedData.수량}
+- 옵션: ${combinedData.옵션}
+- 총 이용 인원: ${combinedData.총이용인원}
+- 입실시간: ${combinedData.입실시간}
+- 결제금액: ${combinedData.결제금액}
+- 예약플랫폼: ${combinedData.예약플랫폼}`;
+
+    // 무통장
+    if (combinedData.무통장여부 === true) {
+      message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
+
+${formattedParsedData}
+
+(이하 무통장 안내문...)`;
+    }
+    else if (combinedData.예약플랫폼 === '네이버' && combinedData.이용기간 && !combinedData.이용기간.includes('~')) {
+      // 네이버 당일
+      message = `[양주잼잼] ... (당일 안내문) ...\n${formattedParsedData}\n...`;
+    }
+    else if (combinedData.예약플랫폼 === '네이버') {
+      // 네이버 숙박
+      message = `[양주잼잼] ... (네이버 숙박 안내문) ...\n${formattedParsedData}\n...`;
+    }
+    else if (combinedData.예약플랫폼 === '야놀자') {
+      message = `[양주잼잼] ... (야놀자 안내문) ...\n${formattedParsedData}\n...`;
+    }
+    else if (combinedData.예약플랫폼 === '여기어때') {
+      message = `[양주잼잼] ... (여기어때 안내문) ...\n${formattedParsedData}\n...`;
+    }
+
+    document.getElementById('outputData').textContent = message;
+    navigator.clipboard.writeText(message)
+      .then(() => alert('안내문자가 클립보드에 복사되었습니다.'));
+
+  } else {
+    // [B] 붙여넣기 탭 (단일 파싱)
+    rawText = document.getElementById('inputData').value;
+    const data = parseReservation(rawText);
+
+    // 이하 기존 로직 그대로
+    let message = '';
+    const formattedParsedData = `
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
 - 전화번호: ${data.전화번호}
@@ -586,8 +666,6 @@ function generateReservationMessage() {
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}
 - 예약플랫폼: ${data.예약플랫폼}`;
-
-  let message = '';
   // 무통장
   if (rawText.includes('무통장할인') || data.예약플랫폼 === '네이버무통장' || data.무통장여부 === true) {
     message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
