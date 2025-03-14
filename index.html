@@ -20,7 +20,7 @@
   <header class="top-menu">
     <nav>
       <ul>
-        <li><a href="index.html">예약업무</a></li>
+        <li><a href="#">예약업무</a></li>
         <li><a href="#">예약관리</a></li>
         <li><a href="#">예약캘린더</a></li>
       </ul>
@@ -52,39 +52,11 @@
         <td><input type="text" id="manualPhone" /></td>
       </tr>
       <tr>
-        <th>이용객실</th>
-        <td>
-          <!-- 이용객실 선택 -->
-          <select id="manualRoom" onchange="onRoomChange()">
-            <option value="">(선택)</option>
-            <option value="대형 카라반">대형 카라반</option>
-            <option value="복층 우드캐빈">복층 우드캐빈</option>
-            <option value="파티룸">파티룸</option>
-            <option value="몽골텐트">몽골텐트</option>
-          </select>
-
-          <!-- 바로 옆에 수량 선택 -->
-          <select id="manualRoomCount" onchange="onRoomCountChange()">
-            <!-- 'onRoomChange()'에서 옵션을 채움 -->
-          </select>
-        </td>
-      </tr>
-      <tr>
         <th>이용기간</th>
         <td>
-          <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 13.(목) ~ 2025. 3. 14.(금)" />
+          <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 14.(금) ~ 2025. 3. 16.(일)" />
           <div id="calendarContainer"></div>
         </td>
-      </tr>
-      <!-- ↓↓↓ 변경: '수량'은 사용자가 직접 치는 대신, 위에서 선택한 값이 자동 반영되도록 -->
-      <tr>
-        <th>수량</th>
-        <!-- readonly 처리 (원하시면 뺄 수도 있음) -->
-        <td><input type="text" id="manualCount" value="1" readonly /></td>
-      </tr>
-      <tr>
-        <th>옵션</th>
-        <td><textarea id="manualOption" placeholder="옵션들을 쉼표(,)로 구분 또는 줄바꿈을 활용하여 입력하세요"></textarea></td>
       </tr>
       <tr>
         <th>총이용인원</th>
@@ -92,13 +64,20 @@
       </tr>
       <tr>
         <th>입실시간</th>
-        <td><input type="text" id="manualCheckinTime" placeholder="예) 15시~21시" /></td>
+        <td><input type="text" id="manualCheckinTime" placeholder="예) 15시" /></td>
       </tr>
       <tr>
         <th>결제금액</th>
         <td><input type="text" id="manualPayment" placeholder="예) 178,000원" /></td>
       </tr>
     </table>
+
+    <!-- [여러 개의 객실/수량 선택] -->
+    <h3>객실 선택</h3>
+    <div id="roomsContainer">
+      <!-- 여기에 '객실 행'들을 동적으로 추가 -->
+    </div>
+    <button onclick="addRoomRow()">+ 객실추가</button>
   </div>
 
   <!-- 버튼 부분 -->
