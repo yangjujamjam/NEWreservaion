@@ -42,43 +42,46 @@
 
   <!-- 수기작성 탭 -->
   <div id="tabManual" class="tab-content">
-    <table class="manual-table">
-      <tr>
-        <th>예약자</th>
-        <td><input type="text" id="manualGuest" /></td>
-      </tr>
-      <tr>
-        <th>전화번호</th>
-        <td><input type="text" id="manualPhone" /></td>
-      </tr>
-      <tr>
-        <th>이용기간</th>
-        <td>
-          <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 14.(금) ~ 2025. 3. 16.(일)" />
-          <div id="calendarContainer"></div>
-        </td>
-      </tr>
-      <tr>
-        <th>총이용인원</th>
-        <td><input type="text" id="manualTotalPeople" placeholder="예) 대인2 소인2" /></td>
-      </tr>
-      <tr>
-        <th>입실시간</th>
-        <td><input type="text" id="manualCheckinTime" placeholder="예) 15시" /></td>
-      </tr>
-      <tr>
-        <th>결제금액</th>
-        <td><input type="text" id="manualPayment" placeholder="예) 178,000원" /></td>
-      </tr>
-    </table>
+  <table class="manual-table">
+    <tr>
+      <th>예약자</th>
+      <td><input type="text" id="manualGuest" /></td>
+    </tr>
+    <tr>
+      <th>전화번호</th>
+      <td><input type="text" id="manualPhone" /></td>
+    </tr>
+    <tr>
+      <th>이용기간</th>
+      <td>
+        <input type="text" id="manualPeriod" placeholder="예) 2025. 3. 14.(금) ~ 2025. 3. 16.(일)" />
+        <div id="calendarContainer"></div>
+      </td>
+    </tr>
+    <tr>
+      <th>총이용인원</th>
+      <td><input type="text" id="manualTotalPeople" placeholder="예) 대인2 소인2" /></td>
+    </tr>
+    <tr>
+      <th>입실시간</th>
+      <td><input type="text" id="manualCheckinTime" placeholder="예) 15시" /></td>
+    </tr>
+    <tr>
+      <th>결제금액</th>
+      <td><input type="text" id="manualPayment" placeholder="예) 178,000원" /></td>
+    </tr>
+  </table>
 
-    <!-- [여러 개의 객실/수량 선택] -->
+  <!-- 객실 선택 영역을 하나의 그룹(컨테이너)으로 감싸기 -->
+  <div class="room-selection">
     <h3>객실 선택</h3>
+    <!-- 스크롤이 필요한 영역 -->
     <div id="roomsContainer">
-      <!-- 여기에 '객실 행'들을 동적으로 추가 -->
+      <!-- 여기에 '객실 행'들이 동적으로 추가됩니다 -->
     </div>
-    <button onclick="addRoomRow()">+ 객실추가</button>
+    <button id="addRoomBtn" onclick="addRoomRow()">+ 객실추가</button>
   </div>
+</div>
 
   <!-- 버튼 부분 -->
   <div class="buttons">
