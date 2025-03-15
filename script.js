@@ -472,7 +472,7 @@ function buildCalendar() {
   };
 
   const monthYearSpan = document.createElement('span');
-  monthYearSpan.textContent = ${currentYear}년 ${currentMonth+1}월;
+  monthYearSpan.textContent = `${currentYear}년 ${currentMonth+1}월`;
 
   headerDiv.appendChild(prevBtn);
   headerDiv.appendChild(monthYearSpan);
@@ -603,7 +603,7 @@ function updatePeriodInput() {
     const yyyy = date.getFullYear();
     const m = date.getMonth()+1;
     const d = date.getDate();
-    return ${yyyy}. ${m}. ${d}.(${getKoreanDay(date)});
+    return `${yyyy}. ${m}. ${d}.(${getKoreanDay(date)})`;
   };
 
   // 단일 날짜
@@ -613,7 +613,7 @@ function updatePeriodInput() {
     // 범위
     let start = (firstSelectedDate < secondSelectedDate)? firstSelectedDate : secondSelectedDate;
     let end   = (firstSelectedDate < secondSelectedDate)? secondSelectedDate : firstSelectedDate;
-    periodInput.value = ${formatKoreanDate(start)}~${formatKoreanDate(end)};
+    periodInput.value = `${formatKoreanDate(start)}~${formatKoreanDate(end)}`;
   }
 }
 
