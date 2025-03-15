@@ -69,23 +69,6 @@ pre {
   color: black;
 }
 
-/* ---- 로그인 화면 (loginScreen) ---- */
-#loginScreen {
-  margin: 0 auto;
-  max-width: 300px;
-  text-align: center;
-}
-
-#loginScreen input[type="password"] {
-  width: 100%;
-  padding: 8px;
-  margin: 10px 0;
-}
-
-/* #app는 JS에서 show/hide 제어 */
-#app {
-  /* 기본적으로 display:none; -> JS에서 인증 후 보이게 */
-}
 
 /* 탭 메뉴 스타일 */
 .tab-menu {
