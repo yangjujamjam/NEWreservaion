@@ -6,8 +6,6 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- [실제 앱 영역] -->
 <div id="app">
   <header class="top-menu">
     <nav>
@@ -45,11 +43,9 @@
       </tr>
     </table>
 
-    <!-- (새로 추가) 여러 객실을 추가/삭제할 수 있는 영역 -->
+    <!-- 여러 객실을 추가/삭제할 수 있는 영역 -->
     <h3>객실 선택</h3>
-    <div id="roomsContainer">
-      <!-- “객실추가” 버튼으로 여러 줄을 생성 -->
-    </div>
+    <div id="roomsContainer"></div>
     <button type="button" onclick="addRoomRow()">+ 객실추가</button>
 
     <table class="manual-table">
@@ -74,23 +70,24 @@
       </tr>
       <tr>
         <th>옵션</th>
-        <td><textarea id="manualOption" placeholder="옵션을 입력하세요 (예: 고기세트, 얼리체크인 등)"></textarea></td>
+        <td>
+          <textarea id="manualOption" placeholder="옵션을 입력하세요 (예: 고기세트, 얼리체크인 등)"></textarea>
+        </td>
       </tr>
     </table>
   </div>
 
-  <!-- 버튼 부분 -->
+  <!-- 버튼 영역 -->
   <div class="buttons">
     <button onclick="processReservation()">파싱 결과 보기</button>
     <button onclick="generateReservationMessage()">안내문자 양식적용</button>
     <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
   </div>
 
-  <!-- 모달 관련 버튼/태그 전부 삭제 -->
-
   <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 </div>
 
+<!-- 자바스크립트 -->
 <script src="script.js"></script>
 </body>
 </html>
