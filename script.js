@@ -172,75 +172,118 @@ function parseHereReservation(text) {
 /** =========================================
  *  [5] 수기작성: 객실 select + 수량 select
  * ========================================= */
-function onRoomChange(){
-  const selectedRoom= document.getElementById('manualRoom').value.trim();
-  populateRoomCountOptions(selectedRoom);
-  // 첫 번째 옵션
-  document.getElementById('manualRoomCount').selectedIndex=0;
-  onRoomCountChange();
-}
-
-function populateRoomCountOptions(roomName){
-  const countSel= document.getElementById('manualRoomCount');
-  countSel.innerHTML='';
-
-  let range=[];
-  if(!roomName){
-    range=[];
-  } else if(roomName==='대형 카라반'){
-    range= Array.from({length:12},(_,i)=> i+1); 
-  } else if(roomName==='복층 우드캐빈'){
-    range= Array.from({length:6},(_,i)=> i+1);
-  } else if(roomName==='파티룸'){
-    range=[2];
-  } else if(roomName==='몽골텐트'){
-    range=[1];
-  }
+function addRoomRow() {
+  const container = document.getElementById('roomsContainer');
   
-  if(range.length===0){
-    const opt= document.createElement('option');
-    opt.value='';
-    opt.textContent='(수량)';
-    countSel.appendChild(opt);
-    countSel.disabled=true;
-  } else {
-    countSel.disabled=false;
-    range.forEach(n=>{
-      const opt= document.createElement('option');
-      opt.value= String(n);
-      opt.textContent= n+'개';
-      countSel.appendChild(opt);
-    });
-  }
+  // row 컨테이너
+  const rowDiv = document.createElement('div');
+  rowDiv.className = 'room-row';
+
+  // 객실 select
+  const roomSelect = document.createElement('select');
+  roomSelect.className = 'room-type';
+  // 기본 placeholder
+  let defaultOption = document.createElement('option');
+  defaultOption.value = '';
+  defaultOption.textContent = '(객실 선택)';
+  roomSelect.appendChild(defaultOption);
+
+  // 객실 목록
+  const roomTypes = ['대형 카라반','복층 우드캐빈','파티룸','몽골텐트'];
+  roomTypes.forEach(rt => {
+    let opt = document.createElement('option');
+    opt.value = rt;
+    opt.textContent = rt;
+    roomSelect.appendChild(opt);
+  });
+
+  // 수량 select
+  const countSelect = document.createElement('select');
+  countSelect.className = 'room-count';
+  countSelect.disabled = true; // 아직 객실 선택 전이므로
+
+  // roomSelect 변경 시 수량 옵션 업데이트
+  roomSelect.addEventListener('change', () => {
+    populateRoomCountOptions(roomSelect.value, countSelect);
+  });
+
+  // 삭제 버튼
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = '삭제';
+  removeBtn.type = 'button';
+  removeBtn.onclick = () => {
+    container.removeChild(rowDiv);
+  };
+
+  // DOM 연결
+  rowDiv.appendChild(roomSelect);
+  rowDiv.appendChild(countSelect);
+  rowDiv.appendChild(removeBtn);
+  container.appendChild(rowDiv);
 }
 
-function onRoomCountChange(){
-  const val= document.getElementById('manualRoomCount').value;
-  document.getElementById('manualCount').value= val || "0";
+// roomName에 따라 countSelect를 0~최대값으로 채움
+function populateRoomCountOptions(roomName, countSelect) {
+  countSelect.innerHTML = '';
+
+  let range = [];
+  if (!roomName) {
+    // 객실이 선택 안 되었으면 비활성화
+    countSelect.disabled = true;
+    let opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '(수량)';
+    countSelect.appendChild(opt);
+    return;
+  }
+
+  // 객실별 수량 범위
+  if (roomName === '대형 카라반') {
+    range = Array.from({length: 13}, (_, i) => i); // 0~12
+  } else if (roomName === '복층 우드캐빈') {
+    range = Array.from({length: 7},  (_, i) => i); // 0~6
+  } else if (roomName === '파티룸') {
+    range = Array.from({length: 3},  (_, i) => i); // 0~2
+  } else if (roomName === '몽골텐트') {
+    range = [0, 1]; // 0 또는 1
+  }
+
+  countSelect.disabled = false;
+  range.forEach(n => {
+    const opt = document.createElement('option');
+    opt.value = String(n);
+    opt.textContent = n + '개';
+    countSelect.appendChild(opt);
+  });
 }
 
 /** =========================================
- *  [6] 수기작성(단일) 데이터 구성
+ *  [6] 여러 객실 정보 취합 (수기작성)
  * ========================================= */
-function generateReservationNumber(){
-  const d= new Date();
-  const YYYY= d.getFullYear();
-  const MM= String(d.getMonth()+1).padStart(2,'0');
-  const DD= String(d.getDate()).padStart(2,'0');
-  const HH= String(d.getHours()).padStart(2,'0');
-  const mm= String(d.getMinutes()).padStart(2,'0');
-  const ss= String(d.getSeconds()).padStart(2,'0');
-  return `${YYYY}${MM}${DD}${HH}${mm}${ss}`;
-}
+// (A) 안내문자/파싱결과용: 모든 객실을 한 줄로 합쳐서 반환
+function getManualReservationDataSingle() {
+  // 객실 행들을 모두 가져옴
+  const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
 
-function getManualReservationData(){
+  // 객실명 + 수량 합치기
+  let roomsArr = [];
+  rowNodes.forEach(row => {
+    const roomType = row.querySelector('.room-type').value.trim();
+    const countVal = row.querySelector('.room-count').value.trim();
+    if (roomType && countVal !== '0') {
+      roomsArr.push(`${roomType} ${countVal}개`);
+    }
+  });
+  // 쉼표로 연결
+  let 이용객실 = roomsArr.join(', ');
+
   return {
     예약번호: generateReservationNumber(),
     예약자: document.getElementById('manualGuest').value.trim(),
     전화번호: document.getElementById('manualPhone').value.trim(),
-    이용객실: document.getElementById('manualRoom').value.trim(),
+    이용객실,
     이용기간: document.getElementById('manualPeriod').value.trim(),
-    수량: document.getElementById('manualCount').value.trim(),
+    수량: '', // 여러개를 합쳤으므로 단일 '수량'은 따로 두지 않음
     옵션: document.getElementById('manualOption').value.trim(),
     총이용인원: document.getElementById('manualTotalPeople').value.trim(),
     입실시간: document.getElementById('manualCheckinTime').value.trim(),
@@ -250,13 +293,61 @@ function getManualReservationData(){
   };
 }
 
+// (B) 스프레드시트용: 객실마다 한 행씩 나누어 반환 (객실명/수량만 다르고 나머지는 동일)
+function getManualReservationDataMultiple() {
+  const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
+
+  // 공통 데이터(예약번호 등)
+  const common = {
+    예약번호: generateReservationNumber(),
+    예약자: document.getElementById('manualGuest').value.trim(),
+    전화번호: document.getElementById('manualPhone').value.trim(),
+    이용기간: document.getElementById('manualPeriod').value.trim(),
+    옵션: document.getElementById('manualOption').value.trim(),
+    총이용인원: document.getElementById('manualTotalPeople').value.trim(),
+    입실시간: document.getElementById('manualCheckinTime').value.trim(),
+    결제금액: document.getElementById('manualPayment').value.trim(),
+    예약플랫폼: '수기입력',
+    무통장여부: true
+  };
+
+  let result = [];
+  rowNodes.forEach(row => {
+    const roomType = row.querySelector('.room-type').value.trim();
+    const countVal = row.querySelector('.room-count').value.trim();
+    // 0개나 객실이 미선택이면 제외
+    if (roomType && countVal !== '0') {
+      // 공통정보 복사해서, 이 row객실만 대입
+      let rowData = { ...common };
+      rowData.이용객실 = roomType;
+      rowData.수량 = countVal;
+      result.push(rowData);
+    }
+  });
+
+  return result;
+}
+
+// 예약번호 생성(연-월-일-시-분-초)
+function generateReservationNumber() {
+  const d = new Date();
+  const YYYY = d.getFullYear();
+  const MM   = String(d.getMonth()+1).padStart(2,'0');
+  const DD   = String(d.getDate()).padStart(2,'0');
+  const hh   = String(d.getHours()).padStart(2,'0');
+  const mm   = String(d.getMinutes()).padStart(2,'0');
+  const ss   = String(d.getSeconds()).padStart(2,'0');
+  return `${YYYY}${MM}${DD}${hh}${mm}${ss}`;
+}
+
 /** =========================================
- *  [7] 버튼 / 기능 함수
+ *  [7] 버튼 동작
  * ========================================= */
 function processReservation(){
   let data;
   if(isManualTabActive()){
-    data= getManualReservationData();
+    // 여러 객실을 합쳐서 한 오브젝트로만 보여주기
+    data = getManualReservationDataSingle();
   } else {
     const text= document.getElementById('inputData').value;
     data= parseReservation(text);
@@ -265,43 +356,70 @@ function processReservation(){
 }
 
 function sendToSheet(){
-  let data;
+  // “수기작성”이면 객실별로 나누어 여러행을 전송
   if(isManualTabActive()){
-    data= getManualReservationData();
-  } else {
-    const text= document.getElementById('inputData').value;
-    data= parseReservation(text);
+    const dataArr = getManualReservationDataMultiple();
+    if(dataArr.length === 0) {
+      alert("추가된 객실이 없습니다. (객실 0개는 전송 안 함)");
+      return;
+    }
+    // 객실별로 반복 전송
+    dataArr.forEach(data => {
+      const params = new URLSearchParams({
+        예약번호:    data.예약번호||"",
+        예약자:     data.예약자||"",
+        전화번호:   data.전화번호||"",
+        이용객실:   data.이용객실||"",
+        이용기간:   data.이용기간||"",
+        수량:       data.수량||"",
+        옵션:       data.옵션? data.옵션.replace(/, /g,'\n'): "",
+        총이용인원: data.총이용인원||"",
+        입실시간:   data.입실시간||"",
+        결제금액:   data.결제금액||"",
+        예약플랫폼: data.예약플랫폼||""
+      });
+      fetch(gasUrl + '?' + params.toString())
+        .then(r=>r.text())
+        .then(msg=> console.log(`전송결과(${data.이용객실}): ` + msg))
+        .catch(err=> console.error(`오류(${data.이용객실}): ` + err));
+    });
+    alert("구글 스프레드시트로 전송을 시도했습니다. (콘솔 로그 참고)");
   }
+  else {
+    // 붙여넣기 탭 → 기존 로직
+    const text= document.getElementById('inputData').value;
+    let data= parseReservation(text);
 
-  const params= new URLSearchParams({
-    예약번호:    data.예약번호||"",
-    예약자:     data.예약자||"",
-    전화번호:   data.전화번호||"",
-    이용객실:   data.이용객실||"",
-    이용기간:   data.이용기간||"",
-    수량:       data.수량||"",
-    옵션:       data.옵션? data.옵션.replace(/, /g,'\n'): "",
-    총이용인원: data.총이용인원||"",
-    입실시간:   data.입실시간||"",
-    결제금액:   data.결제금액||"",
-    예약플랫폼: data.예약플랫폼||""
-  });
-
-  fetch(gasUrl+'?'+params.toString())
-    .then(r=>r.text())
-    .then(msg=> alert(msg))
-    .catch(err=> alert("전송 중 오류: "+err));
+    const params= new URLSearchParams({
+      예약번호:    data.예약번호||"",
+      예약자:     data.예약자||"",
+      전화번호:   data.전화번호||"",
+      이용객실:   data.이용객실||"",
+      이용기간:   data.이용기간||"",
+      수량:       data.수량||"",
+      옵션:       data.옵션? data.옵션.replace(/, /g,'\n'): "",
+      총이용인원: data.총이용인원||"",
+      입실시간:   data.입실시간||"",
+      결제금액:   data.결제금액||"",
+      예약플랫폼: data.예약플랫폼||""
+    });
+    fetch(gasUrl+'?'+params.toString())
+      .then(r=>r.text())
+      .then(msg=> alert(msg))
+      .catch(err=> alert("전송 중 오류: "+err));
+  }
 }
 
 function generateReservationMessage(){
   let data;
   let rawText='';
-  
+
   if(isManualTabActive()){
-    data= getManualReservationData();
+    // 안내문자용: 객실 여러개를 한 문자열로 합침
+    data = getManualReservationDataSingle();
   } else {
-    rawText= document.getElementById('inputData').value;
-    data= parseReservation(rawText);
+    rawText = document.getElementById('inputData').value;
+    data = parseReservation(rawText);
   }
 
   const formattedParsedData= `
@@ -310,8 +428,8 @@ function generateReservationMessage(){
 - 전화번호: ${data.전화번호}
 - 이용객실: ${data.이용객실}
 - 이용기간: ${data.이용기간}
-- 수량: ${data.수량}
-- 옵션: ${data.옵션? data.옵션.replace(/, /g,'\n'): '없음'}
+- 수량: ${data.수량 || '(복수객실)'}
+- 옵션: ${data.옵션 ? data.옵션.replace(/, /g,'\n') : '없음'}
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}
