@@ -170,9 +170,12 @@ pre {
 .room-row {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  gap: 10px;              /* 요소 간 좌우 간격 */
+  margin-bottom: 8px;     /* 아래쪽 여백 */
 }
-
 .room-row select {
-  margin-right: 10px;
+  min-width: 120px;       /* select 너비 확보 */
+}
+.room-row button {
+  margin-left: 10px;      /* 삭제버튼 여백 */
 }
