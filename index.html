@@ -75,7 +75,14 @@
       </tr>
       <tr>
         <th>결제금액</th>
-        <td><input type="text" id="manualPayment" placeholder="예) 178,000원" /></td>
+        <td>
+          <input type="text" 
+            id="manualPayment" 
+            placeholder="예) 178,000원"
+            oninput="onlyNumbers(this)"
+            onblur="formatPayment()"
+          />
+        </td>
       </tr>
       <tr>
         <th>옵션</th>
