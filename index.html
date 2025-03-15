@@ -62,7 +62,16 @@
       </tr>
       <tr>
         <th>입실시간</th>
-        <td><input type="text" id="manualCheckinTime" placeholder="예) 15시" /></td>
+        <td>
+          <!-- [숙박], [당일] 중 선택할 select -->
+          <select id="checkinType" style="width:80px;">
+            <option value="숙박">[숙박]</option>
+            <option value="당일">[당일]</option>
+          </select>
+
+          <!-- 실제 시간대 입력 -->
+          <input type="text" id="manualCheckinTime" placeholder="예) 15시입실~11시퇴실" />
+        </td>
       </tr>
       <tr>
         <th>결제금액</th>
