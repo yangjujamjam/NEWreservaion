@@ -905,3 +905,20 @@ function sameDay(d1,d2){
       && d1.getMonth()===d2.getMonth()
       && d1.getDate()===d2.getDate();
 }
+
+function onlyNumbers(el) {
+  // 모든 숫자 이외 문자를 제거 (^\d)
+  el.value = el.value.replace(/\D/g, '');
+}
+
+function formatPayment() {
+  const el = document.getElementById('manualPayment');
+  let val  = el.value.replace(/\D/g, '');  // 우선 숫자만 추출
+  if (!val) {
+    el.value = ''; // 아무것도 없으면 빈칸
+    return;
+  }
+  // 정수화 후 3자리 콤마
+  const num = parseInt(val, 10);
+  el.value = num.toLocaleString('ko-KR') + '원';
+}
