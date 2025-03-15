@@ -8,7 +8,6 @@ const gasUrl = 'https://script.google.com/macros/s/AKfycby2D33Ulsl5aQOjaDyLv5veP
  *  [2] 페이지 로드 시점 초기 처리
  * ========================================= */
 window.onload = function() {
-  checkAuth();
   showTab('paste');
   buildCalendar(); // 달력 초기화
 
@@ -17,57 +16,6 @@ window.onload = function() {
   populateRoomCountOptions("");
 };
 
-/**
- * 로컬스토리지에서 'jamjam_auth' 값 확인
- * - 이미 'true'이면 (로그인 상태) → 앱 화면(#app) 표시
- * - 아니면 로그인 화면(#loginScreen) 표시
- */
-function checkAuth() {
-  const hasAuth = localStorage.getItem('jamjam_auth') === 'true';
-  document.getElementById('loginScreen').style.display = hasAuth ? 'none' : 'block';
-  document.getElementById('app').style.display = hasAuth ? 'block' : 'none';
-}
-
-/**
- * [확인] 버튼 클릭 시 (비밀번호 입력 처리)
- */
-async function doLogin() {
-  const inputPassword = document.getElementById('passwordInput').value.trim();
-  if (!inputPassword) {
-    alert("비밀번호를 입력하세요.");
-    return;
-  }
-
-  // GAS에서 스프레드시트 A1 비밀번호 가져오기
-  const realPassword = await fetchPasswordFromGAS();
-  if (!realPassword) {
-    alert("비밀번호 조회에 실패했습니다.");
-    return;
-  }
-
-  // 사용자 입력값과 비교
-  if (inputPassword === realPassword) {
-    // 로그인 성공
-    localStorage.setItem('jamjam_auth', 'true');
-    checkAuth();
-  } else {
-    alert("비밀번호가 틀립니다.");
-  }
-}
-
-/**
- * 구글 앱 스크립트로부터 비밀번호(A1셀) 가져오기
- */
-async function fetchPasswordFromGAS() {
-  try {
-    const response = await fetch(gasUrl + '?mode=password');
-    const data = await response.json(); // { password: '...' }
-    return data.password;
-  } catch (err) {
-    console.error(err);
-    return '';
-  }
-}
 
 /** =========================================
  *  [3] '붙여넣기'와 '수기작성' 탭 전환 로직
