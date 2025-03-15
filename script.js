@@ -645,6 +645,22 @@ ${formattedParsedData}
 https://litt.ly/jamjam_bbq`;
   }
 
+  else if (data.예약플랫폼 === '수기입력'){
+  message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
+
+${formattedParsedData}
+
+*추가 옵션 설정을 정확하게 선택해 주셔야 되며 체크인 시 현장 결제도 가능합니다.
+ (인원추가, 시간연장, 얼리체크인, 레이트체크아웃 / 바베큐, 불멍, 온수풀, 고기세트 별도)
+
+*숙박은 “15시”부터 입실 가능하며 수영은 13시부터 이용하실 수 있습니다.
+얼리체크인을 원하실 경우 카톡으로 별도 문의주세요.
+
+▶계좌번호  우리 1005 504 540028 (주) 유연음
+
+※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
+  }
+
   document.getElementById('outputData').textContent= message;
   navigator.clipboard.writeText(message)
     .then(()=> alert('안내문자가 클립보드에 복사되었습니다.'));
