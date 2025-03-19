@@ -10,11 +10,11 @@
   <header class="top-menu">
     <nav>
       <ul>
-        <li><a href="#">예약 업무 관리</a></li>
-        <li><a href="#">예약관리</a></li>
-        <li><a href="#">예약캘린더</a></li>
-        <li><a href="#">입실표</a></li>
-        <li><a href="#">청소표</a></li>
+        <li><a href="https://ne-wreservaion.vercel.app/">예약 업무 관리</a></li>
+        <li><a href="https://docs.google.com/spreadsheets/d/1EIYwM2fVDN2Y3d4dSfzoBLuyjsBFuZn5aBtRLC9HIUM/edit?gid=0#gid=0">예약관리</a></li>
+        <li><a href="https://script.google.com/macros/s/AKfycbx9LumkpD61gcOjZkT6oXWvDTTdtz3OmlYiN4xxLSCmPHV82wUeb-A5JzPaXcLL_ffT4w/exec">예약캘린더</a></li>
+        <li><a href="https://script.google.com/macros/s/AKfycbwyWRa9Zu0D-yQRW6rvJ9u5YvbGQXyPOToSyWt9EksUcZAOR9lgEoJvdh9YKf6LEVPheg/exec">입실표</a></li>
+        <li><a href="https://script.google.com/macros/s/AKfycby6I1C47Qfg-BuU6LLNhOCYRxo49nDLA2Tshy9TMDAcMEAQN3xPMVJ39vsYmuWTg899/exec">청소표</a></li>
       </ul>
     </nav>
   </header>
@@ -99,13 +99,18 @@
   <div class="buttons">
     <button onclick="processReservation()">파싱 결과 보기</button>
     <button onclick="generateReservationMessage()">안내문자 양식적용</button>
+    <!-- 알림톡 발송 버튼 (script_talk.js에서 정의한 sendAlimtalk() 호출) -->
+    <button onclick="sendAlimtalk()">알림톡 발송</button>
     <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
   </div>
 
   <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 </div>
 
-<!-- 자바스크립트 -->
+<!-- 기존 메인 기능 -->
 <script src="script.js"></script>
+<!-- 알림톡 관련 스크립트 (새로 추가된 파일) -->
+<script src="script_talk.js"></script>
+
 </body>
 </html>
