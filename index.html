@@ -65,14 +65,26 @@
       <tr>
         <th>입실시간</th>
         <td>
-          <!-- [숙박], [당일] 중 선택할 select -->
-          <select id="checkinType" style="width:80px;">
-            <option value="숙박">[숙박]</option>
-            <option value="당일">[당일]</option>
+          <!-- 단일 select: 미리 정의된 입실시간 텍스트 목록 -->
+          <select id="manualCheckinTime" style="width:250px;">
+            <option value="[숙박] 15시 입실 / 11시 퇴실">[숙박] 15시 입실 / 11시 퇴실</option>
+            <option value="[당일캠핑] 08시-14시">[당일캠핑] 08시-14시</option>
+            <option value="[당일캠핑] 09시-15시">[당일캠핑] 09시-15시</option>
+            <option value="[당일캠핑] 10시-16시">[당일캠핑] 10시-16시</option>
+            <option value="[당일캠핑] 11시-17시">[당일캠핑] 11시-17시</option>
+            <option value="[당일캠핑] 12시-18시">[당일캠핑] 12시-18시</option>
+            <option value="[당일캠핑] 13시-19시">[당일캠핑] 13시-19시</option>
+            <option value="[당일캠핑] 14시-20시">[당일캠핑] 14시-20시</option>
+            <option value="[당일캠핑] 15시-21시">[당일캠핑] 15시-21시</option>
+            <option value="[당일캠핑] 16시-22시">[당일캠핑] 16시-22시</option>
+            <option value="[늦은입실] 18시 늦은입실/ 11시 퇴실">[늦은입실] 18시 늦은입실/ 11시 퇴실</option>
+            <option value="[늦은입실] 19시 늦은입실/ 11시 퇴실">[늦은입실] 19시 늦은입실/ 11시 퇴실</option>
+            <option value="[늦은입실] 20시 늦은입실/ 11시 퇴실">[늦은입실] 20시 늦은입실/ 11시 퇴실</option>
+            <option value="[늦은입실] 21시 늦은입실/ 11시 퇴실">[늦은입실] 21시 늦은입실/ 11시 퇴실</option>
+            <option value="[늦은입실] 22시 늦은입실/ 11시 퇴실">[늦은입실] 22시 늦은입실/ 11시 퇴실</option>
+            <option value="[늦은입실] 23시 늦은입실/ 11시 퇴실">[늦은입실] 23시 늦은입실/ 11시 퇴실</option>
+            <option value="[숙박] 빠른입실 09시/익일11시(상담전 선택불가)">[숙박] 빠른입실 09시/익일11시(상담전 선택불가)</option>
           </select>
-
-          <!-- 실제 시간대 입력 -->
-          <input type="text" id="manualCheckinTime" placeholder="예) 15시입실~11시퇴실" />
         </td>
       </tr>
       <tr>
