@@ -419,7 +419,7 @@ function getManualReservationDataSingle() {
     총이용인원: document.getElementById('manualTotalPeople').value.trim(),
     입실시간, // 바로 select에서 선택된 값
     결제금액: document.getElementById('manualPayment').value.trim(),
-    예약플랫폼: '상담',    // ← '수기입력' 대신 '상담'으로 변경
+    예약플랫폼: '수기입력',    
     무통장여부: true
   };
 }
