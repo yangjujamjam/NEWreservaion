@@ -403,9 +403,7 @@ function getManualReservationDataSingle() {
   });
 
   const 이용객실 = roomsArr.join(', ');
-  const checkinPrefix = document.getElementById('checkinType').value; 
-  const checkinText   = document.getElementById('manualCheckinTime').value.trim();
-
+  const 입실시간 = document.getElementById('manualCheckinTime').value.trim();
 
   // 단일 예약번호
   const 예약번호 = generateReservationNumber();
@@ -419,9 +417,9 @@ function getManualReservationDataSingle() {
     수량: '', // 복수객실 합치므로 단일 '수량'은 ""
     옵션: document.getElementById('manualOption').value.trim(),
     총이용인원: document.getElementById('manualTotalPeople').value.trim(),
-    입실시간: `[${checkinPrefix}]${checkinText}`,
+    입실시간, // 바로 select에서 선택된 값
     결제금액: document.getElementById('manualPayment').value.trim(),
-    예약플랫폼: '수기입력',
+    예약플랫폼: '상담',    // ← '수기입력' 대신 '상담'으로 변경
     무통장여부: true
   };
 }
@@ -436,8 +434,6 @@ function getManualReservationDataMultiple() {
   const 총인원    = document.getElementById('manualTotalPeople').value.trim();
   const 입실시간  = document.getElementById('manualCheckinTime').value.trim();
   const 결제금액  = document.getElementById('manualPayment').value.trim();
-  const checkinPrefix = document.getElementById('checkinType').value; 
-  const checkinText   = document.getElementById('manualCheckinTime').value.trim();
 
   // “roomsContainer” 내의 모든 row
   const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
@@ -465,9 +461,9 @@ function getManualReservationDataMultiple() {
       수량: countVal, 
       옵션,
       총이용인원: 총인원,
-      입실시간: `[${checkinPrefix}]${checkinText}`,
+      입실시간,
       결제금액,
-      예약플랫폼: '수기입력',
+      예약플랫폼: '상담',   // ← '수기입력' → '상담'
       무통장여부: true
     };
     result.push(oneRow);
@@ -523,7 +519,6 @@ function generateReservationMessage() {
   let rawText='';
 
   if(isManualTabActive()){
-    // 여러 객실을 합쳐서 한 줄로
     data = getManualReservationDataSingle();
   } else {
     rawText = document.getElementById('inputData').value;
