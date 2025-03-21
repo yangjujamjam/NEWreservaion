@@ -111,8 +111,8 @@
   <div class="buttons">
     <button onclick="processReservation()">파싱 결과 보기</button>
     <button onclick="generateReservationMessage()">안내문자 양식적용</button>
-    <!-- 알림톡 발송 버튼 (script_talk.js에서 정의한 sendAlimtalk() 호출) -->
-    <button onclick="sendAlimtalk()">알림톡 발송</button>
+    <!-- 알림톡 발송 버튼: 클릭 시 확인창 후 실제 발송 -->
+    <button onclick="confirmAlimtalk()">알림톡 발송</button>
     <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
   </div>
 
