@@ -56,7 +56,6 @@
       <tr>
         <th>입실시간</th>
         <td>
-          <!-- 단일 select: 미리 정의된 입실시간 텍스트 목록 -->
           <select id="manualCheckinTime" style="width:250px;">
             <option value="[숙박] 15시 입실 / 11시 퇴실">[숙박] 15시 입실 / 11시 퇴실</option>
             <option value="[당일캠핑] 08시-14시">[당일캠핑] 08시-14시</option>
@@ -81,8 +80,8 @@
       <tr>
         <th>결제금액</th>
         <td>
-          <input type="text" 
-            id="manualPayment" 
+          <input type="text"
+            id="manualPayment"
             placeholder="예) 178,000원"
             oninput="onlyNumbers(this)"
             onblur="formatPayment()"
@@ -102,7 +101,6 @@
   <div class="buttons">
     <button onclick="processReservation()">파싱 결과 보기</button>
     <button onclick="generateReservationMessage()">안내문자 양식적용</button>
-    <!-- 알림톡 발송 버튼: 클릭 시 확인창 후 실제 발송 -->
     <button onclick="confirmAlimtalk()">알림톡 발송</button>
     <button onclick="sendToSheet()">구글 스프레드시트로 보내기</button>
   </div>
@@ -110,17 +108,15 @@
   <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 </div>
 <script>
-    fetch('nav.html') // nav.html 파일이 같은 폴더라면 이렇게 사용
+    // nav.html 로드
+    fetch('nav.html')
       .then(res => res.text())
       .then(data => {
         document.getElementById('nav-container').innerHTML = data;
       })
       .catch(err => console.error('nav.html 불러오기 실패:', err));
-  </script>
-<!-- 기존 메인 기능 -->
+</script>
 <script src="script.js"></script>
-<!-- 알림톡 관련 스크립트 (새로 추가된 파일) -->
 <script src="script_talk.js"></script>
-
 </body>
 </html>
