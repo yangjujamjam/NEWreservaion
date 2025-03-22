@@ -1,9 +1,8 @@
-<!-- nav.html -->
 <style>
   /* 네비게이션 컨테이너 */
   .nav-container {
-    background: #f8f8f8;               /* 연한 그레이톤 배경 */
-    padding: 10px;                     /* 상하좌우 여백 */
+    background: #f8f8f8; /* 연한 그레이톤 배경 */
+    padding: 10px; /* 상하좌우 여백 */
     box-shadow: 0 1px 2px rgba(0,0,0,0.15); /* 가벼운 그림자 효과 */
   }
 
@@ -12,56 +11,45 @@
     margin: 0;
     padding: 0;
     display: flex;
-    gap: 15px;          /* 메뉴 간격 */
-    align-items: center;/* 세로 중앙 정렬 */
-    justify-content: center; /* 가로 중앙 정렬(원하면 왼쪽 정렬로 바꿔도 됨) */
+    gap: 15px;
+    align-items: center;
+    justify-content: center;
   }
-
-  .nav-container li {
-    /* li 자체는 특별한 스타일 필요 없으면 비워둠 */
-  }
-
   .nav-container a {
     display: block;
-    color: #333;                /* 텍스트 색상: 어두운 그레이 */
-    text-decoration: none;      /* 링크 밑줄 제거 */
-    padding: 8px 14px;          /* 내부 여백 */
-    border-radius: 4px;         /* 모서리 둥글림 */
+    color: #333;
+    text-decoration: none;
+    padding: 8px 14px;
+    border-radius: 4px;
     transition: background-color 0.2s, color 0.2s;
   }
-
   .nav-container a:hover {
-    background-color: #e0e0e0;  /* 살짝 진해지는 호버 배경 */
-    color: #000;                /* 텍스트 색상도 살짝 진하게 */
+    background-color: #e0e0e0;
+    color: #000;
   }
 </style>
 
 <nav class="nav-container">
   <ul>
     <li>
-      <!-- (1) 예약업무 관리 (현재창 이동) -->
       <a href="https://ne-wreservaion.vercel.app/">예약업무 관리</a>
     </li>
     <li>
-      <!-- (2) 예약관리 (새 창으로 열기) -->
-      <a href="https://docs.google.com/spreadsheets/d/1EIYwM2fVDN2Y3d4dSfzoBLuyjsBFuZn5aBtRLC9HIUM/edit?gid=0#gid=0"
-         target="_blank" 
+      <a href="https://docs.google.com/spreadsheets/d/1EIYwM2fVDN2Y3d4dSfzoBLuyjsBFuZn5aBtRLC9HIUM/edit#gid=0"
+         target="_blank"
          rel="noopener noreferrer">예약관리</a>
     </li>
     <li>
-      <!-- (3) 예약캘린더 (현재창 이동) -->
       <a href="https://script.google.com/macros/s/AKfycbxdrjI1FdkDW2Vf1sIkA1ZXqLEWeewKV0FpfgERe7ISj0re_9AazlzHhG-X4IJXzQ6g1A/exec">
         예약캘린더
       </a>
     </li>
     <li>
-      <!-- (4) 입실표 (현재창 이동) -->
       <a href="https://script.google.com/macros/s/AKfycbyq41Wg74bFNv6qxKmVDTrMYZ4yrK-qaJCegy6Ics1Ar2WCI0r7HccaGZo8HUG7OCc7nA/exec">
         입실표
       </a>
     </li>
     <li>
-      <!-- (5) 청소표 (현재창 이동) -->
       <a href="https://script.google.com/macros/s/AKfycbxoNfQmytGTxqCqxZyun3ndqoriY6aTVamtpKEBXi-N_Z5bJRk7ZhU68XR0BRMR8RPz/exec">
         청소표
       </a>
