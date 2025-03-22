@@ -7,17 +7,8 @@
 </head>
 <body>
 <div id="app">
-  <header class="top-menu">
-    <nav>
-      <ul>
-        <li><a href="https://ne-wreservaion.vercel.app/">예약 업무 관리</a></li>
-        <li><a href="https://docs.google.com/spreadsheets/d/1EIYwM2fVDN2Y3d4dSfzoBLuyjsBFuZn5aBtRLC9HIUM/edit?gid=0#gid=0">예약관리</a></li>
-        <li><a href="https://script.google.com/macros/s/AKfycbwWnXkiMP9jvJEbr8HteIAaXiF_Un0J_EKwCJPPnTmURFpBw8NkXPxIasQzYo-Gu_gyKg/exec">예약캘린더</a></li>
-        <li><a href="https://script.google.com/macros/s/AKfycbwyWRa9Zu0D-yQRW6rvJ9u5YvbGQXyPOToSyWt9EksUcZAOR9lgEoJvdh9YKf6LEVPheg/exec">입실표</a></li>
-        <li><a href="https://script.google.com/macros/s/AKfycby6I1C47Qfg-BuU6LLNhOCYRxo49nDLA2Tshy9TMDAcMEAQN3xPMVJ39vsYmuWTg899/exec">청소표</a></li>
-      </ul>
-    </nav>
-  </header>
+  <!-- (1) 내비게이션이 들어갈 위치 -->
+  <div id="nav-container"></div>
 
   <h1>예약 업무 관리</h1>
 
@@ -118,7 +109,14 @@
 
   <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 </div>
-
+<script>
+    fetch('nav.html') // nav.html 파일이 같은 폴더라면 이렇게 사용
+      .then(res => res.text())
+      .then(data => {
+        document.getElementById('nav-container').innerHTML = data;
+      })
+      .catch(err => console.error('nav.html 불러오기 실패:', err));
+  </script>
 <!-- 기존 메인 기능 -->
 <script src="script.js"></script>
 <!-- 알림톡 관련 스크립트 (새로 추가된 파일) -->
