@@ -156,6 +156,14 @@ pre {
 .room-row select {
   min-width: 120px;       /* select 너비 확보 */
 }
+.room-row .room-count {
+  max-width: 70px;
+}
+.room-row .room-price {
+  color: #d9534f;         /* 빨간색 계열 */
+  font-weight: bold; 
+  min-width: 60px;        /* 여유공간 */
+}
 .room-row button {
   margin-left: 10px;      /* 삭제버튼 여백 */
 }
