@@ -1,4 +1,4 @@
-/** =========================================
+  /** =========================================
  *  [1] 전역 설정
  * ========================================= */
 const gasUrl = 'https://script.google.com/macros/s/AKfycbwElw4ktB8qECIt1KKaHqk722CwjyD7kvnJk5pHXcEJTz5sf3jf82oaKE3-Osb-jg82/exec';
@@ -458,8 +458,12 @@ async function updateRoomPrice(roomDiv) {
 
   try {
     // HTML 요청 (CORS 문제 발생 가능)
-    const htmlText = await fetch(fetchUrl).then(r=>r.text());
+    // 변경: Apps Script 프록시를 통해 fetch
+    const proxyUrl = 'https://script.google.com/macros/s/AKfycbxyz.../exec'; 
+    const fullUrl = proxyUrl + '?targetUrl=' + encodeURIComponent(fetchUrl);
 
+    // Apps Script에서 받은 HTML 가져오기
+    const htmlText = await fetch(fullUrl).then(r => r.text());
     // DOMParser로 HTML 파싱
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlText, 'text/html');
