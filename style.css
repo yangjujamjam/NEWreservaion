@@ -11,12 +11,9 @@ body {
 }
 .top-menu nav ul {
   list-style-type: none;
-  margin: 0; 
+  margin: 0;
   padding: 0;
   display: flex;
-}
-.top-menu nav ul li {
-  float: left;
 }
 .top-menu nav ul li a {
   display: block;
@@ -54,108 +51,87 @@ pre {
 .tab-menu {
   margin-bottom: 10px;
 }
-
 .tab-menu button {
   padding: 10px 15px;
   margin-right: 5px;
   cursor: pointer;
 }
-
 .tab-menu button.active {
   background-color: #5cb85c;
   color: #fff;
 }
-
-/* 탭 내용 기본 숨김 처리 */
 .tab-content {
   display: none;
 }
 
-/* 테이블 형태 수기작성 폼 */
 .manual-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 10px;
 }
-
 .manual-table th {
   width: 120px;
   background-color: #eee;
   text-align: left;
   padding: 8px;
 }
-
 .manual-table td {
   padding: 8px;
   border-bottom: 1px solid #ccc;
 }
-
 .manual-table input[type="text"],
 .manual-table textarea,
 .manual-table select {
   width: 95%;
 }
 
-/* 달력 */
 #calendarContainer {
   margin-top: 10px;
   width: 100%;
   max-width: 350px;
 }
-
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 5px;
 }
-
 .calendar-header button {
   padding: 5px 10px;
   cursor: pointer;
 }
-
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 3px;
 }
-
 .calendar-day {
   text-align: center;
   padding: 5px 0;
   border-radius: 4px;
   cursor: pointer;
 }
-
 .calendar-day:hover {
   background-color: #eee;
 }
-
 .inactive {
   color: #ccc;
   pointer-events: none;
 }
-
 .selected {
   background-color: #5cb85c !important;
   color: #fff;
 }
-
 .range {
   background-color: #b2e2b2 !important;
 }
 
-/* 객실 행 */
 .room-row {
   display: flex;
   align-items: center;
-  gap: 10px;              /* 요소 간 좌우 간격 */
-  margin-bottom: 8px;     /* 아래쪽 여백 */
+  gap: 10px;
+  margin-bottom: 8px;
 }
 .room-row select {
-  min-width: 120px;       /* select 너비 확보 */
-}
-.room-row button {
-  margin-left: 10px;      /* 삭제버튼 여백 */
+  min-width: 120px;
 }
