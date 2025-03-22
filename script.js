@@ -4,6 +4,15 @@
 const gasUrl = 'https://script.google.com/macros/s/AKfycbwElw4ktB8qECIt1KKaHqk722CwjyD7kvnJk5pHXcEJTz5sf3jf82oaKE3-Osb-jg82/exec';
 // ↑ 실제 본인의 GAS URL로 교체하세요.
 
+// 네이버 예약 페이지 기본 주소(객실별)
+const naverBookingMap = {
+  "대형 카라반": "https://booking.naver.com/booking/3/bizes/962578/items/5254867",
+  "복층 우드캐빈": "https://booking.naver.com/booking/3/bizes/962578/items/5262851"
+};
+// 체크인/체크아웃 시간은 기본적으로 15시 입실 / 11시 퇴실로 가정
+const defaultCheckIn  = "15:00:00";
+const defaultCheckOut = "11:00:00";
+
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
  * ========================================= */
@@ -329,9 +338,6 @@ function addRoomRow() {
       roomSelect.appendChild(opt);
     });
   }
-  roomSelect.addEventListener('change', ()=> {
-    populateRoomCountOptions(roomSelect.value, countSelect);
-  });
   rowDiv.appendChild(roomSelect);
 
   // -- 수량 select --
@@ -340,16 +346,34 @@ function addRoomRow() {
   countSelect.disabled = true; // 초기엔 (객실 선택 전)
   rowDiv.appendChild(countSelect);
 
+  // -- 가격 표시용 span --
+  const priceSpan = document.createElement('span');
+  priceSpan.className = 'room-price';
+  priceSpan.textContent = ''; // 초기엔 빈 상태
+  rowDiv.appendChild(priceSpan);
+
   // -- 삭제버튼 --
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.textContent = '삭제';
   removeBtn.onclick = () => {
     container.removeChild(rowDiv);
+    recalcAllRoomsPrice(); // 삭제 후 전체 합계 재계산
   };
   rowDiv.appendChild(removeBtn);
 
   container.appendChild(rowDiv);
+
+  // 객실 선택 시 수량 옵션 세팅 & 금액 조회
+  roomSelect.addEventListener('change', ()=> {
+    populateRoomCountOptions(roomSelect.value, countSelect);
+    updateRoomPrice(rowDiv);
+  });
+  // 수량 변경 시 금액 재계산
+  countSelect.addEventListener('change', ()=> {
+    updateDisplayedPrice(rowDiv);
+    recalcAllRoomsPrice();
+  });
 }
 
 // 객실명에 따라 0~최대수량 옵션 생성
@@ -383,6 +407,152 @@ function populateRoomCountOptions(roomName, countSelect) {
     opt.textContent= num + '개';
     countSelect.appendChild(opt);
   });
+}
+
+/** ============= [핵심] 가격 확인 로직 ============= 
+ *  1) 날짜(이용기간) 확인 → URL 생성
+ *  2) fetch → HTML 파싱해서 <strong class="num">금액</strong> 추출
+ *  3) roomDiv에 basePrice 저장 & 표시
+ *  4) 수량 select * basePrice = 표시
+ * ================================================**/
+async function updateRoomPrice(roomDiv) {
+  const roomType = roomDiv.querySelector('.room-type').value;
+  const countSelect = roomDiv.querySelector('.room-count');
+
+  // 선택된 객실이 없으면 처리 X
+  if(!roomType) {
+    roomDiv.querySelector('.room-price').textContent = '';
+    return;
+  }
+
+  // 이용기간(달력)에서 선택된 날짜를 파싱
+  const period = document.getElementById('manualPeriod').value;
+  const {startDateStr, endDateStr} = parsePeriodToDates(period);
+
+  // 네이버 예약 URL
+  const baseUrl = naverBookingMap[roomType];
+  if(!baseUrl) {
+    // 네이버예약에 없는 객실(파티룸, 몽골텐트) 등은 금액조회 불가 (직접 입력)
+    // 일단 0원으로 설정
+    roomDiv.dataset.basePrice = 0;
+    updateDisplayedPrice(roomDiv);
+    recalcAllRoomsPrice();
+    return;
+  }
+
+  // 시작일이 없으면 금액조회 불가
+  if(!startDateStr) {
+    roomDiv.dataset.basePrice = 0;
+    updateDisplayedPrice(roomDiv);
+    recalcAllRoomsPrice();
+    return;
+  }
+
+  // URL 조합
+  // 예) 2025-03-25T15:00:00+09:00 ~ 2025-03-26T11:00:00+09:00
+  // 하루만 선택된 경우(단일) → endDateStr가 없을 수 있음
+  let fetchUrl = baseUrl + `?startDateTime=${startDateStr}T${defaultCheckIn}%2B09%3A00`;
+  if(endDateStr) {
+    fetchUrl += `&endDateTime=${endDateStr}T${defaultCheckOut}%2B09%3A00`;
+  }
+
+  try {
+    // HTML 요청 (CORS 문제 발생 가능)
+    const htmlText = await fetch(fetchUrl).then(r=>r.text());
+
+    // DOMParser로 HTML 파싱
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(htmlText, 'text/html');
+
+    // <strong class="num">금액</strong> 찾기
+    // (최초 1박 기준 금액)
+    let priceEl = doc.querySelector('.count_area .info_price .num');
+    let basePrice = 0;
+    if(priceEl) {
+      // "98,000" 이런 식으로 있을 것
+      let raw = priceEl.textContent.replace(/[^\d]/g, ''); // 숫자만
+      basePrice = parseInt(raw, 10) || 0;
+    }
+
+    // 추출된 basePrice를 해당 row에 저장
+    roomDiv.dataset.basePrice = basePrice;
+    // 화면에 보여주기
+    updateDisplayedPrice(roomDiv);
+    // 전체합계 다시 계산
+    recalcAllRoomsPrice();
+
+  } catch(e) {
+    console.error("네이버 예약 페이지 fetch 에러:", e);
+    // 실패 시 0원으로 표시
+    roomDiv.dataset.basePrice = 0;
+    updateDisplayedPrice(roomDiv);
+    recalcAllRoomsPrice();
+  }
+}
+
+// roomDiv에 저장된 basePrice × (선택수량) → 표시
+function updateDisplayedPrice(roomDiv) {
+  const basePrice = parseInt(roomDiv.dataset.basePrice || '0', 10);
+  const countVal  = roomDiv.querySelector('.room-count').value;
+  const countNum  = parseInt(countVal, 10) || 0;
+
+  const totalPrice = basePrice * countNum;
+  const priceSpan  = roomDiv.querySelector('.room-price');
+  if(totalPrice === 0) {
+    priceSpan.textContent = '';
+  } else {
+    priceSpan.textContent = formatNumber(totalPrice) + '원';
+  }
+}
+
+// 모든 room-row의 (basePrice×수량)을 합산 → #manualPayment에 표시
+function recalcAllRoomsPrice() {
+  const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
+  let sum = 0;
+  rowNodes.forEach(row => {
+    const basePrice = parseInt(row.dataset.basePrice || '0', 10);
+    const countVal  = row.querySelector('.room-count').value;
+    const countNum  = parseInt(countVal, 10) || 0;
+    sum += (basePrice * countNum);
+  });
+
+  // 결제금액 input에 반영
+  const el = document.getElementById('manualPayment');
+  if(sum === 0) {
+    el.value = '';
+  } else {
+    el.value = formatNumber(sum) + '원';
+  }
+}
+
+/** ---- 이용기간 파싱 (날짜2개 추출) ----
+ *  예) "2025. 3. 25.(화) ~ 2025. 3. 26.(수)" 
+ *  → startDateStr="2025-03-25", endDateStr="2025-03-26"
+*/
+function parsePeriodToDates(periodStr) {
+  // "2025. 3. 25.(화)" 단일 or 
+  // "2025. 3. 25.(화) ~ 2025. 3. 26.(수)" 범위
+  if(!periodStr) return {startDateStr:'', endDateStr:''};
+
+  let parts = periodStr.split('~').map(p=> p.trim());
+  // parts[0] = "2025. 3. 25.(화)" etc
+  let startStr = parts[0];
+  let endStr   = (parts[1]||'');
+
+  // 숫자만 추출해서 년월일 변환
+  function parseToYMD(str) {
+    const match = str.match(/(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/);
+    if(!match) return '';
+    let y = match[1], m = match[2], d = match[3];
+    if(!y || !m || !d) return '';
+    // 2025-03-25 형태로 리턴
+    return `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  }
+
+  const startDateStr = parseToYMD(startStr);
+  const endDateStr   = endStr ? parseToYMD(endStr) : '';
+
+  return {startDateStr, endDateStr};
 }
 
 /** =========================================
@@ -485,7 +655,6 @@ function generateReservationNumber() {
 }
 
 // 예약번호(베이스) - 다중행 전송용 (14자리까지만)
-// 뒤에 (index+1)을 붙여서 최종 예약번호를 만든다.
 function generateBaseReservationNumber() {
   const d = new Date();
   const YYYY= d.getFullYear();
@@ -832,6 +1001,9 @@ function onDateClick(dateObj) {
   }
   highlightSelectedDates();
   updatePeriodInput();
+
+  // 날짜 클릭 시, 모든 객실의 금액도 다시 불러오기
+  refreshAllRoomPrices();
 }
 
 function highlightSelectedDates() {
@@ -895,6 +1067,14 @@ function updatePeriodInput() {
   }
 }
 
+// 날짜를 다시 선택하면, 이미 선택된 객실의 가격을 재조회하기
+function refreshAllRoomPrices() {
+  const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
+  rowNodes.forEach(row => {
+    updateRoomPrice(row);
+  });
+}
+
 function sameDay(d1,d2){
   return d1.getFullYear()===d2.getFullYear()
       && d1.getMonth()===d2.getMonth()
@@ -902,7 +1082,7 @@ function sameDay(d1,d2){
 }
 
 function onlyNumbers(el) {
-  // 모든 숫자 이외 문자를 제거 (^\d)
+  // 모든 숫자 이외 문자를 제거
   el.value = el.value.replace(/\D/g, '');
 }
 
@@ -916,4 +1096,9 @@ function formatPayment() {
   // 정수화 후 3자리 콤마
   const num = parseInt(val, 10);
   el.value = num.toLocaleString('ko-KR') + '원';
+}
+
+// 천단위 콤마
+function formatNumber(num) {
+  return num.toLocaleString('ko-KR');
 }
