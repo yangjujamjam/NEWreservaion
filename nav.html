@@ -1,6 +1,43 @@
 <!-- nav.html -->
-<nav style="background: #f0f0f0; padding: 10px;">
-  <ul style="list-style: none; margin: 0; padding: 0; display: flex; gap: 10px;">
+<style>
+  /* 네비게이션 컨테이너 */
+  .nav-container {
+    background: #f8f8f8;               /* 연한 그레이톤 배경 */
+    padding: 10px;                     /* 상하좌우 여백 */
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15); /* 가벼운 그림자 효과 */
+  }
+
+  .nav-container ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 15px;          /* 메뉴 간격 */
+    align-items: center;/* 세로 중앙 정렬 */
+    justify-content: center; /* 가로 중앙 정렬(원하면 왼쪽 정렬로 바꿔도 됨) */
+  }
+
+  .nav-container li {
+    /* li 자체는 특별한 스타일 필요 없으면 비워둠 */
+  }
+
+  .nav-container a {
+    display: block;
+    color: #333;                /* 텍스트 색상: 어두운 그레이 */
+    text-decoration: none;      /* 링크 밑줄 제거 */
+    padding: 8px 14px;          /* 내부 여백 */
+    border-radius: 4px;         /* 모서리 둥글림 */
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .nav-container a:hover {
+    background-color: #e0e0e0;  /* 살짝 진해지는 호버 배경 */
+    color: #000;                /* 텍스트 색상도 살짝 진하게 */
+  }
+</style>
+
+<nav class="nav-container">
+  <ul>
     <li>
       <!-- (1) 예약업무 관리 (현재창 이동) -->
       <a href="https://ne-wreservaion.vercel.app/">예약업무 관리</a>
