@@ -2,7 +2,6 @@
  *  [1] 전역 설정
  * ========================================= */
 const gasUrl = 'https://script.google.com/macros/s/AKfycbwElw4ktB8qECIt1KKaHqk722CwjyD7kvnJk5pHXcEJTz5sf3jf82oaKE3-Osb-jg82/exec';
-// ↑ 실제 본인의 GAS URL로 교체하세요.
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
@@ -44,20 +43,18 @@ function parseReservation(text) {
   if (platform === "네이버")   return parseNaverReservation(text);
   if (platform === "야놀자")   return parseYanoljaReservation(text);
   if (platform === "여기어때") return parseHereReservation(text);
-  return parseNaverReservation(text); // fallback
+  return parseNaverReservation(text);
 }
 
 // [네이버 파싱 로직 (예시)]
 function parseNaverReservation(text) {
   const lines = text.split('\n').map(line => line.trim());
 
-  // 특정 키워드가 포함된 줄에서 값을 추출
   const getValue = (keyword) => {
     const line = lines.find(l => l.includes(keyword));
     return line ? line.replace(keyword, '').trim() : '';
   };
 
-  // 예약자 / 전화번호
   let visitorLine = lines.find(line => line.includes('방문자'));
   let 예약자 = '';
   let 전화번호 = '';
@@ -72,7 +69,6 @@ function parseNaverReservation(text) {
     전화번호 = getValue('전화번호');
   }
 
-  // 객실
   let siteLine = lines.find(line => line.includes('사이트'));
   let 이용객실 = '';
   if (siteLine) {
@@ -83,7 +79,6 @@ function parseNaverReservation(text) {
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // 옵션
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
@@ -100,29 +95,24 @@ function parseNaverReservation(text) {
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
   ];
-  const filteredOptions = optionLines.filter(line => 
+  const filteredOptions = optionLines.filter(line =>
     !unwantedOptions.some(unwanted => line.includes(unwanted))
   );
 
-  // 총 이용 인원 정보
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
   if (totalPeopleIndex !== -1 && totalPeopleIndex + 1 < lines.length) {
     총이용인원 = lines[totalPeopleIndex + 1].trim();
   }
 
-  // 입실 시간
   let checkInTimeIndex = lines.findIndex(line => line.includes('입실 시간 선택'));
   let 입실시간 = '';
   if (checkInTimeIndex !== -1 && checkInTimeIndex + 1 < lines.length) {
     입실시간 = lines[checkInTimeIndex + 1].trim();
   }
 
-  // 결제 금액
   const 결제예상금액 = getValue('결제예상금액');
   const 결제금액 = getValue('결제금액');
-
-  // 무통장 여부
   const 무통장여부 = 결제예상금액 ? true : "";
   const 예약플랫폼 = 무통장여부 ? '네이버무통장' : '네이버';
 
@@ -147,14 +137,14 @@ function parseYanoljaReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
   const 예약번호 = lines[3];
-  const 객실라인 = lines.find(line => 
+  const 객실라인 = lines.find(line =>
     line.includes('카라반') || line.includes('우드캐빈') || line.includes('파티룸') || line.includes('몽골')
   );
   const 이용객실 = 객실라인 ? 객실라인.replace(/\(.*\)/, '').trim() : '';
 
   const 금액라인 = lines.find(line => line.includes('원'));
-  const 결제금액 = 금액라인 
-    ? 금액라인.replace('원', '').replace(/,/g, '').trim() + '원' 
+  const 결제금액 = 금액라인
+    ? 금액라인.replace('원', '').replace(/,/g, '').trim() + '원'
     : '';
 
   const 예약자라인 = lines.find(line => line.includes('/'));
@@ -175,7 +165,6 @@ function parseYanoljaReservation(text) {
   let 입실시간 = '';
 
   const formatDate = date => {
-    // YYYY-MM-DD(요일) 형태
     const match = date.match(/(\d{4})-(\d{2})-(\d{2})\((.)\)/);
     if (!match) return date;
     const [y, m, d, day] = match.slice(1);
@@ -209,7 +198,7 @@ function parseYanoljaReservation(text) {
     전화번호,
     이용객실,
     이용기간,
-    수량: '1', 
+    수량: '1',
     옵션: '',
     총이용인원: '대인2',
     입실시간,
@@ -223,18 +212,18 @@ function parseHereReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
   const 예약번호라인 = lines.find(line => line.includes('예약번호:'));
-  const 예약번호 = 예약번호라인 
-    ? 예약번호라인.split(':')[1].trim() 
+  const 예약번호 = 예약번호라인
+    ? 예약번호라인.split(':')[1].trim()
     : '';
 
   const 객실정보라인 = lines.find(line => line.includes('객실정보:'));
-  const 객실정보 = 객실정보라인 
-    ? 객실정보라인.split('/')[1].trim() 
+  const 객실정보 = 객실정보라인
+    ? 객실정보라인.split('/')[1].trim()
     : '';
 
   const 판매금액라인 = lines.find(line => line.includes('판매금액:'));
-  const 결제금액 = 판매금액라인 
-    ? 판매금액라인.split(':')[1].trim() 
+  const 결제금액 = 판매금액라인
+    ? 판매금액라인.split(':')[1].trim()
     : '';
 
   const 예약자라인 = lines.find(line => line.includes('예약자명 :'));
@@ -250,7 +239,6 @@ function parseHereReservation(text) {
   const 입실일시라인 = lines.find(line => line.includes('입실일시:'));
   const 퇴실일시라인 = lines.find(line => line.includes('퇴실일시:'));
 
-  // 예약번호에서 YYMMDD 추출
   const 예약날짜Match = 예약번호.match(/^(\d{2})(\d{2})(\d{2})/);
   let 예약날짜 = new Date();
   if (예약날짜Match) {
@@ -260,7 +248,6 @@ function parseHereReservation(text) {
     예약날짜 = new Date(예약연도, 예약월 - 1, 예약일);
   }
 
-  // 날짜 포맷
   const formatDate = (dateStr, refDate) => {
     const match = dateStr.match(/(\d+)\/(\d+)\s*\((.)\)/);
     if (!match) return dateStr;
@@ -312,7 +299,6 @@ function addRoomRow() {
   const rowDiv = document.createElement('div');
   rowDiv.className = 'room-row';
 
-  // -- 객실 select --
   const roomSelect = document.createElement('select');
   roomSelect.className = 'room-type';
   {
@@ -334,13 +320,11 @@ function addRoomRow() {
   });
   rowDiv.appendChild(roomSelect);
 
-  // -- 수량 select --
   const countSelect = document.createElement('select');
   countSelect.className = 'room-count';
-  countSelect.disabled = true; // 초기엔 (객실 선택 전)
+  countSelect.disabled = true;
   rowDiv.appendChild(countSelect);
 
-  // -- 삭제버튼 --
   const removeBtn = document.createElement('button');
   removeBtn.type = 'button';
   removeBtn.textContent = '삭제';
@@ -352,7 +336,6 @@ function addRoomRow() {
   container.appendChild(rowDiv);
 }
 
-// 객실명에 따라 0~최대수량 옵션 생성
 function populateRoomCountOptions(roomName, countSelect) {
   countSelect.innerHTML= '';
 
@@ -367,13 +350,13 @@ function populateRoomCountOptions(roomName, countSelect) {
   }
 
   if(roomName==='대형 카라반'){
-    range= Array.from({length:13}, (_,i)=> i); // 0~12
+    range= Array.from({length:13}, (_,i)=> i);
   } else if(roomName==='복층 우드캐빈'){
-    range= Array.from({length:7}, (_,i)=> i); // 0~6
+    range= Array.from({length:7}, (_,i)=> i);
   } else if(roomName==='파티룸'){
-    range= [0,1,2]; // 0~2
+    range= [0,1,2];
   } else if(roomName==='몽골텐트'){
-    range= [0,1];   // 0~1
+    range= [0,1];
   }
 
   countSelect.disabled= false;
@@ -389,9 +372,8 @@ function populateRoomCountOptions(roomName, countSelect) {
  *  [6] "안내문자용" 단일 데이터 + "시트 전송용" 다중 데이터
  * ========================================= */
 
-// (A) 안내문자/파싱결과 용: 모든 객실을 한 줄에 합침
+// (A) 안내문자/파싱결과 용: 모든 객실 한 줄
 function getManualReservationDataSingle() {
-  // 여러 객실(row)에서 "객실명 count개"를 합쳐 문자열화
   const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
   let roomsArr=[];
   rowNodes.forEach(row => {
@@ -404,8 +386,6 @@ function getManualReservationDataSingle() {
 
   const 이용객실 = roomsArr.join(', ');
   const 입실시간 = document.getElementById('manualCheckinTime').value.trim();
-
-  // 단일 예약번호
   const 예약번호 = generateReservationNumber();
 
   return {
@@ -414,19 +394,18 @@ function getManualReservationDataSingle() {
     전화번호: document.getElementById('manualPhone').value.trim(),
     이용객실,
     이용기간: document.getElementById('manualPeriod').value.trim(),
-    수량: '', // 복수객실 합치므로 단일 '수량'은 ""
+    수량: '',
     옵션: document.getElementById('manualOption').value.trim(),
     총이용인원: document.getElementById('manualTotalPeople').value.trim(),
-    입실시간, // 바로 select에서 선택된 값
+    입실시간,
     결제금액: document.getElementById('manualPayment').value.trim(),
-    예약플랫폼: '수기입력',    
+    예약플랫폼: '수기입력',
     무통장여부: true
   };
 }
 
-// (B) 스프레드시트 전송 용: 객실마다 각 행을 생성 (예약번호도 각기 다르게)
+// (B) 스프레드시트 전송 용: 객실마다 각 행
 function getManualReservationDataMultiple() {
-  // 공통 정보
   const 예약자    = document.getElementById('manualGuest').value.trim();
   const 전화번호  = document.getElementById('manualPhone').value.trim();
   const 이용기간  = document.getElementById('manualPeriod').value.trim();
@@ -435,21 +414,15 @@ function getManualReservationDataMultiple() {
   const 입실시간  = document.getElementById('manualCheckinTime').value.trim();
   const 결제금액  = document.getElementById('manualPayment').value.trim();
 
-  // “roomsContainer” 내의 모든 row
   const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
-
-  // 기본(14자리) 예약번호
   const baseNumber = generateBaseReservationNumber();
 
   let result = [];
   rowNodes.forEach((row, idx) => {
     const roomType = row.querySelector('.room-type').value.trim();
     const countVal = row.querySelector('.room-count').value.trim();
-
-    // 객실명 없거나 수량 0이면 전송 제외
     if(!roomType || countVal==='0') return;
 
-    // 예: "20250315093001", "20250315093002" 등
     const uniqueReservationNo = baseNumber + String(idx+1);
 
     let oneRow = {
@@ -457,13 +430,13 @@ function getManualReservationDataMultiple() {
       예약자,
       전화번호,
       이용객실: roomType,
-      이용기간: 이용기간,
-      수량: countVal, 
+      이용기간,
+      수량: countVal,
       옵션,
       총이용인원: 총인원,
       입실시간,
       결제금액,
-      예약플랫폼: '상담',   // ← '수기입력' → '상담'
+      예약플랫폼: '상담',
       무통장여부: true
     };
     result.push(oneRow);
@@ -472,7 +445,6 @@ function getManualReservationDataMultiple() {
   return result;
 }
 
-// 예약번호(단일) - 안내문자용
 function generateReservationNumber() {
   const d = new Date();
   const YYYY= d.getFullYear();
@@ -484,8 +456,6 @@ function generateReservationNumber() {
   return `${YYYY}${MM}${DD}${hh}${mm}${ss}`;
 }
 
-// 예약번호(베이스) - 다중행 전송용 (14자리까지만)
-// 뒤에 (index+1)을 붙여서 최종 예약번호를 만든다.
 function generateBaseReservationNumber() {
   const d = new Date();
   const YYYY= d.getFullYear();
@@ -494,7 +464,7 @@ function generateBaseReservationNumber() {
   const hh  = String(d.getHours()).padStart(2,'0');
   const mm  = String(d.getMinutes()).padStart(2,'0');
   const ss  = String(d.getSeconds()).padStart(2,'0');
-  return `${YYYY}${MM}${DD}${hh}${mm}${ss}`; 
+  return `${YYYY}${MM}${DD}${hh}${mm}${ss}`;
 }
 
 /** =========================================
@@ -502,12 +472,9 @@ function generateBaseReservationNumber() {
  * ========================================= */
 function processReservation() {
   if(isManualTabActive()){
-    // 여러 객실 => 배열이지만, '파싱 결과 보기'에서는
-    // 통합해서 한 객체로 보여주겠다
     const singleData = getManualReservationDataSingle();
     document.getElementById('outputData').textContent = JSON.stringify(singleData,null,2);
   } else {
-    // 붙여넣기 탭
     const text = document.getElementById('inputData').value;
     const data = parseReservation(text);
     document.getElementById('outputData').textContent = JSON.stringify(data,null,2);
@@ -540,7 +507,6 @@ function generateReservationMessage() {
 
   let message='';
 
-  // 아래는 예시적으로 분기
   if (rawText.includes('무통장할인') || data.예약플랫폼 === '네이버무통장') {
     message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
 
@@ -556,7 +522,6 @@ ${formattedParsedData}
 
 ※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
   }
-  // 네이버 당일캠핑 (기간에 '~' 없는 경우)
   else if (data.예약플랫폼 === '네이버' && data.이용기간 && !data.이용기간.includes('~')) {
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
@@ -570,7 +535,6 @@ ${formattedParsedData}
 
 예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.`;
   }
-  // 네이버 숙박
   else if (data.예약플랫폼 === '네이버') {
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
@@ -594,7 +558,6 @@ ${formattedParsedData}
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
 https://litt.ly/jamjam_bbq`;
   }
-  // 야놀자
   else if (data.예약플랫폼 === '야놀자') {
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
@@ -617,7 +580,6 @@ ${formattedParsedData}
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
 https://litt.ly/jamjam_bbq`;
   }
-  // 여기어때
   else if (data.예약플랫폼 === '여기어때') {
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
@@ -644,9 +606,8 @@ ${formattedParsedData}
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
 https://litt.ly/jamjam_bbq`;
   }
-
   else if (data.예약플랫폼 === '수기입력'){
-  message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
+    message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
 
 ${formattedParsedData}
 
@@ -668,13 +629,11 @@ ${formattedParsedData}
 
 function sendToSheet() {
   if(isManualTabActive()){
-    // 여러 객실 -> 여러 행 전송
     const dataArr = getManualReservationDataMultiple();
     if(dataArr.length===0) {
       alert("추가된 객실이 없습니다. (객실 이름이 없거나 수량이 0개)");
       return;
     }
-    // 각 객실마다 전송 (Promise.all or for문)
     let successCount=0;
     let failCount=0;
 
@@ -688,7 +647,6 @@ function sendToSheet() {
     })();
 
   } else {
-    // 붙여넣기 단일
     const text= document.getElementById('inputData').value;
     const data= parseReservation(text);
     sendOneRowToGAS(data).then(success=>{
@@ -698,7 +656,6 @@ function sendToSheet() {
   }
 }
 
-// 개별 row를 GAS로 전송
 async function sendOneRowToGAS(d) {
   const params= new URLSearchParams({
     예약번호:    d.예약번호||"",
@@ -718,7 +675,6 @@ async function sendOneRowToGAS(d) {
     const res = await fetch(url);
     const msg = await res.text();
     console.log(`[${d.예약번호}] → ${msg}`);
-    // 성공/실패 간단 분기
     if(msg.includes("오류") || msg.includes("이미 있는 예약")) {
       return false;
     }
@@ -739,9 +695,8 @@ let secondSelectedDate= null;
 
 function buildCalendar() {
   const container = document.getElementById('calendarContainer');
-  container.innerHTML = ''; // 초기화
+  container.innerHTML = '';
 
-  // 헤더
   const headerDiv = document.createElement('div');
   headerDiv.className = 'calendar-header';
 
@@ -750,7 +705,7 @@ function buildCalendar() {
   prevBtn.onclick = () => {
     currentMonth--;
     if (currentMonth < 0) {
-      currentMonth=11; 
+      currentMonth=11;
       currentYear--;
     }
     buildCalendar();
@@ -775,7 +730,6 @@ function buildCalendar() {
   headerDiv.appendChild(nextBtn);
   container.appendChild(headerDiv);
 
-  // 요일 헤더
   const dayNames = ['일','월','화','수','목','금','토'];
   const gridDiv = document.createElement('div');
   gridDiv.className = 'calendar-grid';
@@ -787,7 +741,6 @@ function buildCalendar() {
     gridDiv.appendChild(dayHeader);
   });
 
-  // 날짜 채우기
   const firstDay = new Date(currentYear, currentMonth, 1).getDay();
   const lastDate = new Date(currentYear, currentMonth+1, 0).getDate();
 
@@ -826,7 +779,6 @@ function onDateClick(dateObj) {
       }
     }
   } else {
-    // 이미 두 날짜가 선택된 상태 → 새로시작
     firstSelectedDate = dateObj;
     secondSelectedDate= null;
   }
@@ -852,11 +804,9 @@ function highlightSelectedDates() {
 
     const cellDate = new Date(currentYear, currentMonth, dayNum);
 
-    // 단일
     if(sameDay(cellDate, firstSelectedDate) && !secondSelectedDate){
       cell.classList.add('selected');
     }
-    // 범위
     else if(secondSelectedDate){
       const minD = firstSelectedDate < secondSelectedDate ? firstSelectedDate : secondSelectedDate;
       const maxD = firstSelectedDate < secondSelectedDate ? secondSelectedDate : firstSelectedDate;
@@ -884,11 +834,9 @@ function updatePeriodInput() {
   };
   const fmt = d=> `${d.getFullYear()}. ${d.getMonth()+1}. ${d.getDate()}.(${getKoreanDay(d)})`;
 
-  // 단일
   if(!secondSelectedDate){
     periodInput.value = fmt(firstSelectedDate);
   } else {
-    // 범위
     let start = firstSelectedDate < secondSelectedDate ? firstSelectedDate : secondSelectedDate;
     let end   = firstSelectedDate < secondSelectedDate ? secondSelectedDate : firstSelectedDate;
     periodInput.value = `${fmt(start)} ~ ${fmt(end)}`;
@@ -902,18 +850,16 @@ function sameDay(d1,d2){
 }
 
 function onlyNumbers(el) {
-  // 모든 숫자 이외 문자를 제거 (^\d)
   el.value = el.value.replace(/\D/g, '');
 }
 
 function formatPayment() {
   const el = document.getElementById('manualPayment');
-  let val  = el.value.replace(/\D/g, '');  // 우선 숫자만 추출
+  let val  = el.value.replace(/\D/g, '');
   if (!val) {
-    el.value = ''; // 아무것도 없으면 빈칸
+    el.value = '';
     return;
   }
-  // 정수화 후 3자리 콤마
   const num = parseInt(val, 10);
   el.value = num.toLocaleString('ko-KR') + '원';
 }
