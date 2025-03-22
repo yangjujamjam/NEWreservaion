@@ -2,14 +2,13 @@
  *  [알림톡 전용] 전역 설정
  * ========================================= */
 const ALIMTALK_API_URL = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
-const ALIMTALK_API_KEY = 's2qfjf9gxkhzv0ms04bt54f3w8w6b9jd';         // 알리고에서 받은 API Key
-const ALIMTALK_USER_ID = 'yangjujamjam';         // 알리고 사용자 ID
-const ALIMTALK_SENDERKEY = 'fc0570b6c7f7785506ea85b62838fd6fb37a3bcc';    // 발신프로필키
-const ALIMTALK_TPLCODE  = 'TY_7495';       // 승인된 템플릿 코드
-const ALIMTALK_SENDER   = '01059055559';         // 발신번호(카카오 비즈 프로필)
+const ALIMTALK_API_KEY = 's2qfjf9gxkhzv0ms04bt54f3w8w6b9jd';
+const ALIMTALK_USER_ID = 'yangjujamjam';
+const ALIMTALK_SENDERKEY = 'fc0570b6c7f7785506ea85b62838fd6fb37a3bcc';
+const ALIMTALK_TPLCODE  = 'TY_7495';
+const ALIMTALK_SENDER   = '01059055559';
 
-// 승인된 템플릿 본문(개행 포함) - #{파싱내용} 위치에 실제 데이터 삽입
-const ALIMTALK_TEMPLATE = 
+const ALIMTALK_TEMPLATE =
 `고객님 예약 신청해 주셔서 
 진심으로 감사드립니다.
 
@@ -29,13 +28,8 @@ const ALIMTALK_TEMPLATE =
  *  [A] 확인창(Yes/No) → 알림톡 발송
  * ========================================= */
 function confirmAlimtalk() {
-  // 확인창
   const ok = confirm("알림톡을 보내시겠습니까?");
-  if(!ok) {
-    // 취소 누르면 종료
-    return;
-  }
-  // 확인 누르면 진행
+  if(!ok) return;
   sendAlimtalk();
 }
 
@@ -45,23 +39,18 @@ function confirmAlimtalk() {
 async function sendAlimtalk() {
   let data;
 
-  // script.js에 있는 함수 활용
   if (isManualTabActive()) {
-    // 수기작성 탭
     data = getManualReservationDataSingle();
   } else {
-    // 붙여넣기 탭
     const text = document.getElementById('inputData').value;
     data = parseReservation(text);
   }
 
-  // 무통장 여부만 알림톡 발송 (예시)
   if (!data.무통장여부) {
     alert("무통장 예약건이 아니므로 알림톡 발송을 지원하지 않습니다.");
     return;
   }
 
-  // #{파싱내용}에 들어갈 예약정보
   const parsingContent = `
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
@@ -75,10 +64,8 @@ async function sendAlimtalk() {
 - 결제금액: ${data.결제금액}
 `;
 
-  // 템플릿에 삽입
   const messageText = ALIMTALK_TEMPLATE.replace('#{파싱내용}', parsingContent.trim());
 
-  // 알리고 API 파라미터 구성
   const params = new URLSearchParams();
   params.append('apikey',    ALIMTALK_API_KEY);
   params.append('userid',    ALIMTALK_USER_ID);
@@ -86,16 +73,13 @@ async function sendAlimtalk() {
   params.append('tpl_code',  ALIMTALK_TPLCODE);
   params.append('sender',    ALIMTALK_SENDER);
 
-  // 수신자 번호 (숫자만)
   const phoneOnlyNumbers = data.전화번호.replace(/[^0-9]/g,'');
   params.append('receiver_1', phoneOnlyNumbers);
   params.append('recvname_1', data.예약자 || '고객님');
 
-  // 제목, 메시지
   params.append('subject_1', '무통장 입금 안내');
   params.append('message_1', messageText);
 
-  // 대체문자 실패전송 Y/N
   params.append('failover', 'N');
 
   try {
