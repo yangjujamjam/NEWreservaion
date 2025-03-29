@@ -75,27 +75,16 @@ function parseNaverReservation(text) {
     const rooms = ['대형카라반', '복층우드캐빈', '파티룸', '몽골텐트'];
     const normalizedSiteLine = siteLine.replace(/\s+/g, '');
     이용객실 = rooms.find(room => normalizedSiteLine.includes(room));
-    if (이용객실 === '대형카라반')   이용객실 = '대형 카라반';
+    if (이용객실 === '대형카라반') 이용객실 = '대형 카라반';
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // --- [옵션 처리 수정된 부분] -------------------------------------------
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
     optionsEndIndex = lines.findIndex(line => line.includes('유입경로'));
   }
-  // 옵션 줄들을 미리 추출
-  const optionLines = (optionsStartIndex !== -1 && optionsEndIndex !== -1 && optionsEndIndex > optionsStartIndex)
-    ? lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean)
-    : [];
-
-  // "쿠폰"이 포함된 줄이 발견되면 해당 줄부터 아래로 모두 제거
-  const couponIndex = optionLines.findIndex(line => line.includes('쿠폰'));
-  const trimmedOptionLines = (couponIndex !== -1)
-    ? optionLines.slice(0, couponIndex)    // 쿠폰 줄부터 이후 전부 제거
-    : optionLines;
-
+  const optionLines = lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean);
   const unwantedOptions = [
     '인원수를 꼭 체크해주세요.',
     '수영장 및 외부시설 안내',
@@ -106,11 +95,9 @@ function parseNaverReservation(text) {
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
   ];
-  // 불필요 문구 필터링
-  const filteredOptions = trimmedOptionLines.filter(line =>
+  const filteredOptions = optionLines.filter(line =>
     !unwantedOptions.some(unwanted => line.includes(unwanted))
   );
-  // --- [옵션 처리 끝] --------------------------------------------------
 
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
@@ -144,7 +131,6 @@ function parseNaverReservation(text) {
     무통장여부
   };
 }
-/** -------------------------------------------------------------------- */
 
 /** ---------- 야놀자 파싱 함수 ---------- */
 function parseYanoljaReservation(text) {
@@ -568,7 +554,7 @@ ${formattedParsedData}
 체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
 예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.
 
-(광고)
+(광고) 
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
 https://litt.ly/jamjam_bbq`;
   }
