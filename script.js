@@ -85,13 +85,6 @@ function parseNaverReservation(text) {
     optionsEndIndex = lines.findIndex(line => line.includes('유입경로'));
   }
   const optionLines = lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean);
-
-  const couponIndex = optionLines.findIndex(line => line.includes('쿠폰'));
-  if (couponIndex !== -1) {
-    // 쿠폰 라인부터 뒤로 전부 제거
-    optionLines = optionLines.slice(0, couponIndex);
-  }
-  
   const unwantedOptions = [
     '인원수를 꼭 체크해주세요.',
     '수영장 및 외부시설 안내',
