@@ -55,7 +55,6 @@ function parseNaverReservation(text) {
     return line ? line.replace(keyword, '').trim() : '';
   };
 
-  // 예약자, 전화번호 파싱
   let visitorLine = lines.find(line => line.includes('방문자'));
   let 예약자 = '';
   let 전화번호 = '';
@@ -70,7 +69,6 @@ function parseNaverReservation(text) {
     전화번호 = getValue('전화번호');
   }
 
-  // 객실 파싱
   let siteLine = lines.find(line => line.includes('사이트'));
   let 이용객실 = '';
   if (siteLine) {
@@ -81,26 +79,23 @@ function parseNaverReservation(text) {
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // 옵션 파싱
+  // --- [옵션 처리 수정된 부분] -------------------------------------------
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
     optionsEndIndex = lines.findIndex(line => line.includes('유입경로'));
   }
+  // 옵션 줄들을 미리 추출
+  const optionLines = (optionsStartIndex !== -1 && optionsEndIndex !== -1 && optionsEndIndex > optionsStartIndex)
+    ? lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean)
+    : [];
 
-  // 옵션 구간 추출
-  let optionLines = [];
-  if (optionsStartIndex !== -1 && optionsEndIndex !== -1 && optionsEndIndex > optionsStartIndex) {
-    optionLines = lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean);
-  }
-
-  // (1) "쿠폰" 단어가 나오면 해당 줄 포함 그 뒤 라인은 제거
+  // "쿠폰"이 포함된 줄이 발견되면 해당 줄부터 아래로 모두 제거
   const couponIndex = optionLines.findIndex(line => line.includes('쿠폰'));
-  if (couponIndex !== -1) {
-    optionLines = optionLines.slice(0, couponIndex);
-  }
+  const trimmedOptionLines = (couponIndex !== -1)
+    ? optionLines.slice(0, couponIndex)    // 쿠폰 줄부터 이후 전부 제거
+    : optionLines;
 
-  // (2) 불필요 안내 문구 제거
   const unwantedOptions = [
     '인원수를 꼭 체크해주세요.',
     '수영장 및 외부시설 안내',
@@ -111,31 +106,29 @@ function parseNaverReservation(text) {
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
   ];
-  const filteredOptions = optionLines.filter(line =>
+  // 불필요 문구 필터링
+  const filteredOptions = trimmedOptionLines.filter(line =>
     !unwantedOptions.some(unwanted => line.includes(unwanted))
   );
+  // --- [옵션 처리 끝] --------------------------------------------------
 
-  // 총 이용 인원
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
   if (totalPeopleIndex !== -1 && totalPeopleIndex + 1 < lines.length) {
     총이용인원 = lines[totalPeopleIndex + 1].trim();
   }
 
-  // 입실 시간
   let checkInTimeIndex = lines.findIndex(line => line.includes('입실 시간 선택'));
   let 입실시간 = '';
   if (checkInTimeIndex !== -1 && checkInTimeIndex + 1 < lines.length) {
     입실시간 = lines[checkInTimeIndex + 1].trim();
   }
 
-  // 결제 관련
   const 결제예상금액 = getValue('결제예상금액');
   const 결제금액 = getValue('결제금액');
   const 무통장여부 = 결제예상금액 ? true : "";
   const 예약플랫폼 = 무통장여부 ? '네이버무통장' : '네이버';
 
-  // 최종 결과
   return {
     예약번호: getValue('예약번호'),
     예약자,
@@ -151,6 +144,7 @@ function parseNaverReservation(text) {
     무통장여부
   };
 }
+/** -------------------------------------------------------------------- */
 
 /** ---------- 야놀자 파싱 함수 ---------- */
 function parseYanoljaReservation(text) {
@@ -259,7 +253,6 @@ function parseHereReservation(text) {
   const 입실일시라인 = lines.find(line => line.includes('입실일시:'));
   const 퇴실일시라인 = lines.find(line => line.includes('퇴실일시:'));
 
-  // 예약번호로부터 날짜 추정
   const 예약날짜Match = 예약번호.match(/^(\d{2})(\d{2})(\d{2})/);
   let 예약날짜 = new Date();
   if (예약날짜Match) {
@@ -575,7 +568,7 @@ ${formattedParsedData}
 체크인 또는 체크아웃 하실 때 관리동에 말씀해 주시면 환불처리 도와드립니다.^^
 예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.
 
-(광고) 
+(광고)
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
 https://litt.ly/jamjam_bbq`;
   }
