@@ -9,7 +9,7 @@ const ALIMTALK_TPLCODE  = 'TY_7495';
 const ALIMTALK_SENDER   = '01059055559';
 
 const ALIMTALK_TEMPLATE =
-고객님 예약 신청해 주셔서 
+`고객님 예약 신청해 주셔서 
 진심으로 감사드립니다.
 
 #{파싱내용}
@@ -22,7 +22,7 @@ const ALIMTALK_TEMPLATE =
 
 ▶계좌번호  우리 1005 504 540028 (주) 유연음
 
-※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.;
+※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
 
 /** =========================================
  *  [A] 확인창(Yes/No) → 알림톡 발송
@@ -51,7 +51,7 @@ async function sendAlimtalk() {
     return;
   }
 
-  const parsingContent = 
+  const parsingContent = `
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
 - 전화번호: ${data.전화번호}
@@ -62,7 +62,7 @@ async function sendAlimtalk() {
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}
-;
+`;
 
   const messageText = ALIMTALK_TEMPLATE.replace('#{파싱내용}', parsingContent.trim());
 
