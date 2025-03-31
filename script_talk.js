@@ -1,4 +1,4 @@
-/** =========================================
+  /** =========================================
  *  [알림톡 전용] 전역 설정
  * ========================================= */
 const ALIMTALK_API_URL = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
@@ -97,9 +97,7 @@ async function sendAlimtalk() {
       buttonInfo = {
         button: [{
           name: "채널추가",
-          linkType: "AC",
-          linkTypeName: "채널 추가",
-          linkMo: "http://pf.kakao.com/_xdJxcExj"
+          linkType: "AC"
         }]
       };
     } else {
@@ -138,9 +136,7 @@ async function sendAlimtalk() {
       buttonInfo = {
         button: [{
           name: "채널추가",
-          linkType: "AC",
-          linkTypeName: "채널 추가",
-          linkMo: "http://pf.kakao.com/_xdJxcExj"
+          linkType: "AC"
         }]
       };
     }
