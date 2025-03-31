@@ -48,6 +48,7 @@ async function sendAlimtalk() {
 
   let templateCode;
   let templateContent;
+  let buttonInfo = null; // 버튼정보 기본값 null 설정
 
   if (data.무통장여부) {
     templateCode = DEFAULT_TPLCODE;
@@ -92,6 +93,16 @@ async function sendAlimtalk() {
 입실 2일전 - 변경불가
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
+
+      // 버튼 정보 추가 (TY_8947)
+      buttonInfo = {
+        button: [{
+          name: "채널추가",
+          linkType: "AC",
+          linkTypeName: "채널 추가",
+          linkMo: "http://pf.kakao.com/_xdJxcExj"
+        }]
+      };
     } else {
       templateCode = 'TY_8948';
       templateContent = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
@@ -124,6 +135,16 @@ async function sendAlimtalk() {
 입실 2일전 ~ 당일 -  100%
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
+
+      // 버튼 정보 추가 (TY_8948)
+      buttonInfo = {
+        button: [{
+          name: "채널추가",
+          linkType: "AC",
+          linkTypeName: "채널 추가",
+          linkMo: "http://pf.kakao.com/_xdJxcExj"
+        }]
+      };
     }
   }
 
@@ -153,6 +174,10 @@ async function sendAlimtalk() {
     message_1: messageText,
     failover: 'N'
   });
+
+  if (buttonInfo) {
+    params.append('button_1', JSON.stringify(buttonInfo));
+  }
 
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
