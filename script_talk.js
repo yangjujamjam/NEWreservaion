@@ -94,12 +94,6 @@ async function sendAlimtalk() {
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
 
-      buttonInfo = {
-        button: [{
-          name: "채널추가",
-          linkType: "AC"
-        }]
-      };
     } else {
       templateCode = 'TY_8948';
       templateContent = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
@@ -133,12 +127,6 @@ async function sendAlimtalk() {
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
 
-      buttonInfo = {
-        button: [{
-          name: "채널추가",
-          linkType: "AC"
-        }]
-      };
     }
   }
 
@@ -170,8 +158,6 @@ async function sendAlimtalk() {
     message_1: messageText,
     failover: 'N'
   });
-
-  if (buttonInfo) params.append('button_1', JSON.stringify(buttonInfo));
 
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
