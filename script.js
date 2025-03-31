@@ -408,7 +408,7 @@ function getManualReservationDataSingle() {
     전화번호: document.getElementById('manualPhone').value.trim(),
     이용객실,
     이용기간: document.getElementById('manualPeriod').value.trim(),
-    수량: '',
+    수량: String(totalCount),
     옵션: document.getElementById('manualOption').value.trim(),
     총이용인원: document.getElementById('manualTotalPeople').value.trim(),
     입실시간,
