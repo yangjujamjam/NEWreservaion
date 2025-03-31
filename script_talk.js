@@ -22,7 +22,7 @@ const DEFAULT_TEMPLATE =
 
 ▶계좌번호  우리 1005 504 540028 (주) 유연음
 
-※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
+※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 \"2시간 이내\" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
 
 /** =========================================
  *  [A] 확인창(Yes/No) → 알림톡 발송
@@ -34,7 +34,7 @@ function confirmAlimtalk() {
 }
 
 /** =========================================
- *  알림톡 발송 함수
+ *  알림톡 발송 함수 (최종 수정)
  * ========================================= */
 async function sendAlimtalk() {
   let data;
@@ -46,16 +46,14 @@ async function sendAlimtalk() {
     data = parseReservation(text);
   }
 
-  let templateCode = DEFAULT_TPLCODE;
-  let templateContent = DEFAULT_TEMPLATE;
+  let templateCode;
+  let templateContent;
 
-  const isAccommodation = data.이용기간.includes('~');
-  const isSameDay = !data.이용기간.includes('~');
-
-  if (!data.무통장여부) {
-    if ((data.예약플랫폼.includes('네이버') && isAccommodation) ||
-        (data.예약플랫폼.includes('야놀자') && isAccommodation) ||
-        (data.예약플랫폼.includes('여기어때') && isAccommodation)) {
+  if (data.무통장여부) {
+    templateCode = DEFAULT_TPLCODE;
+    templateContent = DEFAULT_TEMPLATE;
+  } else {
+    if (data.이용기간.includes('~')) {
       templateCode = 'TY_8947';
       templateContent = `[양주잼잼]
 예약해 주셔서 진심으로 감사합니다♬
@@ -76,7 +74,6 @@ async function sendAlimtalk() {
 
 ■ 환불규정
 ▶ 취소수수료
-
 입실 10일전 - 없음
 입실 9일전 - 10%
 입실 8일전 - 20%
@@ -88,7 +85,6 @@ async function sendAlimtalk() {
 입실 2일전 ~ 당일 -  100%
 
 ▶ 날짜 변경 시 수수료
-
 입실 10일전 - 무료
 입실 9일전 - 20,000원
 입실 6일전 - 40,000원
@@ -96,8 +92,7 @@ async function sendAlimtalk() {
 입실 2일전 - 변경불가
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
-    } else if ((data.예약플랫폼.includes('네이버') && isSameDay) ||
-               (data.예약플랫폼.includes('야놀자') && data.입실시간.includes('대실'))) {
+    } else {
       templateCode = 'TY_8948';
       templateContent = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 ■기본 이용시간은 6시간이며 예약해주신 방문시간을 엄수해 주세요.
@@ -118,7 +113,6 @@ async function sendAlimtalk() {
 
 ■ 환불규정
 ▶ 취소수수료
-
 입실 10일전 - 없음
 입실 9일전 - 10%
 입실 8일전 - 20%
@@ -130,9 +124,6 @@ async function sendAlimtalk() {
 입실 2일전 ~ 당일 -  100%
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
-    } else {
-      alert("해당 예약유형은 알림톡 발송이 지원되지 않습니다.");
-      return;
     }
   }
 
