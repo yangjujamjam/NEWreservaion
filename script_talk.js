@@ -1,4 +1,4 @@
-  /** =========================================
+/** =========================================
  *  [알림톡 전용] 전역 설정
  * ========================================= */
 const ALIMTALK_API_URL = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
@@ -48,7 +48,6 @@ async function sendAlimtalk() {
 
   let templateCode;
   let templateContent;
-  let buttonInfo = null;
 
   if (data.무통장여부) {
     templateCode = DEFAULT_TPLCODE;
@@ -93,7 +92,6 @@ async function sendAlimtalk() {
 입실 2일전 - 변경불가
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
-
     } else {
       templateCode = 'TY_8948';
       templateContent = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
@@ -126,7 +124,6 @@ async function sendAlimtalk() {
 입실 2일전 ~ 당일 -  100%
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
-
     }
   }
 
@@ -139,7 +136,7 @@ async function sendAlimtalk() {
 - 이용객실: ${data.이용객실}
 - 이용기간: ${data.이용기간}
 - 수량: ${data.수량 || '(복수객실)'}
-- 옵션:\n${formattedOption}
+- 옵션: ${data.옵션 || '없음'}
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}`;
