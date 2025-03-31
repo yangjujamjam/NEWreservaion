@@ -389,12 +389,15 @@ function populateRoomCountOptions(roomName, countSelect) {
 // (A) 안내문자/파싱결과 용: 모든 객실 한 줄
 function getManualReservationDataSingle() {
   const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
-  let roomsArr=[];
+  let roomsArr = [];
+  let totalCount = 0;
+
   rowNodes.forEach(row => {
     const roomType = row.querySelector('.room-type').value.trim();
-    const countVal = row.querySelector('.room-count').value.trim();
-    if (roomType && countVal!=='0') {
+    const countVal = parseInt(row.querySelector('.room-count').value.trim() || "0", 10);
+    if (roomType && countVal > 0) {
       roomsArr.push(`${roomType} ${countVal}개`);
+      totalCount += countVal;
     }
   });
 
@@ -408,7 +411,7 @@ function getManualReservationDataSingle() {
     전화번호: document.getElementById('manualPhone').value.trim(),
     이용객실,
     이용기간: document.getElementById('manualPeriod').value.trim(),
-    수량: String(totalCount),
+    수량: String(totalCount), // ← 총 수량 숫자만 표시
     옵션: document.getElementById('manualOption').value.trim(),
     총이용인원: document.getElementById('manualTotalPeople').value.trim(),
     입실시간,
