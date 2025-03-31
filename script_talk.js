@@ -48,7 +48,7 @@ async function sendAlimtalk() {
 
   let templateCode;
   let templateContent;
-  let buttonInfo = null; // 버튼정보 기본값 null 설정
+  let buttonInfo = null;
 
   if (data.무통장여부) {
     templateCode = DEFAULT_TPLCODE;
@@ -94,7 +94,6 @@ async function sendAlimtalk() {
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
 
-      // 버튼 정보 추가 (TY_8947)
       buttonInfo = {
         button: [{
           name: "채널추가",
@@ -136,7 +135,6 @@ async function sendAlimtalk() {
 
  - 기상악화 & 천재지변으로 인한 취소 및 환불은 어렵습니다`;
 
-      // 버튼 정보 추가 (TY_8948)
       buttonInfo = {
         button: [{
           name: "채널추가",
@@ -148,6 +146,8 @@ async function sendAlimtalk() {
     }
   }
 
+  const formattedOption = data.옵션 ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n') : '없음';
+
   const parsingContent = `
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
@@ -155,7 +155,7 @@ async function sendAlimtalk() {
 - 이용객실: ${data.이용객실}
 - 이용기간: ${data.이용기간}
 - 수량: ${data.수량 || '(복수객실)'}
-- 옵션: ${data.옵션 || '없음'}
+- 옵션:\n${formattedOption}
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}`;
@@ -175,9 +175,7 @@ async function sendAlimtalk() {
     failover: 'N'
   });
 
-  if (buttonInfo) {
-    params.append('button_1', JSON.stringify(buttonInfo));
-  }
+  if (buttonInfo) params.append('button_1', JSON.stringify(buttonInfo));
 
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
