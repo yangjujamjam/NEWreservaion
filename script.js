@@ -888,189 +888,143 @@ function formatPayment() {
  *  [9] 무통장 입금확인 탭 로직
  * ========================================= */
 /**
- * "무통장 입금확인" 탭을 누르면 호출할 함수
- * - 구글 스크립트에서 L열이 '네이버무통장','상담','수기입력'인 행을 JSON으로 받아옴
+ *  - 무통장 입금확인 탭 로직
+ *  - '입금확인' 버튼에서 "confirmPaymentAlimtalk(row)" 호출
  */
+ 
+// (A) '무통장 입금확인' 탭을 누르면 목록 불러오기
 async function loadDepositData() {
   const container = document.getElementById('depositListContainer');
   if (!container) return;
-
   container.innerHTML = "불러오는 중...";
 
-  // L열 무통장 대상만 골라주는 모드
-  const url = gasUrl + '?mode=fetchDeposit';
+  const url = gasUrl + '?mode=fetchDeposit'; 
+  // L열='네이버무통장','상담','수기입력' / O열 != '취소'인 행만 리턴
 
   try {
     const res = await fetch(url);
-    const json = await res.json(); // [{ rowIndex, 예약번호, 예약자, 이용날짜, 결제금액 }, ...]
-    renderDepositList(json);
-  } catch(err) {
+    const list = await res.json(); // [{ rowIndex, 예약번호, 예약자, 전화번호, ... }]
+    renderDepositList(list);
+  } catch (err) {
     console.error(err);
-    container.innerHTML = "오류 발생, 콘솔 확인바랍니다.";
+    container.innerHTML = "오류 발생 (콘솔 확인)";
   }
 }
 
-/**
- * 가져온 무통장 리스트를 <table> 형태로 표시
- */
+// (B) 테이블에 표시
 function renderDepositList(listRows) {
   const container = document.getElementById('depositListContainer');
   if (!container) return;
 
-  if(!listRows || listRows.length===0) {
+  if (!listRows || listRows.length === 0) {
     container.innerHTML = "<p>무통장 입금 대상이 없습니다.</p>";
     return;
   }
 
   const table = document.createElement('table');
-  table.className = 'deposit-table'; 
-
-  // 헤더
-  const thead = document.createElement('thead');
-  thead.innerHTML = `
-    <tr>
-      <th>예약번호</th>
-      <th>예약자</th>
-      <th>전화번호</th>
-      <th>이용객실</th>
-      <th>이용기간</th>
-      <th>수량</th>
-      <th>옵션</th>
-      <th>총이용인원</th>
-      <th>입실시간</th>
-      <th>결제금액</th>
-      <th>입금확인</th>
-      <th>취소</th>
-    </tr>
+  table.className = 'deposit-table';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>예약번호</th><th>예약자</th><th>전화번호</th>
+        <th>이용객실</th><th>이용기간</th><th>수량</th>
+        <th>옵션</th><th>총이용인원</th><th>입실시간</th><th>결제금액</th>
+        <th>입금확인</th><th>취소</th>
+      </tr>
+    </thead>
   `;
-  table.appendChild(thead);
-
   const tbody = document.createElement('tbody');
+
+  // listRows[i] = {
+  //   rowIndex, 예약번호, 예약자, 전화번호, 이용객실,
+  //   이용기간, 수량, 옵션, 총이용인원, 입실시간, 결제금액
+  // }
   listRows.forEach(row => {
     const tr = document.createElement('tr');
 
     // B열: 예약번호
     const tdB = document.createElement('td');
-    tdB.textContent = row.예약번호 || '';
+    tdB.textContent = row.예약번호;
     tr.appendChild(tdB);
-
     // C열: 예약자
     const tdC = document.createElement('td');
-    tdC.textContent = row.예약자 || '';
+    tdC.textContent = row.예약자;
     tr.appendChild(tdC);
-
     // D열: 전화번호
     const tdD = document.createElement('td');
-    tdD.textContent = row.전화번호 || '';
+    tdD.textContent = row.전화번호;
     tr.appendChild(tdD);
-
     // E열: 이용객실
     const tdE = document.createElement('td');
-    tdE.textContent = row.이용객실 || '';
+    tdE.textContent = row.이용객실;
     tr.appendChild(tdE);
-
     // F열: 이용기간
     const tdF = document.createElement('td');
-    tdF.textContent = row.이용기간 || '';
+    tdF.textContent = row.이용기간;
     tr.appendChild(tdF);
-
     // G열: 수량
     const tdG = document.createElement('td');
-    tdG.textContent = row.수량 || '';
+    tdG.textContent = row.수량;
     tr.appendChild(tdG);
-
     // H열: 옵션
     const tdH = document.createElement('td');
-    tdH.textContent = row.옵션 || '';
+    tdH.textContent = row.옵션;
     tr.appendChild(tdH);
-
     // I열: 총이용인원
     const tdI = document.createElement('td');
-    tdI.textContent = row.총이용인원 || '';
+    tdI.textContent = row.총이용인원;
     tr.appendChild(tdI);
-
     // J열: 입실시간
     const tdJ = document.createElement('td');
-    tdJ.textContent = row.입실시간 || '';
+    tdJ.textContent = row.입실시간;
     tr.appendChild(tdJ);
-
     // K열: 결제금액
     const tdK = document.createElement('td');
-    tdK.textContent = row.결제금액 || '';
+    tdK.textContent = row.결제금액;
     tr.appendChild(tdK);
 
-    // 입금확인 버튼
+    // (1) 입금확인 버튼
     const tdBtn = document.createElement('td');
-    const btn = document.createElement('button');
-    btn.textContent = "입금 확인";
-    btn.onclick = () => confirmPaymentAlimtalk(row);
-    tdBtn.appendChild(btn);
+    const btnConfirm = document.createElement('button');
+    btnConfirm.textContent = "입금 확인";
+    // *** 여기서 "confirmPaymentAlimtalk(row)" *** 
+    btnConfirm.onclick = () => confirmPaymentAlimtalk(row);
+    tdBtn.appendChild(btnConfirm);
     tr.appendChild(tdBtn);
 
     // (2) 취소 버튼
     const tdBtn2 = document.createElement('td');
-    const btn2 = document.createElement('button');
-    btn2.textContent = "취소";
-    btn2.onclick = () => confirmCancel(row.rowIndex);
-    tdBtn2.appendChild(btn2);
+    const btnCancel = document.createElement('button');
+    btnCancel.textContent = "취소";
+    btnCancel.onclick = () => confirmCancel(row.rowIndex);
+    tdBtn2.appendChild(btnCancel);
     tr.appendChild(tdBtn2);
 
     tbody.appendChild(tr);
   });
-  table.appendChild(tbody);
 
+  table.appendChild(tbody);
   container.innerHTML = "";
   container.appendChild(table);
 }
 
-/**
- * "입금확인" 버튼 클릭 시 → 스프레드시트 L열='입금확인'으로 업데이트
- */
-async function confirmPayment(rowIndex) {
-  const ok = confirm("입금이 확인되었습니까?");
+// (C) 취소 버튼 → 시트1 O열='취소'
+async function confirmCancel(rowIndex) {
+  const ok = confirm("예약이 취소되었습니까?");
   if(!ok) return;
 
-  // mode=updateDeposit 호출
-  const url = gasUrl + `?mode=updateDeposit&rowIndex=${rowIndex}&newValue=입금확인`;
-
+  const url = gasUrl + `?mode=updateCancel&rowIndex=${rowIndex}&newValue=취소`;
   try {
     const res = await fetch(url);
-    const text = await res.text();
-    if(text.includes("완료") || text.includes("성공")) {
-      alert("업데이트 완료");
-      // 다시 목록 갱신
+    const txt = await res.text();
+    if(txt.includes("완료") || txt.includes("성공")) {
+      alert("취소 처리 완료");
       loadDepositData();
     } else {
-      alert("업데이트 실패: " + text);
+      alert("취소 처리 실패: " + txt);
     }
   } catch(err) {
     console.error(err);
-    alert("업데이트 중 오류 발생");
+    alert("취소 처리 중 오류 발생");
   }
 }
-
-/***********************************************
- * "취소" 버튼 클릭 시 → 시트1 O열="취소" 업데이트
- ***********************************************/
- async function confirmCancel(rowIndex) {
-   const ok = confirm("예약이 취소되었습니까?");
-   if(!ok) return;
-
-   // mode=updateCancel 호출 (예: updateCancel)
-   const url = gasUrl + `?mode=updateCancel&rowIndex=${rowIndex}&newValue=취소`;
-
-   try {
-     const res = await fetch(url);
-     const text = await res.text();
-     if(text.includes("완료") || text.includes("성공")) {
-       alert("취소 처리 완료");
-       // 다시 목록 갱신
-       loadDepositData();
-     } else {
-       alert("취소 처리 실패: " + text);
-     }
-   } catch(err) {
-     console.error(err);
-     alert("취소 처리 중 오류 발생");
-   }
- }
