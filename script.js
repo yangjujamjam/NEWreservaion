@@ -929,11 +929,18 @@ function renderDepositList(listRows) {
   const thead = document.createElement('thead');
   thead.innerHTML = `
     <tr>
-      <th>예약번호(B열)</th>
-      <th>예약자(C열)</th>
-      <th>결제금액(K열)</th>
-      <th>이용날짜(F열)</th>
+      <th>예약번호</th>
+      <th>예약자</th>
+      <th>전화번호</th>
+      <th>이용객실</th>
+      <th>이용기간</th>
+      <th>수량</th>
+      <th>옵션</th>
+      <th>총이용인원</th>
+      <th>입실시간</th>
+      <th>결제금액</th>
       <th>입금확인</th>
+      <th>취소</th>
     </tr>
   `;
   table.appendChild(thead);
@@ -952,15 +959,45 @@ function renderDepositList(listRows) {
     tdC.textContent = row.예약자 || '';
     tr.appendChild(tdC);
 
+    // D열: 전화번호
+    const tdD = document.createElement('td');
+    tdD.textContent = row.전화번호 || '';
+    tr.appendChild(tdD);
+
+    // E열: 이용객실
+    const tdE = document.createElement('td');
+    tdE.textContent = row.이용객실 || '';
+    tr.appendChild(tdE);
+
+    // F열: 이용기간
+    const tdF = document.createElement('td');
+    tdF.textContent = row.이용기간 || '';
+    tr.appendChild(tdF);
+
+    // G열: 수량
+    const tdG = document.createElement('td');
+    tdG.textContent = row.수량 || '';
+    tr.appendChild(tdG);
+
+    // H열: 옵션
+    const tdH = document.createElement('td');
+    tdH.textContent = row.옵션 || '';
+    tr.appendChild(tdH);
+
+    // I열: 총이용인원
+    const tdI = document.createElement('td');
+    tdI.textContent = row.총이용인원 || '';
+    tr.appendChild(tdI);
+
+    // J열: 입실시간
+    const tdJ = document.createElement('td');
+    tdJ.textContent = row.입실시간 || '';
+    tr.appendChild(tdJ);
+
     // K열: 결제금액
     const tdK = document.createElement('td');
     tdK.textContent = row.결제금액 || '';
     tr.appendChild(tdK);
-
-    // F열: 이용날짜
-    const tdF = document.createElement('td');
-    tdF.textContent = row.이용날짜 || '';
-    tr.appendChild(tdF);
 
     // 입금확인 버튼
     const tdBtn = document.createElement('td');
