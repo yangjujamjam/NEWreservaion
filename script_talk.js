@@ -1,11 +1,11 @@
 /** =========================================
- *  [알림톡 전용] 전역 설정 (기존 유지)
+ *  [알림톡 전용] 전역 설정
  * ========================================= */
-const ALIMTALK_API_URL = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
-const ALIMTALK_API_KEY = 's2qfjf9gxkhzv0ms04bt54f3w8w6b9jd';
-const ALIMTALK_USER_ID = 'yangjujamjam';
+const ALIMTALK_API_URL   = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
+const ALIMTALK_API_KEY   = 's2qfjf9gxkhzv0ms04bt54f3w8w6b9jd';
+const ALIMTALK_USER_ID   = 'yangjujamjam';
 const ALIMTALK_SENDERKEY = 'fc0570b6c7f7785506ea85b62838fd6fb37a3bcc';
-const ALIMTALK_SENDER   = '01059055559';
+const ALIMTALK_SENDER    = '01059055559';
 
 /** 
  * [무통장 템플릿]
@@ -20,10 +20,12 @@ const TEMPLATE_TEXT_BANK =
 
 ▶계좌번호  우리 1005 504 540028 (주) 유연음
 
-※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.
+※입금 시 입금자, 예약자명이 동일해야 하며, 
+예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.
 
 ■ 이용 안내
-▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
+▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 
+   현장에서 추가 결제가 필요합니다.
 
 ▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며 현장 결제 가능합니다.  
 ※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.  
@@ -37,7 +39,7 @@ const TEMPLATE_TEXT_BANK =
 ※예약 내용을 다시 한번 확인하시고 수정 또는 변경 사항이 있으면 연락 바랍니다.`;
 
 /** 
- * [붙여넣기 - 네이버숙박/야놀자숙박/여기어때숙박]
+ * [숙박 템플릿]
  * TZ_1466
  */
 const TEMPLATE_CODE_LODGING = 'TZ_1466';
@@ -47,7 +49,8 @@ const TEMPLATE_TEXT_LODGING =
 #{파싱내용}
 
 ■ 숙박 안내
-▶ 2인을 초과하여 예약하신 경우, 인원 추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
+▶ 2인을 초과하여 예약하신 경우, 인원 추가를 선택하지 않으셨다면 
+   현장에서 추가 결제가 필요합니다.
 
 ▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며, 현장에서 결제 가능합니다.
 ※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.
@@ -85,9 +88,8 @@ const TEMPLATE_TEXT_LODGING =
 ※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.`;
 
 /** 
- * [네이버당일 / 야놀자 당일(대실)]
+ * [당일(대실) 템플릿]
  * TZ_1465
- * #{이용시간}에 주의
  */
 const TEMPLATE_CODE_DAYUSE = 'TZ_1465';
 const TEMPLATE_TEXT_DAYUSE =
@@ -99,7 +101,8 @@ const TEMPLATE_TEXT_DAYUSE =
 #{파싱내용}
 
 ■ 이용 안내
-▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
+▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 
+   현장에서 추가 결제가 필요합니다.
 
 ▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며 현장 결제 가능합니다.  
 ※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.  
@@ -130,7 +133,7 @@ const TEMPLATE_TEXT_DAYUSE =
 ※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.`;
 
 /** 
- *  [버튼 공통]
+ * 버튼(채널추가) 설정 (공통)
  */
 const DEFAULT_BUTTON_INFO = {
   button: [{
@@ -142,53 +145,62 @@ const DEFAULT_BUTTON_INFO = {
 };
 
 /** =========================================
- *  (A) 기존 알림톡 로직 
- *     (붙여넣기/수기작성) 
+ * (A) 기존 붙여넣기/수기작성 탭용 알림톡
+ *     - 무통장, 숙박, 당일 등에 따라 템플릿 분기
  * ========================================= */
+
+/**
+ * 1) "알림톡 보내기" 버튼 클릭 시 → 확인창
+ */
 function confirmAlimtalk() {
   const ok = confirm("알림톡을 보내시겠습니까?");
   if(!ok) return;
   sendAlimtalk();
 }
 
+/**
+ * 2) 실제 발송 함수
+ *    - 붙여넣기 or 수기작성에서 parseReservation / getManualReservationDataSingle 사용
+ */
 async function sendAlimtalk() {
-  // (1) 붙여넣기 or 수기작성 데이터 가져오기
-  // (이 부분은 script.js의 
-  //  isManualTabActive() / getManualReservationDataSingle() / parseReservation() 
-  //  를 사용하는 구조)
+  // (A) 예약 데이터
   let data;
   if (isManualTabActive()) {
-    data = getManualReservationDataSingle();
+    data = getManualReservationDataSingle(); 
   } else {
     const text = document.getElementById('inputData').value;
     data = parseReservation(text);
   }
 
-  // (2) 템플릿 분기 (무통장여부, 숙박/당일)
-  let templateCode = '';
-  let templateContent = '';
-  let buttonInfo = DEFAULT_BUTTON_INFO;
+  // (B) 템플릿 분기
+  let templateCode  = '';
+  let templateText  = '';
+  let buttonInfo    = DEFAULT_BUTTON_INFO;
 
   if (data.무통장여부) {
-    templateCode = TEMPLATE_CODE_BANK;      
-    templateContent = TEMPLATE_TEXT_BANK;
+    // 무통장
+    templateCode = TEMPLATE_CODE_BANK;
+    templateText = TEMPLATE_TEXT_BANK;
   }
-  else if (['네이버', '야놀자', '여기어때'].includes(data.예약플랫폼)) {
+  else if (['네이버','야놀자','여기어때'].includes(data.예약플랫폼)) {
+    // 숙박/당일 구분 (~ 유무)
     const isOvernight = data.이용기간.includes('~');
     if (isOvernight) {
       templateCode = TEMPLATE_CODE_LODGING;     
-      templateContent = TEMPLATE_TEXT_LODGING;
+      templateText = TEMPLATE_TEXT_LODGING;
     } else {
-      templateCode = TEMPLATE_CODE_DAYUSE;      
-      templateContent = TEMPLATE_TEXT_DAYUSE;
+      templateCode = TEMPLATE_CODE_DAYUSE;
+      templateText = TEMPLATE_TEXT_DAYUSE;
     }
   }
   else {
+    // 그 외 → 임의로 숙박템플릿
     templateCode = TEMPLATE_CODE_LODGING;
-    templateContent = TEMPLATE_TEXT_LODGING;
+    templateText = TEMPLATE_TEXT_LODGING;
   }
 
-  // (3) 메시지 치환
+  // (C) 치환
+  const usageTimeReplaced = data.입실시간.replace('[당일캠핑] ','');
   const formattedOption = data.옵션 
     ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n')
     : '없음';
@@ -206,111 +218,111 @@ ${formattedOption}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}`.trim();
 
-  const usageTimeReplaced = data.입실시간.replace('[당일캠핑] ',''); 
-  let messageText = templateContent
+  let messageText = templateText
     .replace('#{파싱내용}', parsingContent)
     .replace('#{이용시간}', usageTimeReplaced);
 
-  // (4) 알리고 API 파라미터
+  // (D) 알리고 파라미터
   const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
-    senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  templateCode,
-    sender:    ALIMTALK_SENDER,
+    apikey:     ALIMTALK_API_KEY,
+    userid:     ALIMTALK_USER_ID,
+    senderkey:  ALIMTALK_SENDERKEY,
+    tpl_code:   templateCode,
+    sender:     ALIMTALK_SENDER,
 
-    receiver_1:  (data.전화번호||'').replace(/\D/g, ''), 
-    recvname_1:  data.예약자 || '고객님',
-    subject_1:   '예약 안내',
-    message_1:   messageText,
-    failover:    'N'
+    receiver_1: (data.전화번호||'').replace(/\D/g, ''),
+    recvname_1: data.예약자 || '고객님',
+    subject_1:  '예약 안내',
+    message_1:  messageText,
+    failover:   'N'
   });
 
   if (buttonInfo) {
     params.append('button_1', JSON.stringify(buttonInfo));
   }
 
-  // (5) fetch
+  // (E) fetch
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+    headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
     body: params
   })
   .then(res => res.json())
   .then(result => {
-    if (result.code === 0) {
+    if(result.code===0) {
       alert("알림톡 발송 성공");
     } else {
       alert("알림톡 발송 실패: " + result.message);
     }
   })
-  .catch(() => alert("알림톡 발송 중 오류 발생"));
+  .catch(err => {
+    console.error(err);
+    alert("알림톡 발송 중 오류 발생");
+  });
 }
 
 /** =========================================
- *  (B) 무통장 "입금확인"용 함수 (추가)
- *     - script.js 의 renderDepositList() 등에서
- *       btn.onclick = () => confirmPaymentAlimtalk(row);
- *       로 호출
+ * (B) 무통장 "입금확인" 탭 전용
+ *     - 숙박: TZ_1466, 당일: TZ_1465
  * ========================================= */
+
+/**
+ * "입금확인" 버튼 클릭:
+ *   1) 시트 L열='입금확인'
+ *   2) 알림톡 (숙박/당일)
+ */
 async function confirmPaymentAlimtalk(row) {
-  // 1) 사용자 확인
   const ok = confirm("입금이 확인되었습니까?");
   if(!ok) return;
 
-  // 2) (선택) 스프레드시트 L열='입금확인' 업데이트
-  //    (만약 script.js에서 이미 updateDeposit 하고 있다면 이 부분 생략 가능)
+  // (A) 시트 L열='입금확인'
   try {
-    const url = gasUrl + `?mode=updateDeposit&rowIndex=${row.rowIndex}&newValue=입금확인`;
-    const res = await fetch(url);
+    const updateUrl = gasUrl + `?mode=updateDeposit&rowIndex=${row.rowIndex}&newValue=입금확인`;
+    const res = await fetch(updateUrl);
     const text = await res.text();
-    if(!text.includes("완료") && !text.includes("성공")) {
-      alert("스프레드시트 '입금확인' 처리 실패: " + text);
+    if(!(text.includes("완료") || text.includes("성공"))) {
+      alert("스프레드시트 업데이트 실패: " + text);
       return;
     }
-    alert("입금확인 처리 완료!");
+    alert("스프레드시트 '입금확인' 처리 완료");
   } catch(e) {
     console.error(e);
     alert("업데이트 중 오류 발생");
     return;
   }
 
-  // 3) 알림톡 발송
+  // (B) 알림톡 발송 (숙박=TZ_1466, 당일=TZ_1465)
   sendAlimtalkForDeposit(row);
 
-  // 4) 목록 재조회 (script.js에 loadDepositData가 있다면 호출)
+  // (C) 무통장 목록 재조회 (script.js에 loadDepositData()가 있으면 호출)
   if(typeof loadDepositData === 'function') {
     loadDepositData();
   }
 }
 
-/** 
- * 무통장행(row) → 알림톡 발송
- *  row = {
- *    예약번호, 예약자, 전화번호, 이용객실, 이용기간,
- *    수량, 옵션, 총이용인원, 입실시간, 결제금액
- *  }
+/**
+ * (B2) 알림톡 발송 (숙박 or 당일)
  */
 function sendAlimtalkForDeposit(row) {
-  // 숙박 vs 당일
-  const isStay = row.이용기간.includes('~');
+  // (1) 숙박 vs 당일
+  const isStay = row.이용기간.includes('~'); 
   let tplCode, tplText;
   if(isStay) {
-    tplCode = TEMPLATE_CODE_LODGING;   // "TZ_1466"
+    tplCode = TEMPLATE_CODE_LODGING;  // TZ_1466
     tplText = TEMPLATE_TEXT_LODGING;
   } else {
-    tplCode = TEMPLATE_CODE_DAYUSE;    // "TZ_1465"
+    tplCode = TEMPLATE_CODE_DAYUSE;   // TZ_1465
     tplText = TEMPLATE_TEXT_DAYUSE;
   }
 
-  // 당일: #{이용시간} 치환
+  // (2) #{이용시간} 치환 (당일만)
   let usageTime = '';
   if(!isStay) {
-    const match = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
-    usageTime = match ? match[1] : '예약시간';
+    const m = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
+    usageTime = m ? m[1] : '예약시간';
   }
 
-  // 파싱내용
+  // (3) #{파싱내용}
   const parsingContent = `
 - 예약번호: ${row.예약번호}
 - 예약자: ${row.예약자}
@@ -323,11 +335,11 @@ function sendAlimtalkForDeposit(row) {
 - 결제금액: ${row.결제금액}
 `.trim();
 
-  let messageText = tplText
+  let finalText = tplText
     .replace('#{이용시간}', usageTime)
     .replace('#{파싱내용}', parsingContent);
 
-  // 알리고 파라미터
+  // (4) 알리고 파라미터
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
     userid:    ALIMTALK_USER_ID,
@@ -335,22 +347,22 @@ function sendAlimtalkForDeposit(row) {
     tpl_code:  tplCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: (row.전화번호||'').replace(/\D/g,''),
+    receiver_1: (row.전화번호 || '').replace(/\D/g, ''),
     recvname_1: row.예약자 || '고객님',
     subject_1:  '예약 안내',
-    message_1:  messageText,
+    message_1:  finalText,
     failover:   'N'
   });
 
-  // 전송
+  // (5) fetch
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+    headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
     body: params
   })
   .then(r => r.json())
   .then(result => {
-    if(result.code === 0) {
+    if(result.code===0) {
       alert("알림톡 발송 성공");
     } else {
       alert("알림톡 발송 실패: " + result.message);
