@@ -1,5 +1,5 @@
 /** =========================================
- *  [알림톡 전용] 전역 설정
+ *  [알림톡 전용] 전역 설정 (원래 코드 유지)
  * ========================================= */
 const ALIMTALK_API_URL = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
 const ALIMTALK_API_KEY = 's2qfjf9gxkhzv0ms04bt54f3w8w6b9jd';
@@ -144,7 +144,9 @@ const DEFAULT_BUTTON_INFO = {
 };
 
 /** =========================================
- *  [A] 확인창(Yes/No) → 알림톡 발송
+ *  기존 알림톡 함수 (A)
+ *  [확인창(Yes/No) → sendAlimtalk()]
+ *  (붙여넣기/수기작성 탭에서 사용)
  * ========================================= */
 function confirmAlimtalk() {
   const ok = confirm("알림톡을 보내시겠습니까?");
@@ -152,9 +154,11 @@ function confirmAlimtalk() {
   sendAlimtalk();
 }
 
-/** =========================================
- *  [B] 알림톡 발송 함수 (템플릿/메시지 구성)
- * ========================================= */
+/** 
+ * (A) 알림톡 발송 함수 (템플릿/메시지 구성)
+ *  - 붙여넣기 / 수기작성 탭에서 사용
+ *  - parseReservation / getManualReservationDataSingle()로 얻은 data
+ */
 async function sendAlimtalk() {
   // (1) 예약 데이터 가져오기
   let data;
@@ -167,55 +171,36 @@ async function sendAlimtalk() {
     data = parseReservation(text);
   }
 
-  // (2) 템플릿 선택 로직
+  // (2) 템플릿 선택 로직 (원래 코드 유지)
   let templateCode = '';
   let templateContent = '';
   let buttonInfo = DEFAULT_BUTTON_INFO;
 
-  // ┌────────── 무통장입금 케이스 ──────────┐
-  //   ( "붙여넣기" , "수기작성" 공통 )
-  // └───────────────────────────────────────┘
   if (data.무통장여부) {
-    // 예) 무통장할인/무통장입금 등등
-    templateCode = TEMPLATE_CODE_BANK;      // 'TZ_1481'
-    templateContent = TEMPLATE_TEXT_BANK;   // 위에 정의한 텍스트
+    templateCode = TEMPLATE_CODE_BANK;     
+    templateContent = TEMPLATE_TEXT_BANK;
   }
-  // ┌────────── 플랫폼별(붙여넣기) ───────────┐
-  //   - 네이버 / 야놀자 / 여기어때
-  //   - 당일(대실) vs 숙박
-  // └───────────────────────────────────────┘
   else if (['네이버', '야놀자', '여기어때'].includes(data.예약플랫폼)) {
-    
-    // "이용기간"에 '~'가 있으면 숙박, 없으면 당일(대실)로 구분
     const isOvernight = data.이용기간.includes('~');
-    
     if (isOvernight) {
-      // 숙박
-      templateCode = TEMPLATE_CODE_LODGING;     // 'TZ_1466'
-      templateContent = TEMPLATE_TEXT_LODGING;  // 네이버/야놀자/여기어때 "숙박"
+      templateCode = TEMPLATE_CODE_LODGING;    
+      templateContent = TEMPLATE_TEXT_LODGING;
     } else {
-      // 당일/대실
-      templateCode = TEMPLATE_CODE_DAYUSE;      // 'TZ_1465'
-      templateContent = TEMPLATE_TEXT_DAYUSE;   // 네이버당일 or 야놀자대실
+      templateCode = TEMPLATE_CODE_DAYUSE;     
+      templateContent = TEMPLATE_TEXT_DAYUSE;
     }
   }
-  // ┌────────── 그 외(수기입력 등) ──────────┐
-  //   - 여기서는 필요에 따라 추가 처리
-  // └───────────────────────────────────────┘
   else {
-    // 플랫폼 분류가 없는 "수기입력" 등
-    // 무통장 여부가 아닌 이상, 임의로 숙박 템플릿을 기본 세팅
     templateCode = TEMPLATE_CODE_LODGING;
     templateContent = TEMPLATE_TEXT_LODGING;
   }
 
-  // (3) #{파싱내용}, #{이용시간} 치환
-  const usageTime = data.입실시간; // #{이용시간} 치환용
+  // (3) 메시지 치환
+  const usageTime = data.입실시간;
   const formattedOption = data.옵션 
     ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n')
     : '없음';
 
-  // 파싱내용
   const parsingContent = `
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
@@ -229,15 +214,12 @@ ${formattedOption}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}`.trim();
 
-  // 당일(대실)일 경우 #{이용시간} 치환이 필요
-  // (만약 data.입실시간 그대로 쓰고 싶다면 그대로 대입)
-  const usageTimeReplaced = data.입실시간.replace('[당일캠핑] ',''); 
-  // 템플릿 문자열 치환
+  const usageTimeReplaced = data.입실시간.replace('[당일캠핑] ','');
   let messageText = templateContent
     .replace('#{파싱내용}', parsingContent)
     .replace('#{이용시간}', usageTimeReplaced);
 
-  // (4) 알림톡 발송에 필요한 파라미터 조립
+  // (4) 파라미터
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
     userid:    ALIMTALK_USER_ID,
@@ -245,14 +227,13 @@ ${formattedOption}
     tpl_code:  templateCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1:  data.전화번호.replace(/\D/g, ''),   // 숫자만
+    receiver_1:  (data.전화번호||'').replace(/\D/g, ''),
     recvname_1:  data.예약자 || '고객님',
     subject_1:   '예약 안내',
     message_1:   messageText,
     failover:    'N'
   });
 
-  // 버튼(채널추가) 설정
   if (buttonInfo) {
     params.append('button_1', JSON.stringify(buttonInfo));
   }
@@ -272,4 +253,114 @@ ${formattedOption}
     }
   })
   .catch(() => alert("알림톡 발송 중 오류 발생"));
+}
+
+/** =========================================
+ *  (B) 무통장 "입금확인" 용 함수 (추가)
+ *     - 입금확인 버튼 누르면 호출
+ *     - (1) L열='입금확인' 업데이트
+ *     - (2) 알림톡 전송(숙박/당일 분기)
+ * ========================================= */
+async function confirmPaymentAlimtalk(row) {
+  // (1) 사용자 확인
+  const ok = confirm("입금이 확인되었습니까?");
+  if(!ok) return;
+
+  // (2) 스프레드시트 '입금확인' 처리
+  const updateUrl = gasUrl + `?mode=updateDeposit&rowIndex=${row.rowIndex}&newValue=입금확인`;
+  try {
+    const res = await fetch(updateUrl);
+    const text = await res.text();
+    if(text.includes("완료") || text.includes("성공")) {
+      alert("입금확인 업데이트 완료!");
+
+      // (3) 입금확인 후 알림톡 발송
+      sendAlimtalkForDeposit(row);
+
+      // (4) 목록 재조회 (script.js 쪽에 loadDepositData()가 있다면)
+      if(typeof loadDepositData === 'function') {
+        loadDepositData();
+      }
+    } else {
+      alert("업데이트 실패: " + text);
+    }
+  } catch(err) {
+    console.error(err);
+    alert("업데이트 중 오류 발생");
+  }
+}
+
+/** 
+ * (B) 실제 알림톡 전송 로직
+ *     row = {예약번호, 예약자, 전화번호, ...}
+ */
+function sendAlimtalkForDeposit(row) {
+  // 숙박 vs 당일
+  const isStay = row.이용기간.includes('~');
+  let tplCode, tplText;
+  if(isStay) {
+    tplCode = TEMPLATE_CODE_LODGING;
+    tplText = TEMPLATE_TEXT_LODGING;
+  } else {
+    tplCode = TEMPLATE_CODE_DAYUSE;
+    tplText = TEMPLATE_TEXT_DAYUSE;
+  }
+
+  // 당일 only: #{이용시간} 치환
+  let usageTime = '';
+  if(!isStay) {
+    const m = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
+    usageTime = m ? m[1] : '예약시간';
+  }
+
+  // 파싱내용
+  const parsingContent = `
+- 예약번호: ${row.예약번호}
+- 예약자: ${row.예약자}
+- 전화번호: ${row.전화번호}
+- 이용객실: ${row.이용객실}
+- 수량: ${row.수량}
+- 옵션: ${row.옵션}
+- 총인원: ${row.총이용인원}
+- 입실시간: ${row.입실시간}
+- 결제금액: ${row.결제금액}
+`.trim();
+
+  let finalText = tplText
+    .replace('#{이용시간}', usageTime)
+    .replace('#{파싱내용}', parsingContent);
+
+  // 알리고 API 파라미터
+  const params = new URLSearchParams({
+    apikey:    ALIMTALK_API_KEY,
+    userid:    ALIMTALK_USER_ID,
+    senderkey: ALIMTALK_SENDERKEY,
+    tpl_code:  tplCode,
+    sender:    ALIMTALK_SENDER,
+
+    receiver_1: (row.전화번호||'').replace(/\D/g,''),
+    recvname_1: row.예약자 || '고객님',
+    subject_1:  '예약 안내',
+    message_1:  finalText,
+    failover:   'N'
+  });
+
+  // fetch 전송
+  fetch(ALIMTALK_API_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    body: params
+  })
+  .then(r => r.json())
+  .then(result => {
+    if(result.code === 0) {
+      alert("알림톡 발송 성공");
+    } else {
+      alert("알림톡 발송 실패: " + result.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("알림톡 발송 중 오류 발생");
+  });
 }
