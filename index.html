@@ -16,6 +16,7 @@
   <div class="tab-menu">
     <button id="tabPasteBtn" onclick="showTab('paste')">붙여넣기</button>
     <button id="tabManualBtn" onclick="showTab('manual')">수기작성</button>
+    <button id="tabDepositBtn" onclick="showTab('deposit'); loadDepositData();">무통장 입금확인</button>
   </div>
 
   <!-- 붙여넣기 탭 -->
@@ -95,6 +96,12 @@
         </td>
       </tr>
     </table>
+  </div>
+
+  <div id="tabDeposit" class="tab-content">
+    <h3>무통장 입금 대상 목록</h3>
+    <!-- 데이터를 표시할 컨테이너 -->
+    <div id="depositListContainer">Loading...</div>
   </div>
 
   <!-- 버튼 영역 -->
