@@ -3,6 +3,102 @@
  * ========================================= */
 const gasUrl = 'https://script.google.com/macros/s/AKfycbytOX0L7wsulBFatFhD7n516nCIBhllIi1pz3uwPwu_4cKdI7XA8qLETsiyJY7IxnMe/exec';
 
+/** 
+ * [알리고 알림톡 설정] (예시)
+ *  실제 운영 시에는 보안상 서버에서 처리하는 걸 권장하지만,
+ *  여기서는 클라이언트에서 직접 호출 예시를 보여드립니다.
+ */
+const ALIMTALK_API_URL   = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
+const ALIMTALK_API_KEY   = 's2qfjf9gxkhzv0ms04bt54f3w8w6b9jd';    // 예: "s2qfjf9g..."
+const ALIMTALK_USER_ID   = 'yangjujamjam';        // 예: "yangjujamjam"
+const ALIMTALK_SENDERKEY = 'fc0570b6c7f7785506ea85b62838fd6fb37a3bcc';    // 예: "fc0570b6..."
+const ALIMTALK_SENDER    = '01059055559';      // 등록된 발신번호
+
+// 숙박용 / 당일용 템플릿코드 + 텍스트
+const TEMPLATE_CODE_LODGING = 'TZ_1466'; 
+const TEMPLATE_TEXT_LODGING = 
+`예약해 주셔서 진심으로 감사합니다♪
+
+#{파싱내용}
+
+■ 숙박 안내
+▶ 2인을 초과하여 예약하신 경우, 인원 추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
+
+▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며, 현장에서 결제 가능합니다.
+※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.
+※ 대형풀 무료 이용 / 온수풀 유료 이용
+
+▶ 선택하신 입실 시간을 꼭 준수해 주시기 바랍니다.
+
+▶ 얼리체크인, 레이트체크아웃 시 1시간당 1인 5,000원의 추가 요금이 부과됩니다.
+이용을 원하시면 반드시 사전 문의 바랍니다.
+
+▶ 수영장은 체크인 시간 2시간 전부터 이용 가능합니다.
+
+예약 내용을 다시 한번 확인해 주시고, 수정이나 변경이 있으시면 연락 바랍니다.
+
+
+■ 환불 규정
+▶ 취소 수수료
+입실 10일 전 : 없음
+입실 9일 전 : 10%
+입실 8일 전 : 20%
+입실 7일 전 : 30%
+입실 6일 전 : 40%
+입실 5일 전 : 50%
+입실 4일 전 : 60%
+입실 3일 전 : 70%
+입실 2일 전 ~ 당일 : 100%
+
+▶ 날짜 변경 수수료
+입실 10일 전 : 무료
+입실 9일 전 : 20,000원
+입실 6일 전 : 40,000원
+입실 4일 전 : 60,000원
+입실 2일 전 : 변경 불가
+
+※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다..`;
+
+const TEMPLATE_CODE_DAYUSE  = 'TZ_1465'; 
+const TEMPLATE_TEXT_DAYUSE =
+`예약해 주셔서 진심으로 감사합니다♪
+
+■ 선택하신 이용시간은
+#{이용시간}이며, 예약하신 방문 시간을 꼭 지켜주시기 바랍니다.
+
+#{파싱내용}
+
+■ 이용 안내
+▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
+
+▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며 현장 결제 가능합니다.  
+※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.  
+※ 대형풀은 무료, 온수풀은 유료로 운영됩니다.
+
+▶ 예약하신 입실 시간을 꼭 준수해 주시기 바랍니다.
+
+▶ 얼리체크인, 레이트체크아웃 시 1시간당 1인 5,000원의 추가 요금이 부과됩니다.  
+이용을 원하실 경우 반드시 사전에 문의해 주세요.
+
+▶ 수영장은 체크인 시간 2시간 전부터 이용 가능합니다.
+
+예약 내용을 다시 한번 확인하시고 수정 또는 변경 사항이 있으면 연락 바랍니다.
+
+
+■ 환불 규정
+▶ 취소 수수료  
+- 입실 10일 전 : 없음  
+- 입실 9일 전 : 10%  
+- 입실 8일 전 : 20%  
+- 입실 7일 전 : 30%  
+- 입실 6일 전 : 40%  
+- 입실 5일 전 : 50%  
+- 입실 4일 전 : 60%  
+- 입실 3일 전 : 70%  
+- 입실 2일 전~당일 : 100%
+
+※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.`;
+
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
  * ========================================= */
@@ -902,8 +998,8 @@ async function loadDepositData() {
 
   try {
     const res = await fetch(url);
-    const json = await res.json(); // [{ rowIndex, 예약번호, 예약자, 이용날짜, 결제금액 }, ...]
-    renderDepositList(json);
+    const list = await res.json(); 
+    renderDepositList(list);
   } catch(err) {
     console.error(err);
     container.innerHTML = "오류 발생, 콘솔 확인바랍니다.";
@@ -929,16 +1025,16 @@ function renderDepositList(listRows) {
   const thead = document.createElement('thead');
   thead.innerHTML = `
     <tr>
-      <th>예약번호</th>
-      <th>예약자</th>
-      <th>전화번호</th>
-      <th>이용객실</th>
-      <th>이용기간</th>
-      <th>수량</th>
-      <th>옵션</th>
-      <th>총이용인원</th>
-      <th>입실시간</th>
-      <th>결제금액</th>
+      <th>B.예약번호</th>
+      <th>C.예약자</th>
+      <th>D.전화번호</th>
+      <th>E.이용객실</th>
+      <th>F.이용기간</th>
+      <th>G.수량</th>
+      <th>H.옵션</th>
+      <th>I.총이용인원</th>
+      <th>J.입실시간</th>
+      <th>K.결제금액</th>
       <th>입금확인</th>
       <th>취소</th>
     </tr>
@@ -999,18 +1095,20 @@ function renderDepositList(listRows) {
     tdK.textContent = row.결제금액 || '';
     tr.appendChild(tdK);
 
-    // 입금확인 버튼
+    // (입금확인) 버튼
     const tdBtn = document.createElement('td');
     const btn = document.createElement('button');
-    btn.textContent = "입금 확인";
-    btn.onclick = () => confirmPayment(row.rowIndex);
+    btn.textContent = "입금확인";
+    // rowIndex만 넘기지 말고, row 전체를 넘김
+    btn.onclick = () => confirmPayment(row);
     tdBtn.appendChild(btn);
     tr.appendChild(tdBtn);
 
-    // (2) 취소 버튼
+    // (취소) 버튼
     const tdBtn2 = document.createElement('td');
     const btn2 = document.createElement('button');
     btn2.textContent = "취소";
+    // 취소는 rowIndex만 필요하면 그대로
     btn2.onclick = () => confirmCancel(row.rowIndex);
     tdBtn2.appendChild(btn2);
     tr.appendChild(tdBtn2);
@@ -1026,18 +1124,22 @@ function renderDepositList(listRows) {
 /**
  * "입금확인" 버튼 클릭 시 → 스프레드시트 L열='입금확인'으로 업데이트
  */
-async function confirmPayment(rowIndex) {
+async function confirmPayment(row) {
   const ok = confirm("입금이 확인되었습니까?");
   if(!ok) return;
 
-  // mode=updateDeposit 호출
-  const url = gasUrl + `?mode=updateDeposit&rowIndex=${rowIndex}&newValue=입금확인`;
+  // row.rowIndex 값으로 시트 업데이트
+  const url = gasUrl + `?mode=updateDeposit&rowIndex=${row.rowIndex}&newValue=입금확인`;
 
   try {
     const res = await fetch(url);
     const text = await res.text();
     if(text.includes("완료") || text.includes("성공")) {
-      alert("업데이트 완료");
+      alert("입금확인 업데이트 완료");
+
+      // (추가) 알림톡 발송
+      sendAlimtalkForDeposit(row);
+
       // 다시 목록 갱신
       loadDepositData();
     } else {
@@ -1049,28 +1151,109 @@ async function confirmPayment(rowIndex) {
   }
 }
 
-/***********************************************
- * "취소" 버튼 클릭 시 → 시트1 O열="취소" 업데이트
- ***********************************************/
- async function confirmCancel(rowIndex) {
-   const ok = confirm("예약이 취소되었습니까?");
-   if(!ok) return;
+/** 
+ *  [취소] 버튼 클릭 
+ */
+async function confirmCancel(rowIndex) {
+  const ok = confirm("예약이 취소되었습니까?");
+  if(!ok) return;
 
-   // mode=updateCancel 호출 (예: updateCancel)
-   const url = gasUrl + `?mode=updateCancel&rowIndex=${rowIndex}&newValue=취소`;
+  const url = gasUrl + `?mode=updateCancel&rowIndex=${rowIndex}&newValue=취소`;
 
-   try {
-     const res = await fetch(url);
-     const text = await res.text();
-     if(text.includes("완료") || text.includes("성공")) {
-       alert("취소 처리 완료");
-       // 다시 목록 갱신
-       loadDepositData();
-     } else {
-       alert("취소 처리 실패: " + text);
-     }
-   } catch(err) {
-     console.error(err);
-     alert("취소 처리 중 오류 발생");
-   }
- }
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    if(text.includes("완료") || text.includes("성공")) {
+      alert("취소 처리 완료");
+      loadDepositData();
+    } else {
+      alert("취소 처리 실패: " + text);
+    }
+  } catch(err) {
+    console.error(err);
+    alert("취소 처리 중 오류 발생");
+  }
+}
+
+/** 
+ * [추가] "무통장 입금확인" 알림톡 발송
+ *   - row: { 
+ *       예약번호, 예약자, 전화번호, 이용객실, 이용기간, 수량, 옵션, 총이용인원, 입실시간, 결제금액 
+ *     }
+ */
+function sendAlimtalkForDeposit(row) {
+  // 1) 숙박 vs 당일
+  const isStay = row.이용기간.includes('~'); // "~"가 있으면 숙박
+
+  let templateCode;
+  let templateText;
+
+  if(isStay) {
+    // 숙박
+    templateCode = TEMPLATE_CODE_LODGING;
+    templateText = TEMPLATE_TEXT_LODGING;
+  } else {
+    // 당일/대실
+    templateCode = TEMPLATE_CODE_DAYUSE;
+    templateText = TEMPLATE_TEXT_DAYUSE;
+  }
+
+  // 2) #{이용시간} 치환 (당일만)
+  let usageTime = '';
+  if(!isStay) {
+    const match = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
+    usageTime = match ? match[1] : '예약시간';
+  }
+
+  // 3) #{파싱내용} 구성
+  const parsingContent = `
+- 예약번호: ${row.예약번호}
+- 예약자: ${row.예약자}
+- 전화번호: ${row.전화번호}
+- 이용객실: ${row.이용객실}
+- 수량: ${row.수량}
+- 옵션: ${row.옵션}
+- 총인원: ${row.총이용인원}
+- 입실시간: ${row.입실시간}
+- 결제금액: ${row.결제금액}
+`.trim();
+
+  // 치환
+  let finalText = templateText
+    .replace('#{이용시간}', usageTime)
+    .replace('#{파싱내용}', parsingContent);
+
+  // 4) 알리고 알림톡 요청 파라미터
+  const params = new URLSearchParams({
+    apikey:    ALIMTALK_API_KEY,
+    userid:    ALIMTALK_USER_ID,
+    senderkey: ALIMTALK_SENDERKEY,
+    tpl_code:  templateCode,
+    sender:    ALIMTALK_SENDER,
+
+    receiver_1: (row.전화번호||'').replace(/\D/g,''), 
+    recvname_1: row.예약자 || '고객님',
+    subject_1:  '예약 안내',
+    message_1:  finalText,
+    failover:   'N'
+  });
+
+  // 5) fetch
+  fetch(ALIMTALK_API_URL, {
+    method: 'POST',
+    headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    body: params
+  })
+  .then(r=> r.json())
+  .then(result => {
+    if(result.code === 0) {
+      alert("알림톡 발송 성공");
+    } else {
+      alert("알림톡 발송 실패: " + result.message);
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    alert("알림톡 발송 중 오류 발생");
+  });
+}
