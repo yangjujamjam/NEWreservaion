@@ -210,6 +210,7 @@ async function sendAlimtalk() {
   }
 
   // (3) #{파싱내용}, #{이용시간} 치환
+  const usageTime      = data.입실시간; // #{이용시간} 치환용
   const formattedOption = data.옵션 
     ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n')
     : '없음';
