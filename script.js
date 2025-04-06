@@ -17,12 +17,15 @@ window.onload = function() {
 function showTab(tabName) {
   const pasteTab  = document.getElementById('tabPaste');
   const manualTab = document.getElementById('tabManual');
+  const depositTab= document.getElementById('tabDeposit');
 
-  pasteTab.style.display  = (tabName==='paste') ? 'block' : 'none';
-  manualTab.style.display = (tabName==='manual')? 'block' : 'none';
+  pasteTab.style.display   = (tabName==='paste')   ? 'block' : 'none';
+  manualTab.style.display  = (tabName==='manual')  ? 'block' : 'none';
+  depositTab.style.display = (tabName==='deposit') ? 'block' : 'none';
 
-  document.getElementById('tabPasteBtn').classList.toggle('active', (tabName==='paste'));
-  document.getElementById('tabManualBtn').classList.toggle('active', (tabName==='manual'));
+  document.getElementById('tabPasteBtn').classList.toggle('active',   (tabName==='paste'));
+  document.getElementById('tabManualBtn').classList.toggle('active',  (tabName==='manual'));
+  document.getElementById('tabDepositBtn').classList.toggle('active', (tabName==='deposit'));
 }
 
 function isManualTabActive() {
@@ -79,21 +82,19 @@ function parseNaverReservation(text) {
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // --- [옵션 처리 수정된 부분] -------------------------------------------
+  // --- [옵션 처리] -------------------------------------------
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
     optionsEndIndex = lines.findIndex(line => line.includes('유입경로'));
   }
-  // 옵션 줄들을 미리 추출
   const optionLines = (optionsStartIndex !== -1 && optionsEndIndex !== -1 && optionsEndIndex > optionsStartIndex)
     ? lines.slice(optionsStartIndex + 1, optionsEndIndex).filter(Boolean)
     : [];
 
-  // "쿠폰"이 포함된 줄이 발견되면 해당 줄부터 아래로 모두 제거
   const couponIndex = optionLines.findIndex(line => line.includes('쿠폰'));
   const trimmedOptionLines = (couponIndex !== -1)
-    ? optionLines.slice(0, couponIndex)    // 쿠폰 줄부터 이후 전부 제거
+    ? optionLines.slice(0, couponIndex) // 쿠폰 이후 전부 제거
     : optionLines;
 
   const unwantedOptions = [
@@ -106,11 +107,10 @@ function parseNaverReservation(text) {
     'Information on swimming pools and external facilities',
     'Room Facilities Guide'
   ];
-  // 불필요 문구 필터링
   const filteredOptions = trimmedOptionLines.filter(line =>
     !unwantedOptions.some(unwanted => line.includes(unwanted))
   );
-  // --- [옵션 처리 끝] --------------------------------------------------
+  // ----------------------------------------------------------
 
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
@@ -144,9 +144,8 @@ function parseNaverReservation(text) {
     무통장여부
   };
 }
-/** -------------------------------------------------------------------- */
 
-/** ---------- 야놀자 파싱 함수 ---------- */
+/** ---------- 야놀자 파싱 ---------- */
 function parseYanoljaReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
@@ -185,6 +184,7 @@ function parseYanoljaReservation(text) {
     return `${Number(y)}. ${Number(m)}. ${Number(d)}.(${day})`;
   };
 
+  // 대실
   if (이용유형.includes('대실')) {
     if (체크인라인) {
       이용기간 = formatDate(체크인라인.split(' ')[0]);
@@ -221,7 +221,7 @@ function parseYanoljaReservation(text) {
   };
 }
 
-/** ---------- 여기어때 파싱 함수 ---------- */
+/** ---------- 여기어때 파싱 ---------- */
 function parseHereReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
@@ -411,7 +411,7 @@ function getManualReservationDataSingle() {
     전화번호: document.getElementById('manualPhone').value.trim(),
     이용객실,
     이용기간: document.getElementById('manualPeriod').value.trim(),
-    수량: String(totalCount), // ← 총 수량 숫자만 표시
+    수량: String(totalCount),
     옵션: document.getElementById('manualOption').value.trim(),
     총이용인원: document.getElementById('manualTotalPeople').value.trim(),
     입실시간,
@@ -524,6 +524,7 @@ function generateReservationMessage() {
 
   let message='';
 
+  // 무통장할인 or 네이버무통장
   if (rawText.includes('무통장할인') || data.예약플랫폼 === '네이버무통장') {
     message = `고객님 예약 신청해 주셔서 진심으로 감사드립니다.
 
@@ -540,6 +541,7 @@ ${formattedParsedData}
 ※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.`;
   }
   else if (data.예약플랫폼 === '네이버' && data.이용기간 && !data.이용기간.includes('~')) {
+    // 네이버(당일)
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
 *기본 이용시간은 6시간이며 예약해주신 방문시간을 엄수해 주세요.
@@ -553,6 +555,7 @@ ${formattedParsedData}
 예약 내용 확인해보시고 수정 또는 변경해야할 내용이 있다면 말씀 부탁드립니다.`;
   }
   else if (data.예약플랫폼 === '네이버') {
+    // 네이버(숙박)
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
 ${formattedParsedData}
@@ -879,4 +882,124 @@ function formatPayment() {
   }
   const num = parseInt(val, 10);
   el.value = num.toLocaleString('ko-KR') + '원';
+}
+
+/** =========================================
+ *  [9] 무통장 입금확인 탭 로직
+ * ========================================= */
+/**
+ * "무통장 입금확인" 탭을 누르면 호출할 함수
+ * - 구글 스크립트에서 L열이 '네이버무통장','상담','수기입력'인 행을 JSON으로 받아옴
+ */
+async function loadDepositData() {
+  const container = document.getElementById('depositListContainer');
+  if (!container) return;
+
+  container.innerHTML = "불러오는 중...";
+
+  // L열 무통장 대상만 골라주는 모드
+  const url = gasUrl + '?mode=fetchDeposit';
+
+  try {
+    const res = await fetch(url);
+    const json = await res.json(); // [{ rowIndex, 예약번호, 예약자, 이용날짜, 결제금액 }, ...]
+    renderDepositList(json);
+  } catch(err) {
+    console.error(err);
+    container.innerHTML = "오류 발생, 콘솔 확인바랍니다.";
+  }
+}
+
+/**
+ * 가져온 무통장 리스트를 <table> 형태로 표시
+ */
+function renderDepositList(listRows) {
+  const container = document.getElementById('depositListContainer');
+  if (!container) return;
+
+  if(!listRows || listRows.length===0) {
+    container.innerHTML = "<p>무통장 입금 대상이 없습니다.</p>";
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.className = 'deposit-table'; 
+
+  // 헤더
+  const thead = document.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th>예약번호(B열)</th>
+      <th>예약자(C열)</th>
+      <th>결제금액(K열)</th>
+      <th>이용날짜(F열)</th>
+      <th>입금확인</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  listRows.forEach(row => {
+    const tr = document.createElement('tr');
+
+    // B열: 예약번호
+    const tdB = document.createElement('td');
+    tdB.textContent = row.예약번호 || '';
+    tr.appendChild(tdB);
+
+    // C열: 예약자
+    const tdC = document.createElement('td');
+    tdC.textContent = row.예약자 || '';
+    tr.appendChild(tdC);
+
+    // K열: 결제금액
+    const tdK = document.createElement('td');
+    tdK.textContent = row.결제금액 || '';
+    tr.appendChild(tdK);
+
+    // F열: 이용날짜
+    const tdF = document.createElement('td');
+    tdF.textContent = row.이용날짜 || '';
+    tr.appendChild(tdF);
+
+    // 입금확인 버튼
+    const tdBtn = document.createElement('td');
+    const btn = document.createElement('button');
+    btn.textContent = "입금 확인";
+    btn.onclick = () => confirmPayment(row.rowIndex);
+    tdBtn.appendChild(btn);
+    tr.appendChild(tdBtn);
+
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  container.innerHTML = "";
+  container.appendChild(table);
+}
+
+/**
+ * "입금확인" 버튼 클릭 시 → 스프레드시트 L열='입금확인'으로 업데이트
+ */
+async function confirmPayment(rowIndex) {
+  const ok = confirm("입금이 확인되었습니까?");
+  if(!ok) return;
+
+  // mode=updateDeposit 호출
+  const url = gasUrl + `?mode=updateDeposit&rowIndex=${rowIndex}&newValue=입금확인`;
+
+  try {
+    const res = await fetch(url);
+    const text = await res.text();
+    if(text.includes("완료") || text.includes("성공")) {
+      alert("업데이트 완료");
+      // 다시 목록 갱신
+      loadDepositData();
+    } else {
+      alert("업데이트 실패: " + text);
+    }
+  } catch(err) {
+    console.error(err);
+    alert("업데이트 중 오류 발생");
+  }
 }
