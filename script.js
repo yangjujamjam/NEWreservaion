@@ -970,6 +970,14 @@ function renderDepositList(listRows) {
     tdBtn.appendChild(btn);
     tr.appendChild(tdBtn);
 
+    // (2) 취소 버튼
+    const tdBtn2 = document.createElement('td');
+    const btn2 = document.createElement('button');
+    btn2.textContent = "취소";
+    btn2.onclick = () => confirmCancel(row.rowIndex);
+    tdBtn2.appendChild(btn2);
+    tr.appendChild(tdBtn2);
+
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
@@ -1003,3 +1011,29 @@ async function confirmPayment(rowIndex) {
     alert("업데이트 중 오류 발생");
   }
 }
+
+/***********************************************
+ * "취소" 버튼 클릭 시 → 시트1 O열="취소" 업데이트
+ ***********************************************/
+ async function confirmCancel(rowIndex) {
+   const ok = confirm("예약이 취소되었습니까?");
+   if(!ok) return;
+
+   // mode=updateCancel 호출 (예: updateCancel)
+   const url = gasUrl + `?mode=updateCancel&rowIndex=${rowIndex}&newValue=취소`;
+
+   try {
+     const res = await fetch(url);
+     const text = await res.text();
+     if(text.includes("완료") || text.includes("성공")) {
+       alert("취소 처리 완료");
+       // 다시 목록 갱신
+       loadDepositData();
+     } else {
+       alert("취소 처리 실패: " + text);
+     }
+   } catch(err) {
+     console.error(err);
+     alert("취소 처리 중 오류 발생");
+   }
+ }
