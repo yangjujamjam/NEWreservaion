@@ -210,7 +210,7 @@ async function sendAlimtalk() {
   }
 
   // (3) #{파싱내용}, #{이용시간} 치환
-  const usageTime      = data.입실시간; // #{이용시간} 치환용
+  const usageTime = data.입실시간; // #{이용시간} 치환용
   const formattedOption = data.옵션 
     ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n')
     : '없음';
@@ -231,11 +231,11 @@ ${formattedOption}
 
   // 당일(대실)일 경우 #{이용시간} 치환이 필요
   // (만약 data.입실시간 그대로 쓰고 싶다면 그대로 대입)
-  const usageTime = data.입실시간.replace('[당일캠핑] ',''); 
+  const usageTimeReplaced = data.입실시간.replace('[당일캠핑] ',''); 
   // 템플릿 문자열 치환
   let messageText = templateContent
     .replace('#{파싱내용}', parsingContent)
-    .replace('#{이용시간}', usageTime);
+    .replace('#{이용시간}', usageTimeReplaced);
 
   // (4) 알림톡 발송에 필요한 파라미터 조립
   const params = new URLSearchParams({
