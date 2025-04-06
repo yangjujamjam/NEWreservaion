@@ -1003,7 +1003,7 @@ function renderDepositList(listRows) {
     const tdBtn = document.createElement('td');
     const btn = document.createElement('button');
     btn.textContent = "입금 확인";
-    btn.onclick = () => confirmPayment(row.rowIndex);
+    btn.onclick = () => confirmPaymentAlimtalk(row);
     tdBtn.appendChild(btn);
     tr.appendChild(tdBtn);
 
