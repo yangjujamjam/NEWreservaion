@@ -32,7 +32,8 @@ h1, h3 {
 }
 
 textarea, input[type="text"], select {
-  width: 100%;
+  width: 50%;
+  height: 400px;
   padding: 8px 12px;
   margin-bottom: 10px;
   border: 1px solid #ced4da;
