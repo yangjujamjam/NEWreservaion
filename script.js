@@ -171,7 +171,6 @@ function parseYanoljaReservation(text) {
   const 예약자라인 = lines.find(line => line.includes('/'));
   let 예약자 = '';
   let 전화번호 = '';
-  const 예약자라인 = lines.find(line => line.includes('/'));
   if (예약자라인) {
     const splitted = 예약자라인.split('/');
     예약자 = splitted[0].trim();
