@@ -1,3 +1,7 @@
+/*******************************************************
+ * script.js
+ *******************************************************/
+
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
@@ -7,7 +11,7 @@ const gasUrl = 'https://script.google.com/macros/s/AKfycbyjhvlt0PtzOWfyllwvQar28
  *  [2] 페이지 로드 시 초기 처리
  * ========================================= */
 window.onload = function() {
-  showTab('paste');  // 기본 탭: 붙여넣기
+  showTab('paste');  // 기본 탭: "붙여넣기"
   buildCalendar();    // 달력 초기화
 };
 
@@ -15,17 +19,20 @@ window.onload = function() {
  *  [3] 탭 전환
  * ========================================= */
 function showTab(tabName) {
-  const pasteTab  = document.getElementById('tabPaste');
-  const manualTab = document.getElementById('tabManual');
-  const depositTab= document.getElementById('tabDeposit');
+  const pasteTab   = document.getElementById('tabPaste');
+  const manualTab  = document.getElementById('tabManual');
+  const depositTab = document.getElementById('tabDeposit');
+  const reminderTab= document.getElementById('tabReminder'); // 전날메세지
 
   pasteTab.style.display   = (tabName==='paste')   ? 'block' : 'none';
   manualTab.style.display  = (tabName==='manual')  ? 'block' : 'none';
   depositTab.style.display = (tabName==='deposit') ? 'block' : 'none';
+  reminderTab.style.display= (tabName==='reminder')? 'block' : 'none';
 
   document.getElementById('tabPasteBtn').classList.toggle('active',   (tabName==='paste'));
   document.getElementById('tabManualBtn').classList.toggle('active',  (tabName==='manual'));
   document.getElementById('tabDepositBtn').classList.toggle('active', (tabName==='deposit'));
+  document.getElementById('tabReminderBtn').classList.toggle('active',(tabName==='reminder'));
 }
 
 function isManualTabActive() {
@@ -49,7 +56,7 @@ function parseReservation(text) {
   return parseNaverReservation(text);
 }
 
-// [네이버 파싱 로직 (예시)]
+// [네이버 파싱 로직]
 function parseNaverReservation(text) {
   const lines = text.split('\n').map(line => line.trim());
 
@@ -82,7 +89,7 @@ function parseNaverReservation(text) {
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // --- [옵션 처리] -------------------------------------------
+  // [옵션 처리]
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
@@ -94,7 +101,7 @@ function parseNaverReservation(text) {
 
   const couponIndex = optionLines.findIndex(line => line.includes('쿠폰'));
   const trimmedOptionLines = (couponIndex !== -1)
-    ? optionLines.slice(0, couponIndex) // 쿠폰 이후 전부 제거
+    ? optionLines.slice(0, couponIndex) 
     : optionLines;
 
   const unwantedOptions = [
@@ -110,7 +117,6 @@ function parseNaverReservation(text) {
   const filteredOptions = trimmedOptionLines.filter(line =>
     !unwantedOptions.some(unwanted => line.includes(unwanted))
   );
-  // ----------------------------------------------------------
 
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
@@ -125,27 +131,27 @@ function parseNaverReservation(text) {
   }
 
   const 결제예상금액 = getValue('결제예상금액');
-  const 결제금액 = getValue('결제금액');
-  const 무통장여부 = 결제예상금액 ? true : "";
-  const 예약플랫폼 = 무통장여부 ? '네이버무통장' : '네이버';
+  const 결제금액     = getValue('결제금액');
+  const 무통장여부   = 결제예상금액 ? true : "";
+  const 예약플랫폼   = 무통장여부 ? '네이버무통장' : '네이버';
 
   return {
-    예약번호: getValue('예약번호'),
+    예약번호:     getValue('예약번호'),
     예약자,
     전화번호,
     이용객실,
-    이용기간: getValue('이용기간'),
-    수량: getValue('수량'),
-    옵션: filteredOptions.join(', '),
+    이용기간:     getValue('이용기간'),
+    수량:         getValue('수량'),
+    옵션:         filteredOptions.join(', '),
     총이용인원,
     입실시간,
-    결제금액: 결제금액 || 결제예상금액,
+    결제금액:     결제금액 || 결제예상금액,
     예약플랫폼,
     무통장여부
   };
 }
 
-/** ---------- 야놀자 파싱 ---------- */
+// [야놀자 파싱]
 function parseYanoljaReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
@@ -169,8 +175,8 @@ function parseYanoljaReservation(text) {
     전화번호 = splitted[1] ? splitted[1].trim() : '';
   }
 
-  const 체크인라인 = lines.find(line => line.includes('~'));
-  const idx = lines.indexOf(체크인라인);
+  const 체크인라인   = lines.find(line => line.includes('~'));
+  const idx          = lines.indexOf(체크인라인);
   const 체크아웃라인 = idx !== -1 ? lines[idx + 1] : '';
 
   const 이용유형 = lines[1] || '';
@@ -184,8 +190,8 @@ function parseYanoljaReservation(text) {
     return `${Number(y)}. ${Number(m)}. ${Number(d)}.(${day})`;
   };
 
-  // 대실
   if (이용유형.includes('대실')) {
+    // 당일(대실)
     if (체크인라인) {
       이용기간 = formatDate(체크인라인.split(' ')[0]);
       const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
@@ -198,7 +204,7 @@ function parseYanoljaReservation(text) {
     // 숙박
     if (체크인라인) {
       const inDateStr = 체크인라인.split(' ')[0];
-      const outDateStr = 체크아웃라인.split(' ')[0];
+      const outDateStr= 체크아웃라인.split(' ')[0];
       이용기간 = `${formatDate(inDateStr)}~${formatDate(outDateStr)}`;
       const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
       const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
@@ -221,45 +227,45 @@ function parseYanoljaReservation(text) {
   };
 }
 
-/** ---------- 여기어때 파싱 ---------- */
+// [여기어때 파싱]
 function parseHereReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
-  const 예약번호라인 = lines.find(line => line.includes('예약번호:'));
-  const 예약번호 = 예약번호라인
-    ? 예약번호라인.split(':')[1].trim()
-    : '';
+  const 예약번호라인   = lines.find(line => line.includes('예약번호:'));
+  const 예약번호       = 예약번호라인
+                          ? 예약번호라인.split(':')[1].trim()
+                          : '';
 
-  const 객실정보라인 = lines.find(line => line.includes('객실정보:'));
-  const 객실정보 = 객실정보라인
-    ? 객실정보라인.split('/')[1].trim()
-    : '';
+  const 객실정보라인   = lines.find(line => line.includes('객실정보:'));
+  const 객실정보       = 객실정보라인
+                          ? 객실정보라인.split('/')[1].trim()
+                          : '';
 
-  const 판매금액라인 = lines.find(line => line.includes('판매금액:'));
-  const 결제금액 = 판매금액라인
-    ? 판매금액라인.split(':')[1].trim()
-    : '';
+  const 판매금액라인   = lines.find(line => line.includes('판매금액:'));
+  const 결제금액       = 판매금액라인
+                          ? 판매금액라인.split(':')[1].trim()
+                          : '';
 
-  const 예약자라인 = lines.find(line => line.includes('예약자명 :'));
-  const 예약자 = 예약자라인
-    ? 예약자라인.split(':')[1].trim()
-    : '';
+  const 예약자라인     = lines.find(line => line.includes('예약자명 :'));
+  const 예약자         = 예약자라인
+                          ? 예약자라인.split(':')[1].trim()
+                          : '';
 
-  const 안심번호라인 = lines.find(line => line.includes('안심번호:'));
-  const 전화번호 = 안심번호라인
-    ? 안심번호라인.split(':')[1].trim()
-    : '';
+  const 안심번호라인   = lines.find(line => line.includes('안심번호:'));
+  const 전화번호       = 안심번호라인
+                          ? 안심번호라인.split(':')[1].trim()
+                          : '';
 
-  const 입실일시라인 = lines.find(line => line.includes('입실일시:'));
-  const 퇴실일시라인 = lines.find(line => line.includes('퇴실일시:'));
+  const 입실일시라인   = lines.find(line => line.includes('입실일시:'));
+  const 퇴실일시라인   = lines.find(line => line.includes('퇴실일시:'));
 
-  const 예약날짜Match = 예약번호.match(/^(\d{2})(\d{2})(\d{2})/);
-  let 예약날짜 = new Date();
+  const 예약날짜Match  = 예약번호.match(/^(\d{2})(\d{2})(\d{2})/);
+  let 예약날짜         = new Date();
   if (예약날짜Match) {
     const 예약연도 = Number('20' + 예약날짜Match[1]);
-    const 예약월 = Number(예약날짜Match[2]);
-    const 예약일 = Number(예약날짜Match[3]);
-    예약날짜 = new Date(예약연도, 예약월 - 1, 예약일);
+    const 예약월   = Number(예약날짜Match[2]);
+    const 예약일   = Number(예약날짜Match[3]);
+    예약날짜       = new Date(예약연도, 예약월 - 1, 예약일);
   }
 
   const formatDate = (dateStr, refDate) => {
@@ -274,17 +280,17 @@ function parseHereReservation(text) {
     return `${year}. ${Number(m)}. ${Number(d)}.(${day})`;
   };
 
-  let 입실날짜 = '';
-  let 퇴실날짜 = '';
-  let 이용기간 = '';
-  let 입실시간 = '';
+  let 입실날짜   = '';
+  let 퇴실날짜   = '';
+  let 이용기간   = '';
+  let 입실시간   = '';
 
   if (입실일시라인 && 퇴실일시라인) {
     입실날짜 = formatDate(입실일시라인, 예약날짜);
     퇴실날짜 = formatDate(퇴실일시라인, 예약날짜);
     이용기간 = `${입실날짜}~${퇴실날짜}`;
 
-    const inMatch = 입실일시라인.match(/\d{2}:\d{2}/);
+    const inMatch  = 입실일시라인.match(/\d{2}:\d{2}/);
     const outMatch = 퇴실일시라인.match(/\d{2}:\d{2}/);
     입실시간 = `[숙박] ${(inMatch ? inMatch[0] : '')} 입실 / ${(outMatch ? outMatch[0] : '')} 퇴실`;
   }
@@ -305,7 +311,7 @@ function parseHereReservation(text) {
 }
 
 /** =========================================
- *  [5] 수기작성: 여러 객실 행 UI 추가
+ *  [5] 수기작성 탭: 여러 객실 행 UI 추가
  * ========================================= */
 function addRoomRow() {
   const container = document.getElementById('roomsContainer');
@@ -385,7 +391,6 @@ function populateRoomCountOptions(roomName, countSelect) {
 /** =========================================
  *  [6] "안내문자용" 단일 데이터 + "시트 전송용" 다중 데이터
  * ========================================= */
-
 // (A) 안내문자/파싱결과 용: 모든 객실 한 줄
 function getManualReservationDataSingle() {
   const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
@@ -401,23 +406,23 @@ function getManualReservationDataSingle() {
     }
   });
 
-  const 이용객실 = roomsArr.join(', ');
-  const 입실시간 = document.getElementById('manualCheckinTime').value.trim();
-  const 예약번호 = generateReservationNumber();
+  const 이용객실  = roomsArr.join(', ');
+  const 입실시간  = document.getElementById('manualCheckinTime').value.trim();
+  const 예약번호  = generateReservationNumber();
 
   return {
     예약번호,
-    예약자: document.getElementById('manualGuest').value.trim(),
-    전화번호: document.getElementById('manualPhone').value.trim(),
+    예약자:        document.getElementById('manualGuest').value.trim(),
+    전화번호:      document.getElementById('manualPhone').value.trim(),
     이용객실,
-    이용기간: document.getElementById('manualPeriod').value.trim(),
-    수량: String(totalCount),
-    옵션: document.getElementById('manualOption').value.trim(),
-    총이용인원: document.getElementById('manualTotalPeople').value.trim(),
+    이용기간:      document.getElementById('manualPeriod').value.trim(),
+    수량:          String(totalCount),
+    옵션:          document.getElementById('manualOption').value.trim(),
+    총이용인원:    document.getElementById('manualTotalPeople').value.trim(),
     입실시간,
-    결제금액: document.getElementById('manualPayment').value.trim(),
-    예약플랫폼: '수기입력',
-    무통장여부: true
+    결제금액:      document.getElementById('manualPayment').value.trim(),
+    예약플랫폼:    '수기입력',
+    무통장여부:    true
   };
 }
 
@@ -485,7 +490,7 @@ function generateBaseReservationNumber() {
 }
 
 /** =========================================
- *  [7] 버튼 동작
+ *  [7] 버튼 동작: 파싱결과 보기, 안내문자 양식적용, 스프레드시트로 전송
  * ========================================= */
 function processReservation() {
   if(isManualTabActive()){
@@ -649,6 +654,7 @@ ${formattedParsedData}
 
 function sendToSheet() {
   if(isManualTabActive()){
+    // 수기작성: 여러 객실 -> 다중 행
     const dataArr = getManualReservationDataMultiple();
     if(dataArr.length===0) {
       alert("추가된 객실이 없습니다. (객실 이름이 없거나 수량이 0개)");
@@ -667,6 +673,7 @@ function sendToSheet() {
     })();
 
   } else {
+    // 붙여넣기 파싱 -> 단일 행
     const text= document.getElementById('inputData').value;
     const data= parseReservation(text);
     sendOneRowToGAS(data).then(success=>{
@@ -887,12 +894,6 @@ function formatPayment() {
 /** =========================================
  *  [9] 무통장 입금확인 탭 로직
  * ========================================= */
-/**
- *  - 무통장 입금확인 탭 로직
- *  - '입금확인' 버튼에서 "confirmPaymentAlimtalk(row)" 호출
- */
- 
-// (A) '무통장 입금확인' 탭을 누르면 목록 불러오기
 async function loadDepositData() {
   const container = document.getElementById('depositListContainer');
   if (!container) return;
@@ -911,7 +912,6 @@ async function loadDepositData() {
   }
 }
 
-// (B) 테이블에 표시
 function renderDepositList(listRows) {
   const container = document.getElementById('depositListContainer');
   if (!container) return;
@@ -935,50 +935,45 @@ function renderDepositList(listRows) {
   `;
   const tbody = document.createElement('tbody');
 
-  // listRows[i] = {
-  //   rowIndex, 예약번호, 예약자, 전화번호, 이용객실,
-  //   이용기간, 수량, 옵션, 총이용인원, 입실시간, 결제금액
-  // }
   listRows.forEach(row => {
     const tr = document.createElement('tr');
 
-    // B열: 예약번호
     const tdB = document.createElement('td');
-    tdB.textContent = row.예약번호;
+    tdB.textContent = row.예약번호; // B열
     tr.appendChild(tdB);
-    // C열: 예약자
+
     const tdC = document.createElement('td');
-    tdC.textContent = row.예약자;
+    tdC.textContent = row.예약자;   // C열
     tr.appendChild(tdC);
-    // D열: 전화번호
+
     const tdD = document.createElement('td');
-    tdD.textContent = row.전화번호;
+    tdD.textContent = row.전화번호; // D열
     tr.appendChild(tdD);
-    // E열: 이용객실
+
     const tdE = document.createElement('td');
-    tdE.textContent = row.이용객실;
+    tdE.textContent = row.이용객실; 
     tr.appendChild(tdE);
-    // F열: 이용기간
+
     const tdF = document.createElement('td');
-    tdF.textContent = row.이용기간;
+    tdF.textContent = row.이용기간; 
     tr.appendChild(tdF);
-    // G열: 수량
+
     const tdG = document.createElement('td');
-    tdG.textContent = row.수량;
+    tdG.textContent = row.수량; 
     tr.appendChild(tdG);
-    // H열: 옵션
+
     const tdH = document.createElement('td');
     tdH.textContent = row.옵션;
     tr.appendChild(tdH);
-    // I열: 총이용인원
+
     const tdI = document.createElement('td');
     tdI.textContent = row.총이용인원;
     tr.appendChild(tdI);
-    // J열: 입실시간
+
     const tdJ = document.createElement('td');
     tdJ.textContent = row.입실시간;
     tr.appendChild(tdJ);
-    // K열: 결제금액
+
     const tdK = document.createElement('td');
     tdK.textContent = row.결제금액;
     tr.appendChild(tdK);
@@ -987,8 +982,7 @@ function renderDepositList(listRows) {
     const tdBtn = document.createElement('td');
     const btnConfirm = document.createElement('button');
     btnConfirm.textContent = "입금 확인";
-    // *** 여기서 "confirmPaymentAlimtalk(row)" *** 
-    btnConfirm.onclick = () => confirmPaymentAlimtalk(row);
+    btnConfirm.onclick = () => confirmPaymentAlimtalk(row); 
     tdBtn.appendChild(btnConfirm);
     tr.appendChild(tdBtn);
 
@@ -1008,7 +1002,6 @@ function renderDepositList(listRows) {
   container.appendChild(table);
 }
 
-// (C) 취소 버튼 → 시트1 O열='취소'
 async function confirmCancel(rowIndex) {
   const ok = confirm("예약이 취소되었습니까?");
   if(!ok) return;
@@ -1030,17 +1023,17 @@ async function confirmCancel(rowIndex) {
 }
 
 /** =========================================
- *  [전날메세지] 로직
+ *  [10] 전날메세지 탭 로직
  * ========================================= */
 
 // "내일 예약" 목록을 저장할 전역 변수
 let reminderList = [];
 
 /**
- * (A) 전날메세지 탭 클릭 -> "내일 예약" 불러오기
- *     - code.gs => mode=fetchAll => 시트1 전체
- *     - 내일 날짜로 시작하는 F열(이용기간)만 필터
- *     - 목록에 (예약자C열, 전화번호D열, 이용기간F열) 표시
+ * 전날메세지 탭 클릭 -> "내일 예약" 불러오기
+ *  - code.gs => mode=fetchAll => 시트1 전체
+ *  - 내일 날짜 문자열(YYYY. M. D.(요일))로 시작하는 F열(이용기간)만 필터
+ *  - 목록에 예약자(C열), 전화번호(D열), 이용기간(F열) 표시
  */
 async function loadTomorrowData() {
   const container = document.getElementById('reminderListContainer');
@@ -1050,7 +1043,7 @@ async function loadTomorrowData() {
     // 1) 시트1 전체 조회
     const url = gasUrl + '?mode=fetchAll';
     const res = await fetch(url);
-    const list = await res.json(); // 전체 [{rowIndex, 예약번호,예약자,전화번호,이용기간,...}, ...]
+    const list = await res.json();
 
     // 2) 내일 날짜 문자열 => "2025. 4. 8.(화)"
     const tomorrowStr = getTomorrowString();
@@ -1097,7 +1090,7 @@ async function loadTomorrowData() {
 }
 
 /**
- * 오늘 날짜의 '내일'을 "YYYY. M. D.(요일)" 형태로 만들어 반환
+ * 오늘 날짜의 내일을 "YYYY. M. D.(요일)" 형태로 반환
  */
 function getTomorrowString() {
   const today = new Date();
@@ -1108,13 +1101,13 @@ function getTomorrowString() {
   const d = tomorrow.getDate();
   const dayKorean = ['일','월','화','수','목','금','토'][ tomorrow.getDay() ];
 
-  // "2025. 4. 8.(화)" 형식
+  // "2025. 4. 8.(화)" 예시
   return `${y}. ${m}. ${d}.(${dayKorean})`;
 }
 
 /**
- * (B) 전날 메세지 보내기 버튼
- *    - reminderList 대상 전체에게 알림톡 전송
+ * 전날메세지 보내기 버튼 -> reminderList 전체 발송
+ *  - script_talk.js 의 sendOneReminder(row) 호출
  */
 function sendReminderMessages() {
   if (!reminderList || reminderList.length === 0) {
@@ -1129,6 +1122,7 @@ function sendReminderMessages() {
     let failCount = 0;
 
     for (let row of reminderList) {
+      // sendOneReminder는 script_talk.js 에서 정의 (async)
       const success = await sendOneReminder(row);
       if (success) successCount++;
       else failCount++;
@@ -1137,4 +1131,3 @@ function sendReminderMessages() {
     alert(`전날 메세지 전송 완료\n성공=${successCount}, 실패=${failCount}`);
   })();
 }
-
