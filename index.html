@@ -17,6 +17,7 @@
     <button id="tabPasteBtn" onclick="showTab('paste')">붙여넣기</button>
     <button id="tabManualBtn" onclick="showTab('manual')">수기작성</button>
     <button id="tabDepositBtn" onclick="showTab('deposit'); loadDepositData();">무통장 입금확인</button>
+    <button id="tabReminderBtn" onclick="showTab('reminder'); loadTomorrowData();">전날메세지</button>
   </div>
 
   <!-- 붙여넣기 탭 -->
@@ -98,11 +99,20 @@
     </table>
   </div>
 
+  <!-- 무통장 입금확인 탭 -->
   <div id="tabDeposit" class="tab-content">
     <h3>무통장 입금 대상 목록</h3>
     <!-- 데이터를 표시할 컨테이너 -->
     <div id="depositListContainer">Loading...</div>
   </div>
+
+  <!-- 전날메세지 탭 -->
+<div id="tabReminder" class="tab-content">
+  <h3>내일 예약 대상 목록</h3>
+  <div id="reminderListContainer">Loading...</div>
+  <button type="button" onclick="sendReminderMessages()">전날 메세지 보내기</button>
+</div>
+ 
 
   <!-- 버튼 영역 -->
   <div class="buttons">
