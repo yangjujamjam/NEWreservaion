@@ -5,7 +5,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbzyCs3CY8nxQudNnd1n6Y4ZkJHZwaF-UqncphoSRp8Dk2HniM47BTtmbsbyxTqybo-r/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbwCqiMzWnZfLNOyUZFrokxlpspl-zvwz1EUFf_ffuUGymQvfG-K5vTJgGr69qnwvjIv/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
@@ -19,20 +19,11 @@ window.onload = function() {
  *  [3] 탭 전환
  * ========================================= */
 function showTab(tabName) {
-  const pasteTab   = document.getElementById('tabPaste');
-  const manualTab  = document.getElementById('tabManual');
-  const depositTab = document.getElementById('tabDeposit');
-  const reminderTab= document.getElementById('tabReminder'); // 전날메세지
-
-  pasteTab.style.display   = (tabName==='paste')   ? 'block' : 'none';
-  manualTab.style.display  = (tabName==='manual')  ? 'block' : 'none';
-  depositTab.style.display = (tabName==='deposit') ? 'block' : 'none';
-  reminderTab.style.display= (tabName==='reminder')? 'block' : 'none';
-
-  document.getElementById('tabPasteBtn').classList.toggle('active',   (tabName==='paste'));
-  document.getElementById('tabManualBtn').classList.toggle('active',  (tabName==='manual'));
-  document.getElementById('tabDepositBtn').classList.toggle('active', (tabName==='deposit'));
-  document.getElementById('tabReminderBtn').classList.toggle('active',(tabName==='reminder'));
+  const tabs = ['paste','manual','deposit','reminder','checkoutStay','checkoutDay','manner'];
+  tabs.forEach(name => {
+    document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).style.display = (tabName===name?'block':'none');
+    document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)+'Btn')?.classList.toggle('active', tabName===name);
+  });
 }
 
 function isManualTabActive() {
@@ -1130,4 +1121,205 @@ function sendReminderMessages() {
 
     alert(`전날 메세지 전송 완료\n성공=${successCount}, 실패=${failCount}`);
   })();
+}
+
+/** =========================================
+ *  [9] 퇴실메세지(숙박) 탭
+ * ========================================= */
+let checkoutStayList = [];
+async function loadCheckoutStayData() {
+  const container = document.getElementById('checkoutStayListContainer');
+  container.innerHTML = "불러오는 중...";
+
+  try {
+    const url = gasUrl + '?mode=fetchAll';
+    const res = await fetch(url);
+    const list = await res.json();
+
+    // "숙박" => F열이 "xxxx~yyyy" 형태 && "yyyy" == 오늘
+    const todayStr = getTodayString();
+
+    checkoutStayList = list.filter(row => {
+      const period = (row.이용기간||'').trim();
+      if (!period.includes('~')) return false; // 숙박은 ~ 있어야
+      // 예: "2025. 4. 5.(토) ~ 2025. 4. 6.(일)"
+      const parts = period.split('~').map(p => p.trim());
+      if (parts.length<2) return false;
+      const lastDate = parts[1]; // "2025. 4. 6.(일)"
+      return lastDate===todayStr; 
+    });
+
+    if (checkoutStayList.length===0) {
+      container.innerHTML = "<p>오늘 퇴실(숙박) 대상이 없습니다.</p>";
+      return;
+    }
+    let html = `<table class="deposit-table"><thead>
+                  <tr><th>예약자</th><th>전화번호</th><th>이용기간</th><th>퇴실시간(R열)</th></tr>
+                </thead><tbody>`;
+    checkoutStayList.forEach(r => {
+      html += `<tr>
+        <td>${r.예약자}</td>
+        <td>${r.전화번호}</td>
+        <td>${r.이용기간}</td>
+        <td>${r.stayOutR}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } catch(err) {
+    console.error(err);
+    container.innerHTML="오류 발생";
+  }
+}
+
+function sendCheckoutStayMessages() {
+  if(!checkoutStayList || checkoutStayList.length===0) {
+    alert("대상이 없습니다.");
+    return;
+  }
+  const ok = confirm("퇴실메세지(숙박)를 보낼까요?");
+  if(!ok) return;
+  (async()=>{
+    let success=0, fail=0;
+    for(let row of checkoutStayList) {
+      const res = await sendCheckoutStayOne(row);
+      if(res) success++; else fail++;
+    }
+    alert(`퇴실메세지(숙박) 완료\n성공=${success}, 실패=${fail}`);
+  })();
+}
+
+/** =========================================
+ *  [10] 퇴실메세지(당일) 탭
+ * ========================================= */
+let checkoutDayList = [];
+async function loadCheckoutDayData() {
+  const container = document.getElementById('checkoutDayListContainer');
+  container.innerHTML = "불러오는 중...";
+
+  try {
+    const url = gasUrl + '?mode=fetchAll';
+    const res = await fetch(url);
+    const list = await res.json();
+
+    const todayStr = getTodayString();
+    // 당일 => F열에 ~가 없고, 그 날짜가 todayStr 이면 OK
+    checkoutDayList = list.filter(row => {
+      const period = (row.이용기간||'').trim();
+      if (period.includes('~')) return false; // 당일은 ~ 없어야
+      return period===todayStr;
+    });
+
+    if(checkoutDayList.length===0) {
+      container.innerHTML="<p>오늘 퇴실(당일) 대상이 없습니다.</p>";
+      return;
+    }
+    let html = `<table class="deposit-table"><thead>
+                  <tr><th>예약자</th><th>전화번호</th><th>이용기간</th><th>퇴실시간(Q열)</th></tr>
+                </thead><tbody>`;
+    checkoutDayList.forEach(r=>{
+      html += `<tr>
+        <td>${r.예약자}</td>
+        <td>${r.전화번호}</td>
+        <td>${r.이용기간}</td>
+        <td>${r.dayOutQ}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } catch(err) {
+    console.error(err);
+    container.innerHTML="오류 발생";
+  }
+}
+
+function sendCheckoutDayMessages() {
+  if(!checkoutDayList || checkoutDayList.length===0) {
+    alert("대상이 없습니다.");
+    return;
+  }
+  const ok = confirm("퇴실메세지(당일)을 보낼까요?");
+  if(!ok) return;
+  (async()=>{
+    let success=0, fail=0;
+    for(let row of checkoutDayList) {
+      const res = await sendCheckoutDayOne(row);
+      if(res) success++; else fail++;
+    }
+    alert(`퇴실메세지(당일) 완료\n성공=${success}, 실패=${fail}`);
+  })();
+}
+
+/** =========================================
+ *  [11] 매너타임 탭
+ * ========================================= */
+let mannerList = [];
+async function loadMannerData() {
+  const container = document.getElementById('mannerListContainer');
+  container.innerHTML = "불러오는 중...";
+
+  try {
+    const url = gasUrl + '?mode=fetchAll';
+    const res = await fetch(url);
+    const list = await res.json();
+
+    const todayStr = getTodayString();
+    // 매너타임: "오늘 날짜의 숙박만"
+    // => F열: "xxxx ~ yyyy", 첫 날짜가 오늘
+    mannerList = list.filter(row=>{
+      const period = (row.이용기간||'').trim();
+      if (!period.includes('~')) return false; // 숙박이면 ~
+      const parts = period.split('~').map(p=>p.trim());
+      if (parts.length<2) return false;
+      const firstDate = parts[0]; // "2025. 4. 7.(월)"
+      return firstDate===todayStr; 
+    });
+
+    if(mannerList.length===0) {
+      container.innerHTML = "<p>오늘 매너타임 대상(숙박) 없습니다.</p>";
+      return;
+    }
+    let html = `<table class="deposit-table"><thead>
+                  <tr><th>예약자</th><th>전화번호</th><th>이용기간</th></tr>
+                </thead><tbody>`;
+    mannerList.forEach(r=>{
+      html += `<tr>
+        <td>${r.예약자}</td>
+        <td>${r.전화번호}</td>
+        <td>${r.이용기간}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  } catch(e) {
+    console.error(e);
+    container.innerHTML="오류 발생";
+  }
+}
+
+function sendMannerMessages() {
+  if(!mannerList || mannerList.length===0) {
+    alert("대상이 없습니다.");
+    return;
+  }
+  const ok = confirm("매너타임 메세지를 보낼까요?");
+  if(!ok) return;
+  (async()=>{
+    let success=0, fail=0;
+    for(let row of mannerList) {
+      const res = await sendMannerOne(row);
+      if(res) success++; else fail++;
+    }
+    alert(`매너타임 메세지 완료\n성공=${success}, 실패=${fail}`);
+  })();
+}
+
+/** 공통: 오늘 날짜를 "YYYY. M. D.(요일)" 로 변환 */
+function getTodayString() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = today.getMonth()+1;
+  const d = today.getDate();
+  const dayKorean = ['일','월','화','수','목','금','토'][today.getDay()];
+  return `${y}. ${m}. ${d}.(${dayKorean})`;
 }
