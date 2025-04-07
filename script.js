@@ -47,6 +47,17 @@ function parseReservation(text) {
   return parseNaverReservation(text);
 }
 
+function format12DigitPhone(raw) {
+  // 숫자만 추출
+  const digits = raw.replace(/\D/g, '');
+  // 길이가 12라면 4-4-4 형태로
+  if (digits.length === 12) {
+    return digits.replace(/^(\d{4})(\d{4})(\d{4})$/, '$1-$2-$3');
+  }
+  // 12자리가 아니면 그대로 리턴
+  return raw;
+}
+
 // [네이버 파싱 로직]
 function parseNaverReservation(text) {
   const lines = text.split('\n').map(line => line.trim());
@@ -160,10 +171,13 @@ function parseYanoljaReservation(text) {
   const 예약자라인 = lines.find(line => line.includes('/'));
   let 예약자 = '';
   let 전화번호 = '';
+  const 예약자라인 = lines.find(line => line.includes('/'));
   if (예약자라인) {
     const splitted = 예약자라인.split('/');
     예약자 = splitted[0].trim();
     전화번호 = splitted[1] ? splitted[1].trim() : '';
+    // ★ 12자리라면 "aaaa-bbbb-cccc"
+    전화번호 = format12DigitPhone(전화번호);
   }
 
   const 체크인라인   = lines.find(line => line.includes('~'));
@@ -242,10 +256,12 @@ function parseHereReservation(text) {
                           ? 예약자라인.split(':')[1].trim()
                           : '';
 
-  const 안심번호라인   = lines.find(line => line.includes('안심번호:'));
-  const 전화번호       = 안심번호라인
-                          ? 안심번호라인.split(':')[1].trim()
-                          : '';
+  const 안심번호라인 = lines.find(line => line.includes('안심번호:'));
+  let 전화번호 = 안심번호라인
+    ? 안심번호라인.split(':')[1].trim()
+    : '';
+  // ★ 12자리라면 aaaa-bbbb-cccc
+  전화번호 = format12DigitPhone(전화번호);
 
   const 입실일시라인   = lines.find(line => line.includes('입실일시:'));
   const 퇴실일시라인   = lines.find(line => line.includes('퇴실일시:'));
