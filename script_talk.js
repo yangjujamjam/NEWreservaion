@@ -591,3 +591,218 @@ async function sendOneReminder(row) {
     return false;
   }
 }
+
+/** =========================================
+ *  [4] 퇴실메세지(숙박=TZ_1475), (당일=TZ_1476)
+ * ========================================= */
+// 숙박
+const TEMPLATE_CHECKOUT_STAY_CODE = 'TZ_1475';
+const TEMPLATE_CHECKOUT_STAY_TEXT =
+`■ 퇴실 전 체크아웃 안내
+
+금일 퇴실 시간은 #{퇴실시간}시입니다.
+TV 리모콘이 들어있는 바구니와 함께
+관리실에 오셔서 체크아웃 해주시면 감사하겠습니다.
+
+▶ 필수 확인 사항
+-사용하신 식기류는 간단한 설거지 필수
+-객실 내 모든 조명 소등 및 문 단속 확인
+-쓰레기(일반/음식물)는 지정된 공용 분리수거장에 배출
+(음식물 쓰레기 봉투 부족 시 관리동 무료 제공)
+
+▶고객님들의 즐거운 글램핑 경험을 위해 퇴실 시 다음 사항을 꼭 확인해주세요.
+
+-개인 짐 놓고 가신 경우 1주일간 보관 후 폐기됩니다.
+-남은 음식물은 즉시 폐기되오니 양해 바랍니다.
+
+잊으신 물건이 없는지 꼼꼼히 확인하시고, 즐거운 추억만 가득 담아 가시길 바랍니다.`;
+
+// 당일
+const TEMPLATE_CHECKOUT_DAY_CODE = 'TZ_1476';
+const TEMPLATE_CHECKOUT_DAY_TEXT =
+`■ 퇴실 전 확인사항
+
+▶퇴실 시간은 #{퇴실시간} 입니다.
+퇴실 시 놓고 가신 물건이 없는지 반드시 확인해 주세요.
+
+▶ 필수 확인 사항
+
+- 기본 설거지 필수
+- 모든 쓰레기(일반, 음식물)는 공용 분리수거장에 배출 (음식물 쓰레기 봉투 부족 시 관리동 무료 제공)
+- TV, 에어컨 리모컨을 바구니에 담아 관리동에 반납
+-퇴실 시 모든 전등 소등 및 객실 문 닫힘 확인
+-개인 짐 놓고 가신 경우 1주일간 보관 후 폐기됩니다.
+-남은 음식물은 즉시 폐기되오니 양해 바랍니다.
+
+▶ 주의사항
+-객실 내 흡연 적발 시 패널티 5만원 청구됩니다.
+
+■ 운영 안내
+-관리동 매점/카페: 오전 8시~오후 9시
+-참숯, 장작 추가 구매: 오후 9시 이전 전화 주문 필수
+-문의사항: 관리동 010-5905-5559
+
+이용해 주셔서 감사합니다.`;
+
+/** 퇴실메세지(숙박) → row.stayOutR */
+async function sendCheckoutStayOne(row) {
+  const tplCode = TEMPLATE_CHECKOUT_STAY_CODE; // 'TZ_1475'
+  let tplText = TEMPLATE_CHECKOUT_STAY_TEXT;
+
+  const checkOutTime = (row.stayOutR || "11:00"); // R열
+  tplText = tplText.replace('#{퇴실시간}', checkOutTime);
+
+  const params = new URLSearchParams({
+    apikey:    ALIMTALK_API_KEY,
+    userid:    ALIMTALK_USER_ID,
+    senderkey: ALIMTALK_SENDERKEY,
+    tpl_code:  tplCode,
+    sender:    ALIMTALK_SENDER,
+
+    receiver_1: (row.전화번호 || '').replace(/\D/g,''),
+    recvname_1: row.예약자 || '고객님',
+    subject_1:  '퇴실 안내(숙박)',
+    message_1:  tplText,
+    failover:   'N'
+  });
+
+  try {
+    const res = await fetch(ALIMTALK_API_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body: params
+    });
+    const result = await res.json();
+    if(result.code===0){
+      console.log(`[${row.예약번호}] 퇴실(숙박) OK`);
+      return true;
+    } else {
+      console.warn(`[${row.예약번호}] 퇴실(숙박) FAIL: ${result.message}`);
+      return false;
+    }
+  } catch(e){
+    console.error(e);
+    return false;
+  }
+}
+
+/** 퇴실메세지(당일) → row.dayOutQ */
+async function sendCheckoutDayOne(row) {
+  const tplCode = TEMPLATE_CHECKOUT_DAY_CODE; // 'TZ_1476'
+  let tplText = TEMPLATE_CHECKOUT_DAY_TEXT;
+
+  const checkOutTime = (row.dayOutQ || "19:00"); // Q열
+  tplText = tplText.replace('#{퇴실시간}', checkOutTime);
+
+  const params = new URLSearchParams({
+    apikey:    ALIMTALK_API_KEY,
+    userid:    ALIMTALK_USER_ID,
+    senderkey: ALIMTALK_SENDERKEY,
+    tpl_code:  tplCode,
+    sender:    ALIMTALK_SENDER,
+
+    receiver_1: (row.전화번호||'').replace(/\D/g,''),
+    recvname_1: row.예약자||'고객님',
+    subject_1:  '퇴실 안내(당일)',
+    message_1:  tplText,
+    failover:   'N'
+  });
+
+  try {
+    const res = await fetch(ALIMTALK_API_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body: params
+    });
+    const result = await res.json();
+    if(result.code===0){
+      console.log(`[${row.예약번호}] 퇴실(당일) OK`);
+      return true;
+    } else {
+      console.warn(`[${row.예약번호}] 퇴실(당일) FAIL: ${result.message}`);
+      return false;
+    }
+  } catch(e){
+    console.error(e);
+    return false;
+  }
+}
+
+/** =========================================
+ *  [5] 매너타임 (TY_8981)
+ * ========================================= */
+const TEMPLATE_MANNER_CODE = 'TY_8981';
+const TEMPLATE_MANNER_TEXT =
+`■ 매너타임 안내
+
+양주잼잼 글램핑을 방문해 주셔서 감사합니다.
+모두가 편안한 시간을 보낼 수 있도록 다음 사항을 준수해 주세요.
+
+▶ 매너타임: 밤 10시부터
+- 밤 10시 이후 큰 소리 대화, 개인 스피커 등 사용 금지
+- 주변 객실에 피해가 가지 않도록 소음 최소화 필수
+- 신발은 객실 내 신발장에 보관해 주세요. (분실·파손 시 책임지지 않습니다.)
+
+▶ 불멍(모닥불) 이용 시 주의사항
+- 화재 예방을 위해 반드시 충분한 공간 확보 및 주변 환경 확인 필수
+
+▶ 객실 내 흡연 엄격 금지
+- 적발 시 즉시 퇴실 조치
+- 흡연으로 인한 손해(침구류 교체, 청소, 시설 손상 등)는 배상 청구될 수 있습니다.
+
+▶ 비상 연락 및 주의사항 위반 신고
+- 긴급 상황 발생 또는 주의사항 위반 시 즉시 연락 바랍니다.
+- 밤 10시 이후는 전화 상담만 가능합니다. (카톡·문자 불가)
+- 연락처: 010-5905-5559
+
+※ 객실 보일러 위치: 싱크대 하단 참고
+※ 매너타임 이후 소음·흡연 등 타인에게 피해를 줄 경우 즉시 환불 없이 퇴실 조치됩니다.
+
+■ 운영시간 안내
+- 숲천탕(온수풀): 오전 9시~오후 9시
+- 대형수영장(냉수풀): 오전 9시~오후 9시
+- 관리동 매점/카페: 오전 8시~오후 9시
+
+■ 참숯·장작 추가 구매
+- 밤 9시 이전 카톡 또는 전화로 주문 필수
+
+협조해 주셔서 감사합니다.`;
+
+/** 매너타임 -> "TY_8981" (치환자/버튼 없음) */
+async function sendMannerOne(row) {
+  const tplCode = TEMPLATE_MANNER_CODE; // 'TY_8981'
+  let tplText = TEMPLATE_MANNER_TEXT;   // 그대로 전송
+
+  const params = new URLSearchParams({
+    apikey:    ALIMTALK_API_KEY,
+    userid:    ALIMTALK_USER_ID,
+    senderkey: ALIMTALK_SENDERKEY,
+    tpl_code:  tplCode,
+    sender:    ALIMTALK_SENDER,
+
+    receiver_1: (row.전화번호||'').replace(/\D/g,''),
+    recvname_1: row.예약자||'고객님',
+    subject_1:  '매너타임 안내',
+    message_1:  tplText,
+    failover:   'N'
+  });
+
+  try {
+    const res = await fetch(ALIMTALK_API_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body: params
+    });
+    const result = await res.json();
+    if(result.code===0){
+      console.log(`[${row.예약번호}] 매너타임 OK`);
+      return true;
+    } else {
+      console.warn(`[${row.예약번호}] 매너타임 FAIL: ${result.message}`);
+      return false;
+    }
+  } catch(e){
+    console.error(e);
+    return false;
+  }
+}
