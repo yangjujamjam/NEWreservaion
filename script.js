@@ -1028,3 +1028,113 @@ async function confirmCancel(rowIndex) {
     alert("취소 처리 중 오류 발생");
   }
 }
+
+/** =========================================
+ *  [전날메세지] 로직
+ * ========================================= */
+
+// "내일 예약" 목록을 저장할 전역 변수
+let reminderList = [];
+
+/**
+ * (A) 전날메세지 탭 클릭 -> "내일 예약" 불러오기
+ *     - code.gs => mode=fetchAll => 시트1 전체
+ *     - 내일 날짜로 시작하는 F열(이용기간)만 필터
+ *     - 목록에 (예약자C열, 전화번호D열, 이용기간F열) 표시
+ */
+async function loadTomorrowData() {
+  const container = document.getElementById('reminderListContainer');
+  container.innerHTML = "불러오는 중...";
+
+  try {
+    // 1) 시트1 전체 조회
+    const url = gasUrl + '?mode=fetchAll';
+    const res = await fetch(url);
+    const list = await res.json(); // 전체 [{rowIndex, 예약번호,예약자,전화번호,이용기간,...}, ...]
+
+    // 2) 내일 날짜 문자열 => "2025. 4. 8.(화)"
+    const tomorrowStr = getTomorrowString();
+
+    // 3) 필터 => "이용기간"이 tomorrowStr로 시작하는 행만
+    reminderList = list.filter(row => {
+      const period = (row.이용기간 || "").trim();
+      return period.startsWith(tomorrowStr);
+    });
+
+    // 4) 화면 표시
+    if (reminderList.length === 0) {
+      container.innerHTML = "<p>내일 이용하는 예약이 없습니다.</p>";
+      return;
+    }
+
+    let html = `
+      <table class="deposit-table">
+        <thead>
+          <tr>
+            <th>예약자</th>
+            <th>전화번호</th>
+            <th>이용기간</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+    reminderList.forEach(row => {
+      html += `
+        <tr>
+          <td>${row.예약자}</td>
+          <td>${row.전화번호}</td>
+          <td>${row.이용기간}</td>
+        </tr>
+      `;
+    });
+    html += `</tbody></table>`;
+
+    container.innerHTML = html;
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "오류 발생 (콘솔 확인)";
+  }
+}
+
+/**
+ * 오늘 날짜의 '내일'을 "YYYY. M. D.(요일)" 형태로 만들어 반환
+ */
+function getTomorrowString() {
+  const today = new Date();
+  const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+  const y = tomorrow.getFullYear();
+  const m = tomorrow.getMonth() + 1; // 1..12
+  const d = tomorrow.getDate();
+  const dayKorean = ['일','월','화','수','목','금','토'][ tomorrow.getDay() ];
+
+  // "2025. 4. 8.(화)" 형식
+  return `${y}. ${m}. ${d}.(${dayKorean})`;
+}
+
+/**
+ * (B) 전날 메세지 보내기 버튼
+ *    - reminderList 대상 전체에게 알림톡 전송
+ */
+function sendReminderMessages() {
+  if (!reminderList || reminderList.length === 0) {
+    alert("메시지 보낼 대상이 없습니다.");
+    return;
+  }
+  const ok = confirm("메세지를 보낼까요?");
+  if (!ok) return;
+
+  (async ()=>{
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let row of reminderList) {
+      const success = await sendOneReminder(row);
+      if (success) successCount++;
+      else failCount++;
+    }
+
+    alert(`전날 메세지 전송 완료\n성공=${successCount}, 실패=${failCount}`);
+  })();
+}
+
