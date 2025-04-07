@@ -304,42 +304,53 @@ async function confirmPaymentAlimtalk(row) {
  * (B2) 알림톡 발송 (숙박 or 당일)
  */
 function sendAlimtalkForDeposit(row) {
-  // (1) 숙박 vs 당일
-  const isStay = row.이용기간.includes('~'); 
+  // (1) 숙박 여부: 이용기간에 '~' 포함이면 숙박, 없으면 당일(대실)
+  const isStay = row.이용기간.includes('~');
+
+  // (2) 사용할 템플릿 코드/텍스트 결정
   let tplCode, tplText;
-  if(isStay) {
-    tplCode = TEMPLATE_CODE_LODGING;  // TZ_1466
+  if (isStay) {
+    tplCode = TEMPLATE_CODE_LODGING;  // 'TZ_1466' (숙박)
     tplText = TEMPLATE_TEXT_LODGING;
   } else {
-    tplCode = TEMPLATE_CODE_DAYUSE;   // TZ_1465
+    tplCode = TEMPLATE_CODE_DAYUSE;   // 'TZ_1465' (당일)
     tplText = TEMPLATE_TEXT_DAYUSE;
   }
 
-  // (2) #{이용시간} 치환 (당일만)
+  // (3) 당일(대실)인 경우 #{이용시간} 치환용으로 사용
   let usageTime = '';
-  if(!isStay) {
-    const m = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
-    usageTime = m ? m[1] : '예약시간';
+  if (!isStay) {
+    // row.이용기간 안에 "HH:MM~HH:MM" 패턴이 있으면 추출
+    const match = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
+    if (match) {
+      usageTime = match[1];
+    } else {
+      // 만약 이용기간에 시간이 없다면 입실시간에서 [당일캠핑]을 제거해서 사용
+      usageTime = (row.입실시간 || '').replace('[당일캠핑] ', '') || '예약시간';
+    }
   }
 
-  // (3) #{파싱내용}
+  // (4) #{파싱내용} 치환할 텍스트 만들기
+  //     붙여넣기/수기작성 탭과 동일하게 "- 예약번호: ...\n" 형태
   const parsingContent = `
 - 예약번호: ${row.예약번호}
 - 예약자: ${row.예약자}
 - 전화번호: ${row.전화번호}
 - 이용객실: ${row.이용객실}
+- 이용기간: ${row.이용기간}
 - 수량: ${row.수량}
-- 옵션: ${row.옵션}
+- 옵션: ${row.옵션 || '없음'}
 - 총이용인원: ${row.총이용인원}
 - 입실시간: ${row.입실시간}
 - 결제금액: ${row.결제금액}
 `.trim();
 
+  // (5) 템플릿 텍스트에서 치환
   let finalText = tplText
-    .replace('#{이용시간}', usageTime)
-    .replace('#{파싱내용}', parsingContent);
+    .replace('#{파싱내용}', parsingContent) // 숙박/당일 공통 치환
+    .replace('#{이용시간}', usageTime);     // 당일 템플릿에만 #{이용시간} 있음
 
-  // (4) 알리고 파라미터
+  // (6) 알리고(카카오) 파라미터 생성
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
     userid:    ALIMTALK_USER_ID,
@@ -347,22 +358,28 @@ function sendAlimtalkForDeposit(row) {
     tpl_code:  tplCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: (row.전화번호 || '').replace(/\D/g, ''),
+    // 수신자 번호/이름
+    receiver_1: (row.전화번호 || '').replace(/\D/g, ''), // 숫자만 추출
     recvname_1: row.예약자 || '고객님',
-    subject_1:  '예약 안내',
+    subject_1:  '예약 안내',  // 카카오 알림톡 제목
     message_1:  finalText,
     failover:   'N'
   });
 
-  // (5) fetch
+  // 버튼(채널추가) 정보가 필요하면 추가
+  if (DEFAULT_BUTTON_INFO) {
+    params.append('button_1', JSON.stringify(DEFAULT_BUTTON_INFO));
+  }
+
+  // (7) fetch로 알림톡 발송
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
     body: params
   })
   .then(r => r.json())
   .then(result => {
-    if(result.code===0) {
+    if (result.code === 0) {
       alert("알림톡 발송 성공");
     } else {
       alert("알림톡 발송 실패: " + result.message);
