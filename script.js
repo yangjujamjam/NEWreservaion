@@ -968,14 +968,6 @@ function renderDepositList(listRows) {
     tdG.textContent = row.수량; 
     tr.appendChild(tdG);
 
-    const tdH = document.createElement('td');
-    tdH.textContent = row.옵션;
-    tr.appendChild(tdH);
-
-    const tdI = document.createElement('td');
-    tdI.textContent = row.총이용인원;
-    tr.appendChild(tdI);
-
     const tdJ = document.createElement('td');
     tdJ.textContent = row.입실시간;
     tr.appendChild(tdJ);
