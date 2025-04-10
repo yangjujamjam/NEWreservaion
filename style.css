@@ -158,23 +158,25 @@ pre {
 }
 
 /* Result Display Tabs */
-.result-table {
+.result-table, .deposit-table {
   width: 100%;
   border-collapse: collapse;
   margin-bottom: 20px;
+  font-size: 14px;
 }
 
-.result-table th, .result-table td {
+.result-table th, .result-table td,
+.deposit-table th, .deposit-table td {
   padding: 10px;
   border: 1px solid #dee2e6;
   text-align: left;
 }
 
-.result-table th {
+.result-table th, .deposit-table th {
   background-color: #f1f3f5;
 }
 
-.result-container {
+.result-container, .deposit-container {
   padding: 15px;
   background-color: #ffffff;
   border-radius: 5px;
