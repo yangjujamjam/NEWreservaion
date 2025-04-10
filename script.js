@@ -1,5 +1,5 @@
 /*******************************************************
- * script.js
+ * script.js (수정본)
  *******************************************************/
 
 /** =========================================
@@ -54,11 +54,12 @@ function format12DigitPhone(raw) {
   if (digits.length === 12) {
     return digits.replace(/^(\d{4})(\d{4})(\d{4})$/, '$1-$2-$3');
   }
-  // 12자리가 아니면 그대로 리턴
   return raw;
 }
 
-// [네이버 파싱 로직]
+/** ========================
+ *  [네이버 파싱 로직]
+ * ======================== */
 function parseNaverReservation(text) {
   const lines = text.split('\n').map(line => line.trim());
 
@@ -91,7 +92,7 @@ function parseNaverReservation(text) {
     if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
   }
 
-  // [옵션 처리]
+  // 옵션 처리
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
   let optionsEndIndex = lines.findIndex(line => line.includes('요청사항'));
   if (optionsEndIndex === -1) {
@@ -103,7 +104,7 @@ function parseNaverReservation(text) {
 
   const couponIndex = optionLines.findIndex(line => line.includes('쿠폰'));
   const trimmedOptionLines = (couponIndex !== -1)
-    ? optionLines.slice(0, couponIndex) 
+    ? optionLines.slice(0, couponIndex)
     : optionLines;
 
   const unwantedOptions = [
@@ -153,7 +154,9 @@ function parseNaverReservation(text) {
   };
 }
 
-// [야놀자 파싱]
+/** ==========================
+ *    [야놀자 파싱]
+ * ========================== */
 function parseYanoljaReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
@@ -175,7 +178,6 @@ function parseYanoljaReservation(text) {
     const splitted = 예약자라인.split('/');
     예약자 = splitted[0].trim();
     전화번호 = splitted[1] ? splitted[1].trim() : '';
-    // ★ 12자리라면 "aaaa-bbbb-cccc"
     전화번호 = format12DigitPhone(전화번호);
   }
 
@@ -231,7 +233,9 @@ function parseYanoljaReservation(text) {
   };
 }
 
-// [여기어때 파싱]
+/** ==========================
+ *   [여기어때 파싱]
+ * ========================== */
 function parseHereReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
 
@@ -259,7 +263,6 @@ function parseHereReservation(text) {
   let 전화번호 = 안심번호라인
     ? 안심번호라인.split(':')[1].trim()
     : '';
-  // ★ 12자리라면 aaaa-bbbb-cccc
   전화번호 = format12DigitPhone(전화번호);
 
   const 입실일시라인   = lines.find(line => line.includes('입실일시:'));
@@ -397,7 +400,6 @@ function populateRoomCountOptions(roomName, countSelect) {
 /** =========================================
  *  [6] "안내문자용" 단일 데이터 + "시트 전송용" 다중 데이터
  * ========================================= */
-// (A) 안내문자/파싱결과 용: 모든 객실 한 줄
 function getManualReservationDataSingle() {
   const rowNodes = document.querySelectorAll('#roomsContainer .room-row');
   let roomsArr = [];
@@ -432,7 +434,6 @@ function getManualReservationDataSingle() {
   };
 }
 
-// (B) 스프레드시트 전송 용: 객실마다 각 행
 function getManualReservationDataMultiple() {
   const 예약자    = document.getElementById('manualGuest').value.trim();
   const 전화번호  = document.getElementById('manualPhone').value.trim();
@@ -496,7 +497,7 @@ function generateBaseReservationNumber() {
 }
 
 /** =========================================
- *  [7] 버튼 동작: 파싱결과 보기, 안내문자 양식적용, 스프레드시트로 전송
+ *  [7] 버튼 동작
  * ========================================= */
 function processReservation() {
   if(isManualTabActive()){
@@ -660,7 +661,6 @@ ${formattedParsedData}
 
 function sendToSheet() {
   if(isManualTabActive()){
-    // 수기작성: 여러 객실 -> 다중 행
     const dataArr = getManualReservationDataMultiple();
     if(dataArr.length===0) {
       alert("추가된 객실이 없습니다. (객실 이름이 없거나 수량이 0개)");
@@ -679,7 +679,6 @@ function sendToSheet() {
     })();
 
   } else {
-    // 붙여넣기 파싱 -> 단일 행
     const text= document.getElementById('inputData').value;
     const data= parseReservation(text);
     sendOneRowToGAS(data).then(success=>{
@@ -906,11 +905,9 @@ async function loadDepositData() {
   container.innerHTML = "불러오는 중...";
 
   const url = gasUrl + '?mode=fetchDeposit'; 
-  // L열='네이버무통장','상담','수기입력' / O열 != '취소'인 행만 리턴
-
   try {
     const res = await fetch(url);
-    const list = await res.json(); // [{ rowIndex, 예약번호, 예약자, 전화번호, ... }]
+    const list = await res.json(); 
     renderDepositList(list);
   } catch (err) {
     console.error(err);
@@ -932,10 +929,16 @@ function renderDepositList(listRows) {
   table.innerHTML = `
     <thead>
       <tr>
-        <th>예약번호</th><th>예약자</th><th>전화번호</th>
-        <th>이용객실</th><th>이용기간</th><th>수량</th>
-        <!--<th>옵션</th><th>총이용인원</th><th>입실시간</th>--><th>결제금액</th>
-        <th>입금확인</th><th>취소</th>
+        <th>예약번호</th>
+        <th>예약자</th>
+        <th>전화번호</th>
+        <th>이용객실</th>
+        <th>이용기간</th>
+        <th>수량</th>
+        <!-- 옵션, 총이용인원, 입실시간 제거 -->
+        <th>결제금액</th>
+        <th>입금확인</th>
+        <th>취소</th>
       </tr>
     </thead>
   `;
@@ -945,23 +948,23 @@ function renderDepositList(listRows) {
     const tr = document.createElement('tr');
 
     const tdB = document.createElement('td');
-    tdB.textContent = row.예약번호; // B열
+    tdB.textContent = row.예약번호; 
     tr.appendChild(tdB);
 
     const tdC = document.createElement('td');
-    tdC.textContent = row.예약자;   // C열
+    tdC.textContent = row.예약자;
     tr.appendChild(tdC);
 
     const tdD = document.createElement('td');
-    tdD.textContent = row.전화번호; // D열
+    tdD.textContent = row.전화번호;
     tr.appendChild(tdD);
 
     const tdE = document.createElement('td');
-    tdE.textContent = row.이용객실; 
+    tdE.textContent = row.이용객실;
     tr.appendChild(tdE);
 
     const tdF = document.createElement('td');
-    tdF.textContent = row.이용기간; 
+    tdF.textContent = row.이용기간;
     tr.appendChild(tdF);
 
     const tdG = document.createElement('td');
@@ -1019,93 +1022,108 @@ async function confirmCancel(rowIndex) {
 /** =========================================
  *  [10] 전날메세지 탭 로직
  * ========================================= */
-
-// "내일 예약" 목록을 저장할 전역 변수
 let reminderList = [];
 
-/**
- * 전날메세지 탭 클릭 -> "내일 예약" 불러오기
- *  - code.gs => mode=fetchAll => 시트1 전체
- *  - 내일 날짜 문자열(YYYY. M. D.(요일))로 시작하는 F열(이용기간)만 필터
- *  - 목록에 예약자(C열), 전화번호(D열), 이용기간(F열) 표시
- */
+/** 로드 + “제외” 버튼 & row.excluded */
 async function loadTomorrowData() {
   const container = document.getElementById('reminderListContainer');
   container.innerHTML = "불러오는 중...";
 
   try {
-    // 1) 시트1 전체 조회
     const url = gasUrl + '?mode=fetchAll';
     const res = await fetch(url);
     const list = await res.json();
 
-    // 2) 내일 날짜 문자열 => "2025. 4. 8.(화)"
     const tomorrowStr = getTomorrowString();
-
-    // 3) 필터 => "이용기간"이 tomorrowStr로 시작하는 행만
     reminderList = list.filter(row => {
       const period = (row.이용기간 || "").trim();
       return period.startsWith(tomorrowStr);
     });
 
-    // 4) 화면 표시
     if (reminderList.length === 0) {
       container.innerHTML = "<p>내일 이용하는 예약이 없습니다.</p>";
       return;
     }
 
-    let html = `
-      <table class="deposit-table">
-        <thead>
-          <tr>
-            <th>예약자</th>
-            <th>전화번호</th>
-            <th>이용기간</th>
-          </tr>
-        </thead>
-        <tbody>
-    `;
-    reminderList.forEach(row => {
-      html += `
+    const table = document.createElement('table');
+    table.className = 'deposit-table';
+    table.innerHTML = `
+      <thead>
         <tr>
-          <td>${row.예약자}</td>
-          <td>${row.전화번호}</td>
-          <td>${row.이용기간}</td>
+          <th>예약자</th>
+          <th>전화번호</th>
+          <th>이용기간</th>
+          <th>제외</th>
         </tr>
-      `;
-    });
-    html += `</tbody></table>`;
+      </thead>
+    `;
+    const tbody = document.createElement('tbody');
 
-    container.innerHTML = html;
+    reminderList.forEach((row) => {
+      // 처음엔 excluded = false
+      row.excluded = false;
+
+      const tr = document.createElement('tr');
+
+      const td1 = document.createElement('td');
+      td1.textContent = row.예약자;
+      tr.appendChild(td1);
+
+      const td2 = document.createElement('td');
+      td2.textContent = row.전화번호;
+      tr.appendChild(td2);
+
+      const td3 = document.createElement('td');
+      td3.textContent = row.이용기간;
+      tr.appendChild(td3);
+
+      // "제외" 버튼
+      const td4 = document.createElement('td');
+      const excludeBtn = document.createElement('button');
+      excludeBtn.textContent = '제외';
+      excludeBtn.style.backgroundColor = '#dc3545';
+      excludeBtn.style.color = '#fff';
+      excludeBtn.onclick = () => {
+        row.excluded = true;
+        // 시각적 표시
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+        excludeBtn.disabled = true;
+      };
+      td4.appendChild(excludeBtn);
+      tr.appendChild(td4);
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.innerHTML = "";
+    container.appendChild(table);
+
   } catch (err) {
     console.error(err);
     container.innerHTML = "오류 발생 (콘솔 확인)";
   }
 }
 
-/**
- * 오늘 날짜의 내일을 "YYYY. M. D.(요일)" 형태로 반환
- */
 function getTomorrowString() {
   const today = new Date();
   const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
 
   const y = tomorrow.getFullYear();
-  const m = tomorrow.getMonth() + 1; // 1..12
+  const m = tomorrow.getMonth() + 1;
   const d = tomorrow.getDate();
-  const dayKorean = ['일','월','화','수','목','금','토'][ tomorrow.getDay() ];
+  const dayKorean = ['일','월','화','수','목','금','토'][tomorrow.getDay()];
 
-  // "2025. 4. 8.(화)" 예시
   return `${y}. ${m}. ${d}.(${dayKorean})`;
 }
 
-/**
- * 전날메세지 보내기 버튼 -> reminderList 전체 발송
- *  - script_talk.js 의 sendOneReminder(row) 호출
- */
+/** 전날메세지 보내기 시 excluded=false 인 항목만 전송 */
 function sendReminderMessages() {
-  if (!reminderList || reminderList.length === 0) {
-    alert("메시지 보낼 대상이 없습니다.");
+  // 제외되지 않은 항목만
+  const targets = reminderList.filter(r => !r.excluded);
+  if (!targets || targets.length === 0) {
+    alert("메시지를 보낼 대상이 없습니다. (모두 제외되었거나 없음)");
     return;
   }
   const ok = confirm("메세지를 보낼까요?");
@@ -1115,8 +1133,7 @@ function sendReminderMessages() {
     let successCount = 0;
     let failCount = 0;
 
-    for (let row of reminderList) {
-      // sendOneReminder는 script_talk.js 에서 정의 (async)
+    for (let row of targets) {
       const success = await sendOneReminder(row);
       if (success) successCount++;
       else failCount++;
@@ -1127,7 +1144,7 @@ function sendReminderMessages() {
 }
 
 /** =========================================
- *  [9] 퇴실메세지(숙박) 탭
+ *  [11] 퇴실메세지(숙박) 탭
  * ========================================= */
 let checkoutStayList = [];
 async function loadCheckoutStayData() {
@@ -1139,16 +1156,13 @@ async function loadCheckoutStayData() {
     const res = await fetch(url);
     const list = await res.json();
 
-    // "숙박" => F열이 "xxxx~yyyy" 형태 && "yyyy" == 오늘
     const todayStr = getTodayString();
-
     checkoutStayList = list.filter(row => {
       const period = (row.이용기간||'').trim();
-      if (!period.includes('~')) return false; // 숙박은 ~ 있어야
-      // 예: "2025. 4. 5.(토) ~ 2025. 4. 6.(일)"
+      if (!period.includes('~')) return false;
       const parts = period.split('~').map(p => p.trim());
       if (parts.length<2) return false;
-      const lastDate = parts[1]; // "2025. 4. 6.(일)"
+      const lastDate = parts[1];
       return lastDate===todayStr; 
     });
 
@@ -1156,19 +1170,65 @@ async function loadCheckoutStayData() {
       container.innerHTML = "<p>오늘 퇴실(숙박) 대상이 없습니다.</p>";
       return;
     }
-    let html = `<table class="deposit-table"><thead>
-                  <tr><th>예약자</th><th>전화번호</th><th>이용기간</th><th>퇴실시간(R열)</th></tr>
-                </thead><tbody>`;
-    checkoutStayList.forEach(r => {
-      html += `<tr>
-        <td>${r.예약자}</td>
-        <td>${r.전화번호}</td>
-        <td>${r.이용기간}</td>
-        <td>${r.stayOutR}</td>
-      </tr>`;
+
+    const table = document.createElement('table');
+    table.className = 'deposit-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>예약자</th>
+          <th>전화번호</th>
+          <th>이용기간</th>
+          <th>퇴실시간(R열)</th>
+          <th>제외</th>
+        </tr>
+      </thead>
+    `;
+    const tbody = document.createElement('tbody');
+
+    checkoutStayList.forEach(row => {
+      row.excluded = false;
+
+      const tr = document.createElement('tr');
+
+      const td1 = document.createElement('td');
+      td1.textContent = row.예약자;
+      tr.appendChild(td1);
+
+      const td2 = document.createElement('td');
+      td2.textContent = row.전화번호;
+      tr.appendChild(td2);
+
+      const td3 = document.createElement('td');
+      td3.textContent = row.이용기간;
+      tr.appendChild(td3);
+
+      const td4 = document.createElement('td');
+      td4.textContent = row.stayOutR;
+      tr.appendChild(td4);
+
+      // "제외" 버튼
+      const td5 = document.createElement('td');
+      const excludeBtn = document.createElement('button');
+      excludeBtn.textContent = '제외';
+      excludeBtn.style.backgroundColor = '#dc3545';
+      excludeBtn.style.color = '#fff';
+      excludeBtn.onclick = () => {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+        excludeBtn.disabled = true;
+      };
+      td5.appendChild(excludeBtn);
+      tr.appendChild(td5);
+
+      tbody.appendChild(tr);
     });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
+
+    table.appendChild(tbody);
+    container.innerHTML = "";
+    container.appendChild(table);
+
   } catch(err) {
     console.error(err);
     container.innerHTML="오류 발생";
@@ -1176,15 +1236,16 @@ async function loadCheckoutStayData() {
 }
 
 function sendCheckoutStayMessages() {
-  if(!checkoutStayList || checkoutStayList.length===0) {
-    alert("대상이 없습니다.");
+  const targets = checkoutStayList.filter(r => !r.excluded);
+  if(!targets || targets.length===0) {
+    alert("대상이 없습니다. (모두 제외됐거나 없음)");
     return;
   }
   const ok = confirm("퇴실메세지(숙박)를 보낼까요?");
   if(!ok) return;
   (async()=>{
     let success=0, fail=0;
-    for(let row of checkoutStayList) {
+    for(let row of targets) {
       const res = await sendCheckoutStayOne(row);
       if(res) success++; else fail++;
     }
@@ -1193,7 +1254,7 @@ function sendCheckoutStayMessages() {
 }
 
 /** =========================================
- *  [10] 퇴실메세지(당일) 탭
+ *  [12] 퇴실메세지(당일) 탭
  * ========================================= */
 let checkoutDayList = [];
 async function loadCheckoutDayData() {
@@ -1206,10 +1267,9 @@ async function loadCheckoutDayData() {
     const list = await res.json();
 
     const todayStr = getTodayString();
-    // 당일 => F열에 ~가 없고, 그 날짜가 todayStr 이면 OK
     checkoutDayList = list.filter(row => {
       const period = (row.이용기간||'').trim();
-      if (period.includes('~')) return false; // 당일은 ~ 없어야
+      if (period.includes('~')) return false;
       return period===todayStr;
     });
 
@@ -1217,19 +1277,65 @@ async function loadCheckoutDayData() {
       container.innerHTML="<p>오늘 퇴실(당일) 대상이 없습니다.</p>";
       return;
     }
-    let html = `<table class="deposit-table"><thead>
-                  <tr><th>예약자</th><th>전화번호</th><th>이용기간</th><th>퇴실시간(Q열)</th></tr>
-                </thead><tbody>`;
-    checkoutDayList.forEach(r=>{
-      html += `<tr>
-        <td>${r.예약자}</td>
-        <td>${r.전화번호}</td>
-        <td>${r.이용기간}</td>
-        <td>${r.dayOutQ}</td>
-      </tr>`;
+
+    const table = document.createElement('table');
+    table.className = 'deposit-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>예약자</th>
+          <th>전화번호</th>
+          <th>이용기간</th>
+          <th>퇴실시간(Q열)</th>
+          <th>제외</th>
+        </tr>
+      </thead>
+    `;
+    const tbody = document.createElement('tbody');
+
+    checkoutDayList.forEach(row=>{
+      row.excluded = false;
+
+      const tr = document.createElement('tr');
+
+      const td1 = document.createElement('td');
+      td1.textContent = row.예약자;
+      tr.appendChild(td1);
+
+      const td2 = document.createElement('td');
+      td2.textContent = row.전화번호;
+      tr.appendChild(td2);
+
+      const td3 = document.createElement('td');
+      td3.textContent = row.이용기간;
+      tr.appendChild(td3);
+
+      const td4 = document.createElement('td');
+      td4.textContent = row.dayOutQ;
+      tr.appendChild(td4);
+
+      // 제외 버튼
+      const td5 = document.createElement('td');
+      const excludeBtn = document.createElement('button');
+      excludeBtn.textContent = '제외';
+      excludeBtn.style.backgroundColor = '#dc3545';
+      excludeBtn.style.color = '#fff';
+      excludeBtn.onclick = () => {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+        excludeBtn.disabled = true;
+      };
+      td5.appendChild(excludeBtn);
+      tr.appendChild(td5);
+
+      tbody.appendChild(tr);
     });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
+
+    table.appendChild(tbody);
+    container.innerHTML = "";
+    container.appendChild(table);
+
   } catch(err) {
     console.error(err);
     container.innerHTML="오류 발생";
@@ -1237,15 +1343,16 @@ async function loadCheckoutDayData() {
 }
 
 function sendCheckoutDayMessages() {
-  if(!checkoutDayList || checkoutDayList.length===0) {
-    alert("대상이 없습니다.");
+  const targets = checkoutDayList.filter(r=> !r.excluded);
+  if(!targets || targets.length===0) {
+    alert("대상이 없습니다. (모두 제외됐거나 없음)");
     return;
   }
   const ok = confirm("퇴실메세지(당일)을 보낼까요?");
   if(!ok) return;
   (async()=>{
     let success=0, fail=0;
-    for(let row of checkoutDayList) {
+    for(let row of targets) {
       const res = await sendCheckoutDayOne(row);
       if(res) success++; else fail++;
     }
@@ -1254,7 +1361,7 @@ function sendCheckoutDayMessages() {
 }
 
 /** =========================================
- *  [11] 매너타임 탭
+ *  [13] 매너타임 탭
  * ========================================= */
 let mannerList = [];
 async function loadMannerData() {
@@ -1267,14 +1374,12 @@ async function loadMannerData() {
     const list = await res.json();
 
     const todayStr = getTodayString();
-    // 매너타임: "오늘 날짜의 숙박만"
-    // => F열: "xxxx ~ yyyy", 첫 날짜가 오늘
     mannerList = list.filter(row=>{
       const period = (row.이용기간||'').trim();
-      if (!period.includes('~')) return false; // 숙박이면 ~
+      if (!period.includes('~')) return false;
       const parts = period.split('~').map(p=>p.trim());
       if (parts.length<2) return false;
-      const firstDate = parts[0]; // "2025. 4. 7.(월)"
+      const firstDate = parts[0];
       return firstDate===todayStr; 
     });
 
@@ -1282,18 +1387,60 @@ async function loadMannerData() {
       container.innerHTML = "<p>오늘 매너타임 대상(숙박) 없습니다.</p>";
       return;
     }
-    let html = `<table class="deposit-table"><thead>
-                  <tr><th>예약자</th><th>전화번호</th><th>이용기간</th></tr>
-                </thead><tbody>`;
-    mannerList.forEach(r=>{
-      html += `<tr>
-        <td>${r.예약자}</td>
-        <td>${r.전화번호}</td>
-        <td>${r.이용기간}</td>
-      </tr>`;
+
+    const table = document.createElement('table');
+    table.className = 'deposit-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>예약자</th>
+          <th>전화번호</th>
+          <th>이용기간</th>
+          <th>제외</th>
+        </tr>
+      </thead>
+    `;
+    const tbody = document.createElement('tbody');
+
+    mannerList.forEach(row=>{
+      row.excluded = false;
+
+      const tr = document.createElement('tr');
+
+      const td1 = document.createElement('td');
+      td1.textContent = row.예약자;
+      tr.appendChild(td1);
+
+      const td2 = document.createElement('td');
+      td2.textContent = row.전화번호;
+      tr.appendChild(td2);
+
+      const td3 = document.createElement('td');
+      td3.textContent = row.이용기간;
+      tr.appendChild(td3);
+
+      // 제외 버튼
+      const td4 = document.createElement('td');
+      const excludeBtn = document.createElement('button');
+      excludeBtn.textContent = '제외';
+      excludeBtn.style.backgroundColor = '#dc3545';
+      excludeBtn.style.color = '#fff';
+      excludeBtn.onclick = () => {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+        excludeBtn.disabled = true;
+      };
+      td4.appendChild(excludeBtn);
+      tr.appendChild(td4);
+
+      tbody.appendChild(tr);
     });
-    html += `</tbody></table>`;
-    container.innerHTML = html;
+
+    table.appendChild(tbody);
+    container.innerHTML = "";
+    container.appendChild(table);
+
   } catch(e) {
     console.error(e);
     container.innerHTML="오류 발생";
@@ -1301,15 +1448,16 @@ async function loadMannerData() {
 }
 
 function sendMannerMessages() {
-  if(!mannerList || mannerList.length===0) {
-    alert("대상이 없습니다.");
+  const targets = mannerList.filter(r=> !r.excluded);
+  if(!targets || targets.length===0) {
+    alert("대상이 없습니다. (모두 제외됐거나 없음)");
     return;
   }
   const ok = confirm("매너타임 메세지를 보낼까요?");
   if(!ok) return;
   (async()=>{
     let success=0, fail=0;
-    for(let row of mannerList) {
+    for(let row of targets) {
       const res = await sendMannerOne(row);
       if(res) success++; else fail++;
     }
@@ -1317,7 +1465,7 @@ function sendMannerMessages() {
   })();
 }
 
-/** 공통: 오늘 날짜를 "YYYY. M. D.(요일)" 로 변환 */
+/** 공통: 오늘 날짜 "YYYY. M. D.(요일)" */
 function getTodayString() {
   const today = new Date();
   const y = today.getFullYear();
