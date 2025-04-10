@@ -319,34 +319,6 @@ function parseHereReservation(text) {
   };
 }
 
-function formatPhoneNumber(el) {
-  // (1) 숫자만 남김
-  let digits = el.value.replace(/\D/g, '');
-
-  // (2) 길이에 따라 패턴 적용
-  if (digits.length <= 3) {
-    el.value = digits;
-  } else if (digits.length <= 6) {
-    el.value = digits.replace(/^(\d{3})(\d{1,3})$/, '$1-$2');
-  } else if (digits.length <= 10) {
-    el.value = digits.replace(/^(\d{3})(\d{3})(\d{1,4})$/, '$1-$2-$3');
-  } else if (digits.length === 11) {
-    el.value = digits.replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3');
-  } else if (digits.length === 12) {
-    el.value = digits.replace(/^(\d{4})(\d{4})(\d{4})$/, '$1-$2-$3');
-  } else {
-    // 13자리 이상 → 기본 4-4-4 뒤 나머지 연결
-    let first = digits.slice(0, 4);  
-    let second = digits.slice(4, 8); 
-    let third = digits.slice(8, 12); 
-    let rest = digits.slice(12);     
-    el.value = `${first}-${second}-${third}`;
-    if (rest.length > 0) {
-      el.value += rest;
-    }
-  }
-}
-
 /** =========================================
  *  [5] 수기작성 탭: 여러 객실 행 UI 추가
  * ========================================= */
