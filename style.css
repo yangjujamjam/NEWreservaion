@@ -266,3 +266,24 @@ pre {
   border-radius: 14px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
+
+/* Kakao Style Button */
+.btn-kakao {
+  background-color: #FEE500; /* 카카오톡 노란색 배경 */
+  color: #3D1D1D;           /* 갈색 계열 폰트 */
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-kakao:hover {
+  background-color: #FDDD00; /* 조금 어두워진 노랑 */
+}
+
+.btn-kakao:active {
+  background-color: #FCCE00; /* 더 어두워진 노랑 */
+}
