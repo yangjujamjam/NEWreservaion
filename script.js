@@ -15,29 +15,13 @@ window.onload = function() {
   buildCalendar();    // 달력 초기화
 };
 
-/** =========================================
- *  [4] 전화번호 자동 포맷 함수
- *  - 01012345678 -> 010-1234-5678
- *  - 입력이 짧을 때도 단계별로 '-' 삽입
- * ========================================= */
-// ★추가 함수
-function formatPhoneNumber(el) {
-  // 1) 숫자만 추출
-  let digits = el.value.replace(/\D/g, '');
-
-  // 2) 전체 길이에 따라 하이픈 넣기
-  if (digits.length < 4) {
-    // 3자리 미만이면 그냥 표시 (ex: 0, 01, 010)
-    el.value = digits;
-  } else if (digits.length < 8) {
-    // 4~7자리: 010-1234 형태
-    // 앞 3자리, 나머지
-    el.value = digits.replace(/(\d{3})(\d{1,4})/, '$1-$2');
-  } else {
-    // 8자리 이상: 010-1234-5678 형태
-    el.value = digits.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+  const phoneInput = document.getElementById('manualPhone');
+  if (phoneInput) {
+    phoneInput.addEventListener('input', () => {
+      formatPhoneNumber(phoneInput);
+    });
   }
-}
+};
 
 /** =========================================
  *  [3] 탭 전환
@@ -341,6 +325,34 @@ function parseHereReservation(text) {
     결제금액,
     예약플랫폼: '여기어때'
   };
+}
+
+function formatPhoneNumber(el) {
+  // (1) 숫자만 남김
+  let digits = el.value.replace(/\D/g, '');
+
+  // (2) 길이에 따라 패턴 적용
+  if (digits.length <= 3) {
+    el.value = digits;
+  } else if (digits.length <= 6) {
+    el.value = digits.replace(/^(\d{3})(\d{1,3})$/, '$1-$2');
+  } else if (digits.length <= 10) {
+    el.value = digits.replace(/^(\d{3})(\d{3})(\d{1,4})$/, '$1-$2-$3');
+  } else if (digits.length === 11) {
+    el.value = digits.replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3');
+  } else if (digits.length === 12) {
+    el.value = digits.replace(/^(\d{4})(\d{4})(\d{4})$/, '$1-$2-$3');
+  } else {
+    // 13자리 이상 → 기본 4-4-4 뒤 나머지 연결
+    let first = digits.slice(0, 4);  
+    let second = digits.slice(4, 8); 
+    let third = digits.slice(8, 12); 
+    let rest = digits.slice(12);     
+    el.value = `${first}-${second}-${third}`;
+    if (rest.length > 0) {
+      el.value += rest;
+    }
+  }
 }
 
 /** =========================================
