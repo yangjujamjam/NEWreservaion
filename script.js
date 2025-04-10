@@ -934,7 +934,7 @@ function renderDepositList(listRows) {
       <tr>
         <th>예약번호</th><th>예약자</th><th>전화번호</th>
         <th>이용객실</th><th>이용기간</th><th>수량</th>
-        <!--<th>옵션</th><th>총이용인원</th>--><th>입실시간</th><th>결제금액</th>
+        <!--<th>옵션</th><th>총이용인원</th><th>입실시간</th>--><th>결제금액</th>
         <th>입금확인</th><th>취소</th>
       </tr>
     </thead>
@@ -967,10 +967,6 @@ function renderDepositList(listRows) {
     const tdG = document.createElement('td');
     tdG.textContent = row.수량; 
     tr.appendChild(tdG);
-
-    const tdJ = document.createElement('td');
-    tdJ.textContent = row.입실시간;
-    tr.appendChild(tdJ);
 
     const tdK = document.createElement('td');
     tdK.textContent = row.결제금액;
