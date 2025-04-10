@@ -1,146 +1,151 @@
-/* Bootstrap Inspired Style Update */
+/* Optimized Bootstrap-inspired CSS */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 20px;
+  padding: 30px;
   margin: 0;
   background-color: #f8f9fa;
-  color: #212529;
+  color: #343a40;
 }
 
-.top-menu {
-  background-color: #343a40;
-  color: #fff;
+.nav-container {
+  background: #ffffff;
+  padding: 12px;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 20px;
 }
-.top-menu nav ul {
-  list-style-type: none;
-  margin: 0;
+
+.nav-container ul {
+  list-style: none;
   padding: 0;
   display: flex;
+  justify-content: center;
+  gap: 10px;
 }
-.top-menu nav ul li a {
-  display: block;
-  color: #fff;
-  padding: 10px 15px;
+
+.nav-container a {
+  color: #343a40;
   text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
 }
-.top-menu nav ul li a:hover {
-  background-color: #495057;
+
+.nav-container a:hover {
+  background-color: #f1f3f5;
 }
 
 h1, h3 {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 textarea, input[type="text"], select {
   width: 100%;
-  padding: 8px 12px;
-  margin-bottom: 10px;
+  padding: 10px;
+  margin-bottom: 12px;
   border: 1px solid #ced4da;
-  border-radius: 4px;
+  border-radius: 5px;
   box-sizing: border-box;
 }
 
 button {
-  padding: 8px 16px;
-  margin: 5px;
+  padding: 10px 20px;
   cursor: pointer;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
-}
-button:hover {
-  background-color: #0056b3;
-}
-button:active {
-  background-color: #004085;
+  border-radius: 5px;
+  transition: background-color 0.3s;
 }
 
-pre {
-  background-color: #e9ecef;
-  padding: 12px;
-  border-radius: 4px;
+button:hover {
+  background-color: #0056b3;
 }
 
 .tab-menu button {
   background-color: #e9ecef;
   color: #495057;
 }
-.tab-menu button.active, .tab-menu button:hover {
-  background-color: #28a745;
+
+.tab-menu button.active,
+.tab-menu button:hover {
+  background-color: #17a2b8;
   color: white;
 }
 
 .tab-content {
-  display: none;
-  padding: 15px;
+  padding: 20px;
   background-color: #ffffff;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 20px;
 }
 
 .manual-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 15px;
 }
-.manual-table th {
-  background-color: #f1f3f5;
-  padding: 10px;
-  text-align: left;
-  border-bottom: 1px solid #dee2e6;
-}
-.manual-table td {
-  padding: 10px;
+
+.manual-table th, .manual-table td {
+  padding: 12px;
   border-bottom: 1px solid #dee2e6;
 }
 
-#calendarContainer {
-  width: 100%;
-  max-width: 400px;
-  margin-bottom: 15px;
+.manual-table th {
+  background-color: #f8f9fa;
+  text-align: left;
 }
+
+#calendarContainer {
+  max-width: 400px;
+}
+
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
-.calendar-header button {
-  background-color: #6c757d;
-}
-.calendar-header button:hover {
-  background-color: #5a6268;
-}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 5px;
 }
+
 .calendar-day {
-  padding: 5px;
+  padding: 8px;
   border-radius: 4px;
   cursor: pointer;
   text-align: center;
 }
+
 .calendar-day:hover {
-  background-color: #dee2e6;
+  background-color: #e2e6ea;
 }
+
 .selected {
   background-color: #28a745;
   color: #fff;
 }
+
 .range {
   background-color: #c3e6cb;
+}
+
+pre {
+  background-color: #f1f3f5;
+  padding: 15px;
+  border-radius: 5px;
 }
 
 .room-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
 }
+
 .room-row select {
   min-width: 150px;
 }
