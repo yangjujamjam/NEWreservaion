@@ -1,6 +1,6 @@
-/* iOS-inspired UI CSS */
+/* iOS-inspired UI CSS + Kakao-Style Button */
 
-/* 폰트: iOS 기본 폰트 우선 사용 */
+/* 1) 기본 폰트 및 레이아웃 */
 body {
   margin: 0;
   padding: 30px;
@@ -9,7 +9,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Apple SD Gothic Neo", sans-serif;
 }
 
-/* 내비게이션 컨테이너 */
+/* 2) 상단 내비게이션 */
 .nav-container {
   background: #FFFFFF;
   padding: 12px;
@@ -34,18 +34,18 @@ body {
   border-radius: 10px;
   transition: background-color 0.15s;
 }
+
 .nav-container a:hover {
   background-color: rgba(0,122,255,0.1);
 }
 
-/* 제목 */
-h1,
-h3 {
+/* 3) 헤딩 스타일 */
+h1, h3 {
   margin-bottom: 20px;
   font-weight: 600;
 }
 
-/* 입력 요소들 */
+/* 4) 폼 요소: 텍스트 입력, 셀렉트, 텍스트에어리어 */
 textarea,
 input[type="text"],
 select {
@@ -59,7 +59,7 @@ select {
   line-height: 1.4;
   background-color: #FFFFFF;
   color: #000000;
-  appearance: none;
+  appearance: none; /* iOS - WebKit 브라우저 기본화 제거 */
 }
 
 textarea {
@@ -67,7 +67,7 @@ textarea {
   resize: vertical;
 }
 
-/* 버튼: iOS 특유의 파란색 하이라이트 & 둥근 모서리 */
+/* 5) 일반 버튼 (iOS 파랑 스타일) */
 button {
   display: inline-block;
   padding: 10px 20px;
@@ -79,17 +79,41 @@ button {
   font-size: 16px;
   transition: background-color 0.2s;
 }
+
 button:hover {
   background-color: #0065d0;
 }
+
 button:active {
   background-color: #0059bd;
 }
 
-/* 탭 메뉴 */
+/* 5-1) 특별 버튼 (카카오톡 스타일) */
+.btn-kakao {
+  background-color: #FEE500; /* 카카오 노란색 */
+  color: #3D1D1D;            /* 갈색 계열 폰트 */
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-kakao:hover {
+  background-color: #FDDD00;
+}
+
+.btn-kakao:active {
+  background-color: #FCCE00;
+}
+
+/* 6) 탭 메뉴 */
 .tab-menu {
   margin-bottom: 16px;
 }
+
 .tab-menu button {
   background-color: #E5E5EA;
   color: #000;
@@ -97,16 +121,19 @@ button:active {
   margin: 0 4px;
   font-size: 15px;
   border: none;
+  transition: background-color 0.2s;
 }
+
 .tab-menu button:hover {
   filter: brightness(95%);
 }
+
 .tab-menu button.active {
   background-color: #007AFF;
   color: #FFFFFF;
 }
 
-/* 탭 내용 */
+/* 7) 탭 콘텐츠 영역 */
 .tab-content {
   padding: 20px;
   background-color: #FFFFFF;
@@ -115,46 +142,53 @@ button:active {
   margin-bottom: 20px;
 }
 
-/* 수기작성 테이블 */
+/* 8) 수기작성 탭 내 테이블 */
 .manual-table {
   width: 100%;
   border-collapse: collapse;
 }
+
 .manual-table th,
 .manual-table td {
   padding: 12px;
   border-bottom: 1px solid #ECECEC;
 }
+
 .manual-table th {
   background-color: #F9F9F9;
   text-align: left;
   font-weight: 500;
 }
 
-/* 달력 */
+/* 9) 달력 */
 #calendarContainer {
   max-width: 380px;
 }
+
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
+
 .calendar-header button {
   background-color: #E5E5EA;
   color: #000;
   border-radius: 8px;
   padding: 6px 14px;
 }
+
 .calendar-header button:hover {
   filter: brightness(95%);
 }
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 5px;
 }
+
 .calendar-day {
   padding: 10px 0;
   border-radius: 8px;
@@ -162,18 +196,21 @@ button:active {
   text-align: center;
   background-color: #FFFFFF;
 }
+
 .calendar-day:hover {
   background-color: rgba(0,122,255,0.06);
 }
+
 .selected {
   background-color: #007AFF;
   color: #FFFFFF;
 }
+
 .range {
   background-color: #ADD6FF;
 }
 
-/* 파싱 / 결과창 */
+/* 10) 파싱/결과 창 */
 pre {
   background-color: #FFFFFF;
   padding: 16px;
@@ -184,18 +221,19 @@ pre {
   overflow: auto; /* 긴 내용 스크롤 */
 }
 
-/* 객실 추가 행 */
+/* 11) 방/객실 추가 행 */
 .room-row {
   display: flex;
   align-items: center;
   gap: 10px;
   margin-bottom: 12px;
 }
+
 .room-row select {
   min-width: 160px;
 }
 
-/* 결과표 / 무통장 입금 목록 표 */
+/* 12) 결과/목록 표 */
 .result-table,
 .deposit-table {
   width: 100%;
@@ -204,6 +242,7 @@ pre {
   font-size: 15px;
   color: #000000;
 }
+
 .result-table th,
 .result-table td,
 .deposit-table th,
@@ -212,13 +251,14 @@ pre {
   border-bottom: 1px solid #ECECEC;
   text-align: left;
 }
+
 .result-table th,
 .deposit-table th {
   background-color: #F9F9F9;
   font-weight: 500;
 }
 
-/* 결과 목록 컨테이너 */
+/* 13) 결과 목록 컨테이너 */
 .result-container,
 .deposit-container {
   padding: 16px;
