@@ -15,14 +15,6 @@ window.onload = function() {
   buildCalendar();    // 달력 초기화
 };
 
-  const phoneInput = document.getElementById('manualPhone');
-  if (phoneInput) {
-    phoneInput.addEventListener('input', () => {
-      formatPhoneNumber(phoneInput);
-    });
-  }
-};
-
 /** =========================================
  *  [3] 탭 전환
  * ========================================= */
