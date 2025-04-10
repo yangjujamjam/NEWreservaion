@@ -1,55 +1,65 @@
-/* Modern Dashboard UI Kit inspired CSS */
+/* iOS-inspired UI CSS */
+
+/* 폰트: iOS 기본 폰트 우선 사용 */
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  padding: 20px;
   margin: 0;
-  background-color: #f7f1f5;
-  color: #333;
+  padding: 30px;
+  background-color: #F2F2F2;
+  color: #000000;
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Apple SD Gothic Neo", sans-serif;
 }
 
+/* 내비게이션 컨테이너 */
 .nav-container {
-  background: #ffffff;
-  padding: 10px;
+  background: #FFFFFF;
+  padding: 12px;
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
   margin-bottom: 20px;
 }
 
 .nav-container ul {
   list-style: none;
   padding: 0;
+  margin: 0;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 16px;
 }
 
 .nav-container a {
-  color: #6c5ce7;
+  color: #007AFF;
   text-decoration: none;
-  padding: 10px 20px;
+  padding: 8px 16px;
   border-radius: 10px;
-  transition: background-color 0.3s;
-  font-weight: 500;
+  transition: background-color 0.15s;
 }
-
 .nav-container a:hover {
-  background-color: #e0d8f4;
+  background-color: rgba(0,122,255,0.1);
 }
 
-h1, h3 {
-  margin-bottom: 15px;
+/* 제목 */
+h1,
+h3 {
+  margin-bottom: 20px;
+  font-weight: 600;
 }
 
-textarea, input[type="text"], select {
+/* 입력 요소들 */
+textarea,
+input[type="text"],
+select {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   margin-bottom: 15px;
-  border: none;
+  border: 1px solid #CED0D4;
   border-radius: 12px;
-  background-color: #f4efff;
   box-sizing: border-box;
-  font-size: 14px;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  font-size: 16px;
+  line-height: 1.4;
+  background-color: #FFFFFF;
+  color: #000000;
+  appearance: none;
 }
 
 textarea {
@@ -57,125 +67,162 @@ textarea {
   resize: vertical;
 }
 
+/* 버튼: iOS 특유의 파란색 하이라이트 & 둥근 모서리 */
 button {
-  padding: 12px 24px;
+  display: inline-block;
+  padding: 10px 20px;
   cursor: pointer;
-  background-color: #6c5ce7;
-  color: white;
+  background-color: #007AFF;
+  color: #FFFFFF;
   border: none;
   border-radius: 12px;
-  transition: background-color 0.3s, transform 0.1s;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  font-size: 16px;
+  transition: background-color 0.2s;
 }
-
 button:hover {
-  background-color: #594cc7;
-  transform: translateY(-2px);
+  background-color: #0065d0;
+}
+button:active {
+  background-color: #0059bd;
 }
 
+/* 탭 메뉴 */
+.tab-menu {
+  margin-bottom: 16px;
+}
 .tab-menu button {
-  background-color: #e0d8f4;
-  color: #6c5ce7;
-  font-weight: 600;
+  background-color: #E5E5EA;
+  color: #000;
+  border-radius: 12px;
+  margin: 0 4px;
+  font-size: 15px;
+  border: none;
 }
-
-.tab-menu button.active,
 .tab-menu button:hover {
-  background-color: #6c5ce7;
-  color: white;
+  filter: brightness(95%);
+}
+.tab-menu button.active {
+  background-color: #007AFF;
+  color: #FFFFFF;
 }
 
+/* 탭 내용 */
 .tab-content {
   padding: 20px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background-color: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
   margin-bottom: 20px;
 }
 
-.manual-table, .result-table, .deposit-table {
+/* 수기작성 테이블 */
+.manual-table {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: 20px;
-  font-size: 14px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
-
-.manual-table th, .manual-table td,
-.result-table th, .result-table td,
-.deposit-table th, .deposit-table td {
-  padding: 15px;
-  border-bottom: 1px solid #ede9f6;
+.manual-table th,
+.manual-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ECECEC;
+}
+.manual-table th {
+  background-color: #F9F9F9;
   text-align: left;
+  font-weight: 500;
 }
 
-.manual-table th, .result-table th, .deposit-table th {
-  background-color: #f4efff;
-  font-weight: bold;
-  color: #6c5ce7;
-}
-
+/* 달력 */
 #calendarContainer {
-  max-width: 400px;
+  max-width: 380px;
 }
-
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
 }
-
+.calendar-header button {
+  background-color: #E5E5EA;
+  color: #000;
+  border-radius: 8px;
+  padding: 6px 14px;
+}
+.calendar-header button:hover {
+  filter: brightness(95%);
+}
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 5px;
 }
-
 .calendar-day {
-  padding: 10px;
-  border-radius: 10px;
+  padding: 10px 0;
+  border-radius: 8px;
   cursor: pointer;
   text-align: center;
-  background-color: #f4efff;
+  background-color: #FFFFFF;
 }
-
 .calendar-day:hover {
-  background-color: #e0d8f4;
+  background-color: rgba(0,122,255,0.06);
 }
-
 .selected {
-  background-color: #6c5ce7;
-  color: #fff;
+  background-color: #007AFF;
+  color: #FFFFFF;
 }
-
 .range {
-  background-color: #d9cffa;
+  background-color: #ADD6FF;
 }
 
+/* 파싱 / 결과창 */
 pre {
-  background-color: #f4efff;
-  padding: 15px;
+  background-color: #FFFFFF;
+  padding: 16px;
   border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: auto; /* 긴 내용 스크롤 */
 }
 
+/* 객실 추가 행 */
 .room-row {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
-
 .room-row select {
-  min-width: 150px;
+  min-width: 160px;
 }
 
-.result-container, .deposit-container {
-  padding: 15px;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+/* 결과표 / 무통장 입금 목록 표 */
+.result-table,
+.deposit-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 15px;
+  color: #000000;
+}
+.result-table th,
+.result-table td,
+.deposit-table th,
+.deposit-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ECECEC;
+  text-align: left;
+}
+.result-table th,
+.deposit-table th {
+  background-color: #F9F9F9;
+  font-weight: 500;
+}
+
+/* 결과 목록 컨테이너 */
+.result-container,
+.deposit-container {
+  padding: 16px;
+  background-color: #FFFFFF;
+  border-radius: 14px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
