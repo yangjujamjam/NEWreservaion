@@ -33,7 +33,7 @@ const DEFAULT_BUTTON_INFO = {
 /** 무통장 템플릿 (TZ_1481) - 버튼(채널추가) 포함 */
 const TEMPLATE_CODE_BANK = 'TZ_1481';
 const TEMPLATE_TEXT_BANK = 
-`고객님 예약 신청해 주셔서 
+고객님 예약 신청해 주셔서 
 진심으로 감사드립니다.
 
 #{파싱내용}
@@ -56,12 +56,12 @@ const TEMPLATE_TEXT_BANK =
 
 ▶ 수영장은 체크인 시간 2시간 전부터 이용 가능합니다.
 
-※예약 내용을 다시 한번 확인하시고 수정 또는 변경 사항이 있으면 연락 바랍니다.`;
+※예약 내용을 다시 한번 확인하시고 수정 또는 변경 사항이 있으면 연락 바랍니다.;
 
 /** 숙박 템플릿 (TZ_1466) - 버튼(채널추가) 포함 */
 const TEMPLATE_CODE_LODGING = 'TZ_1466';
 const TEMPLATE_TEXT_LODGING = 
-`예약해 주셔서 진심으로 감사합니다♪
+예약해 주셔서 진심으로 감사합니다♪
 
 #{파싱내용}
 
@@ -102,12 +102,12 @@ const TEMPLATE_TEXT_LODGING =
 입실 4일 전 : 60,000원
 입실 2일 전 : 변경 불가
 
-※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.`;
+※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.;
 
 /** 당일(대실) 템플릿 (TZ_1465) - 버튼(채널추가) 포함 */
 const TEMPLATE_CODE_DAYUSE = 'TZ_1465';
 const TEMPLATE_TEXT_DAYUSE =
-`예약해 주셔서 진심으로 감사합니다♪
+예약해 주셔서 진심으로 감사합니다♪
 
 ■ 선택하신 이용시간은
 #{이용시간}이며, 예약하신 방문 시간을 꼭 지켜주시기 바랍니다.
@@ -144,7 +144,7 @@ const TEMPLATE_TEXT_DAYUSE =
 - 입실 3일 전 : 70%  
 - 입실 2일 전~당일 : 100%
 
-※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.`;
+※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.;
 
 /** =========================================
  *  [3] 붙여넣기/수기작성 탭 → "알림톡 보내기" 로직
@@ -202,10 +202,10 @@ async function sendAlimtalk() {
   // (c) 치환
   const usageTimeReplaced = (data.입실시간||'').replace('[당일캠핑] ','');
   const formattedOption = data.옵션 
-    ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n')
+    ? data.옵션.split(',').map(opt => ▶${opt.trim()}).join('\n')
     : '없음';
 
-  const parsingContent = `
+  const parsingContent = 
 - 예약번호: ${data.예약번호}
 - 예약자: ${data.예약자}
 - 전화번호: ${data.전화번호}
@@ -216,7 +216,7 @@ async function sendAlimtalk() {
 ${formattedOption}
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
-- 결제금액: ${data.결제금액}`.trim();
+- 결제금액: ${data.결제금액}.trim();
 
   let messageText = templateText
     .replace('#{파싱내용}', parsingContent)
@@ -276,7 +276,7 @@ async function confirmPaymentAlimtalk(row) {
 
   // 1) 시트 L열='입금확인' 업데이트
   try {
-    const updateUrl = gasUrl + `?mode=updateDeposit&rowIndex=${row.rowIndex}&newValue=입금확인`;
+    const updateUrl = gasUrl + ?mode=updateDeposit&rowIndex=${row.rowIndex}&newValue=입금확인;
     const res = await fetch(updateUrl);
     const text = await res.text();
     if(!(text.includes("완료") || text.includes("성공"))) {
@@ -318,12 +318,13 @@ function sendAlimtalkForDeposit(row) {
   // 2) #{이용시간} 치환 (당일만)
   let usageTime = '';
   if(!isStay) {
+    // 이용기간에서 시간패턴 추출 or 입실시간 "[당일캠핑]" 제거
     const match = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
     usageTime = match ? match[1] : (row.입실시간 || '').replace('[당일캠핑]','').trim();
   }
 
   // 3) #{파싱내용}
-  const parsingContent = `
+  const parsingContent = 
 - 예약번호: ${row.예약번호}
 - 예약자: ${row.예약자}
 - 전화번호: ${row.전화번호}
@@ -332,7 +333,7 @@ function sendAlimtalkForDeposit(row) {
 - 옵션: ${row.옵션 || '없음'}
 - 총이용인원: ${row.총이용인원}
 - 입실시간: ${row.입실시간}
-- 결제금액: ${row.결제금액}`.trim();
+- 결제금액: ${row.결제금액}.trim();
 
   let finalText = tplText
     .replace('#{이용시간}', usageTime)
@@ -352,10 +353,12 @@ function sendAlimtalkForDeposit(row) {
     failover:   'N'
   });
 
+  // (중요) 무통장 입금확인 시 → 숙박=TZ_1466, 당일=TZ_1465 모두 버튼(채널추가)
   if (tplCode === 'TZ_1466' || tplCode === 'TZ_1465') {
     params.append('button_1', JSON.stringify(DEFAULT_BUTTON_INFO));
   }
 
+  // 4) fetch
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
@@ -380,9 +383,10 @@ function sendAlimtalkForDeposit(row) {
  *      => (웹링크 버튼 5개)
  * ========================================= */
 
+/** 전날 숙박템플릿 (TY_8998) : 버튼 5개(웹링크) */
 const TEMPLATE_REMIND_LODGING_CODE = 'TY_8998';
 const TEMPLATE_REMIND_LODGING_TEXT =
-`안녕하세요 양주잼잼입니다. 
+안녕하세요 양주잼잼입니다. 
 방문 전  확인 부탁드리겠습니다.
 
 ■ 숙박 이용안내
@@ -443,11 +447,11 @@ const TEMPLATE_REMIND_LODGING_TEXT =
 ■ 개인 준비물
 - 음식, 개인 세면도구, 휴대폰 충전기
 - 수영복, 물놀이 튜브, 구명조끼, 슬리퍼
-- 비치타올/담요`;
+- 비치타올/담요;
 
 const TEMPLATE_REMIND_DAYUSE_CODE = 'TZ_1472';
 const TEMPLATE_REMIND_DAYUSE_TEXT =
-`안녕하세요 양주잼잼입니다. 
+안녕하세요 양주잼잼입니다. 
 방문 전  확인 부탁드리겠습니다.
 
 ■ 당일캠핑 이용 안내
@@ -499,7 +503,7 @@ const TEMPLATE_REMIND_DAYUSE_TEXT =
 ■ 개인 준비물
 - 음식, 개인 세면도구, 휴대폰 충전기
 - 수영복, 튜브, 구명조끼, 슬리퍼
-- 비치타올/담요`;
+- 비치타올/담요;
 
 /**
  * 전날메세지 -> 숙박/당일
@@ -530,7 +534,7 @@ async function sendOneReminder(row) {
     failover:   'N'
   });
 
-  // 전날메세지: 5개 웹링크 버튼
+  // 웹링크 버튼(5개)
   const buttons = {
     button: [
       {
@@ -575,10 +579,10 @@ async function sendOneReminder(row) {
     });
     const result = await res.json();
     if (result.code === 0) {
-      console.log(`[${row.예약번호}] 전날메세지 성공`);
+      console.log([${row.예약번호}] 전날메세지 성공);
       return true;
     } else {
-      console.warn(`[${row.예약번호}] 전날메세지 실패: ${result.message}`);
+      console.warn([${row.예약번호}] 전날메세지 실패: ${result.message});
       return false;
     }
   } catch (err) {
@@ -593,7 +597,7 @@ async function sendOneReminder(row) {
  * ========================================= */
 const TEMPLATE_CHECKOUT_STAY_CODE = 'TZ_1475';
 const TEMPLATE_CHECKOUT_STAY_TEXT =
-`■ 퇴실 전 체크아웃 안내
+■ 퇴실 전 체크아웃 안내
 
 금일 퇴실 시간은 #{퇴실시간}시입니다.
 TV 리모콘이 들어있는 바구니와 함께
@@ -610,11 +614,11 @@ TV 리모콘이 들어있는 바구니와 함께
 -개인 짐 놓고 가신 경우 1주일간 보관 후 폐기됩니다.
 -남은 음식물은 즉시 폐기되오니 양해 바랍니다.
 
-잊으신 물건이 없는지 꼼꼼히 확인하시고, 즐거운 추억만 가득 담아 가시길 바랍니다.`;
+잊으신 물건이 없는지 꼼꼼히 확인하시고, 즐거운 추억만 가득 담아 가시길 바랍니다.;
 
 const TEMPLATE_CHECKOUT_DAY_CODE = 'TZ_1476';
 const TEMPLATE_CHECKOUT_DAY_TEXT =
-`■ 퇴실 전 확인사항
+■ 퇴실 전 확인사항
 
 ▶퇴실 시간은 #{퇴실시간} 입니다.
 퇴실 시 놓고 가신 물건이 없는지 반드시 확인해 주세요.
@@ -636,7 +640,7 @@ const TEMPLATE_CHECKOUT_DAY_TEXT =
 -참숯, 장작 추가 구매: 오후 9시 이전 전화 주문 필수
 -문의사항: 관리동 010-5905-5559
 
-이용해 주셔서 감사합니다.`;
+이용해 주셔서 감사합니다.;
 
 /** 퇴실메세지(숙박) → row.stayOutR */
 async function sendCheckoutStayOne(row) {
@@ -668,10 +672,10 @@ async function sendCheckoutStayOne(row) {
     });
     const result = await res.json();
     if(result.code===0){
-      console.log(`[${row.예약번호}] 퇴실(숙박) OK`);
+      console.log([${row.예약번호}] 퇴실(숙박) OK);
       return true;
     } else {
-      console.warn(`[${row.예약번호}] 퇴실(숙박) FAIL: ${result.message}`);
+      console.warn([${row.예약번호}] 퇴실(숙박) FAIL: ${result.message});
       return false;
     }
   } catch(e){
@@ -710,10 +714,10 @@ async function sendCheckoutDayOne(row) {
     });
     const result = await res.json();
     if(result.code===0){
-      console.log(`[${row.예약번호}] 퇴실(당일) OK`);
+      console.log([${row.예약번호}] 퇴실(당일) OK);
       return true;
     } else {
-      console.warn(`[${row.예약번호}] 퇴실(당일) FAIL: ${result.message}`);
+      console.warn([${row.예약번호}] 퇴실(당일) FAIL: ${result.message});
       return false;
     }
   } catch(e){
@@ -727,7 +731,7 @@ async function sendCheckoutDayOne(row) {
  * ========================================= */
 const TEMPLATE_MANNER_CODE = 'TY_8981';
 const TEMPLATE_MANNER_TEXT =
-`■ 매너타임 안내
+■ 매너타임 안내
 
 양주잼잼 글램핑을 방문해 주셔서 감사합니다.
 모두가 편안한 시간을 보낼 수 있도록 다음 사항을 준수해 주세요.
@@ -761,7 +765,7 @@ const TEMPLATE_MANNER_TEXT =
 ■ 참숯·장작 추가 구매
 - 밤 9시 이전 카톡 또는 전화로 주문 필수
 
-협조해 주셔서 감사합니다.`;
+협조해 주셔서 감사합니다.;
 
 /** 매너타임 → TY_8981 (버튼 없음) */
 async function sendMannerOne(row) {
@@ -790,30 +794,14 @@ async function sendMannerOne(row) {
     });
     const result = await res.json();
     if(result.code===0){
-      console.log(`[${row.예약번호}] 매너타임 OK`);
+      console.log([${row.예약번호}] 매너타임 OK);
       return true;
     } else {
-      console.warn(`[${row.예약번호}] 매너타임 FAIL: ${result.message}`);
+      console.warn([${row.예약번호}] 매너타임 FAIL: ${result.message});
       return false;
     }
   } catch(e){
     console.error(e);
     return false;
-  }
-}
-
-/** =========================================
- *  [8] (옵션) 발송 후 S열에 시간 기록
- *      원하시면 아래 함수 & 각 전송 성공 시점에 호출
- * ========================================= */
-
-async function updateSendTimestamp(rowIndex) {
-  const url = gasUrl + `?mode=updateSendStamp&rowIndex=${rowIndex}`;
-  try {
-    const res = await fetch(url);
-    const txt = await res.text();
-    console.log(`updateSendTimestamp(${rowIndex}): ${txt}`);
-  } catch (err) {
-    console.error(err);
   }
 }
