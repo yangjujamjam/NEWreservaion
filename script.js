@@ -1034,10 +1034,14 @@ async function loadTomorrowData() {
     const res = await fetch(url);
     const list = await res.json();
 
+    const todayStr    = getTodayString();
     const tomorrowStr = getTomorrowString();
     reminderList = list.filter(row => {
       const period = (row.이용기간 || "").trim();
-      return period.startsWith(tomorrowStr);
+      return (
+        period.startsWith(todayStr) ||
+        period.startsWith(tomorrowStr)
+      );
     });
 
     if (reminderList.length === 0) {
@@ -1115,6 +1119,15 @@ function getTomorrowString() {
   const d = tomorrow.getDate();
   const dayKorean = ['일','월','화','수','목','금','토'][tomorrow.getDay()];
 
+  return `${y}. ${m}. ${d}.(${dayKorean})`;
+}
+
+function getTodayString() {
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = today.getMonth() + 1;
+  const d = today.getDate();
+  const dayKorean = ['일','월','화','수','목','금','토'][today.getDay()];
   return `${y}. ${m}. ${d}.(${dayKorean})`;
 }
 
