@@ -5,7 +5,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbyqWlGvIisddyxM63b4FGxp3GVPdmz5EQvuojYGL3DvlDLKngm7R5uuX1Qgi2wJGa0Q/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbx95r-2UJgvmLkq_LLIldiU3RZXmhPq2OEFo1fvmaDLbmWAw_yyixsaPb7BdOYONiPo/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
