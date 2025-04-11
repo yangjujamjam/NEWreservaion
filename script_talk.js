@@ -318,7 +318,6 @@ function sendAlimtalkForDeposit(row) {
   // 2) #{이용시간} 치환 (당일만)
   let usageTime = '';
   if(!isStay) {
-    // 이용기간에서 시간패턴 추출 or 입실시간 "[당일캠핑]" 제거
     const match = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
     usageTime = match ? match[1] : (row.입실시간 || '').replace('[당일캠핑]','').trim();
   }
@@ -353,12 +352,10 @@ function sendAlimtalkForDeposit(row) {
     failover:   'N'
   });
 
-  // (중요) 무통장 입금확인 시 → 숙박=TZ_1466, 당일=TZ_1465 모두 버튼(채널추가)
   if (tplCode === 'TZ_1466' || tplCode === 'TZ_1465') {
     params.append('button_1', JSON.stringify(DEFAULT_BUTTON_INFO));
   }
 
-  // 4) fetch
   fetch(ALIMTALK_API_URL, {
     method: 'POST',
     headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
@@ -383,7 +380,6 @@ function sendAlimtalkForDeposit(row) {
  *      => (웹링크 버튼 5개)
  * ========================================= */
 
-/** 전날 숙박템플릿 (TY_8998) : 버튼 5개(웹링크) */
 const TEMPLATE_REMIND_LODGING_CODE = 'TY_8998';
 const TEMPLATE_REMIND_LODGING_TEXT =
 `안녕하세요 양주잼잼입니다. 
@@ -534,7 +530,7 @@ async function sendOneReminder(row) {
     failover:   'N'
   });
 
-  // 웹링크 버튼(5개)
+  // 전날메세지: 5개 웹링크 버튼
   const buttons = {
     button: [
       {
@@ -803,5 +799,21 @@ async function sendMannerOne(row) {
   } catch(e){
     console.error(e);
     return false;
+  }
+}
+
+/** =========================================
+ *  [8] (옵션) 발송 후 S열에 시간 기록
+ *      원하시면 아래 함수 & 각 전송 성공 시점에 호출
+ * ========================================= */
+
+async function updateSendTimestamp(rowIndex) {
+  const url = gasUrl + `?mode=updateSendStamp&rowIndex=${rowIndex}`;
+  try {
+    const res = await fetch(url);
+    const txt = await res.text();
+    console.log(`updateSendTimestamp(${rowIndex}): ${txt}`);
+  } catch (err) {
+    console.error(err);
   }
 }
