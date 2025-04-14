@@ -5,7 +5,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbxy2v9_-fiKM2UMPBVlYeQ5dEa-NkVK_U7JBXH7kACE2KS5UyvT6v_v5tDIXE2FD-w/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbyQ7OqB-vUR7tubfdELQqLaHaMTg021d4ZmMUqILC5Ziady3RJvaz2q2zQGHumjcPcl/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
@@ -1159,7 +1159,111 @@ function sendReminderMessages() {
 /** =========================================
  *  [11] 퇴실메세지(숙박) 탭
  * ========================================= */
+let reminderList = [];
+
+/** 로드 + "발송됨"인 경우 자동 제외 처리 */
+async function loadTomorrowData() {
+  const container = document.getElementById('reminderListContainer');
+  container.innerHTML = "불러오는 중...";
+
+  try {
+    const url = gasUrl + '?mode=fetchAll';
+    const res = await fetch(url);
+    const list = await res.json();
+
+    const todayStr    = getTodayString();
+    const tomorrowStr = getTomorrowString();
+    // 기존 요구사항: 오늘 + 내일 날짜 모두 필터
+    reminderList = list.filter(row => {
+      const period = (row.이용기간 || "").trim();
+      return (period.startsWith(todayStr) || period.startsWith(tomorrowStr));
+    });
+
+    if (reminderList.length === 0) {
+      container.innerHTML = "<p>내일 이용하는 예약이 없습니다.</p>";
+      return;
+    }
+
+    const table = document.createElement('table');
+    table.className = 'deposit-table';
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>예약자</th>
+          <th>전화번호</th>
+          <th>이용기간</th>
+          <th>제외</th>
+        </tr>
+      </thead>
+    `;
+    const tbody = document.createElement('tbody');
+
+    reminderList.forEach((row) => {
+      row.excluded = false;
+
+      // 테이블 행
+      const tr = document.createElement('tr');
+
+      // (1) 만약 이미 S열이 '발송됨' 이라면 자동 제외 처리
+      //     row.sendStamp가 Code.gs에서 fetchAll()시 반환된 값
+      if (row.sendStamp === '발송됨') {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+      }
+
+      // 셀들
+      const td1 = document.createElement('td');
+      td1.textContent = row.예약자;
+      tr.appendChild(td1);
+
+      const td2 = document.createElement('td');
+      td2.textContent = row.전화번호;
+      tr.appendChild(td2);
+
+      const td3 = document.createElement('td');
+      td3.textContent = row.이용기간;
+      tr.appendChild(td3);
+
+      // 제외 버튼
+      const td4 = document.createElement('td');
+      const excludeBtn = document.createElement('button');
+      excludeBtn.textContent = '제외';
+      excludeBtn.style.backgroundColor = '#dc3545';
+      excludeBtn.style.color = '#fff';
+
+      // (2) 이미 row.excluded=true이면 버튼 비활성화
+      if (row.excluded) {
+        excludeBtn.disabled = true;
+      }
+
+      excludeBtn.onclick = () => {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+        excludeBtn.disabled = true;
+      };
+      td4.appendChild(excludeBtn);
+      tr.appendChild(td4);
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+    container.innerHTML = "";
+    container.appendChild(table);
+
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "오류 발생 (콘솔 확인)";
+  }
+}
+
+/** =========================================
+ *  [11] 퇴실메세지(숙박) 탭
+ * ========================================= */
 let checkoutStayList = [];
+
 async function loadCheckoutStayData() {
   const container = document.getElementById('checkoutStayListContainer');
   container.innerHTML = "불러오는 중...";
@@ -1172,7 +1276,7 @@ async function loadCheckoutStayData() {
     const todayStr = getTodayString();
     checkoutStayList = list.filter(row => {
       const period = (row.이용기간||'').trim();
-      if (!period.includes('~')) return false;
+      if (!period.includes('~')) return false; 
       const parts = period.split('~').map(p => p.trim());
       if (parts.length<2) return false;
       const lastDate = parts[1];
@@ -1204,6 +1308,14 @@ async function loadCheckoutStayData() {
 
       const tr = document.createElement('tr');
 
+      // (1) S열 '발송됨'이면 자동 제외
+      if (row.sendStamp === '발송됨') {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+      }
+
+      // 셀들
       const td1 = document.createElement('td');
       td1.textContent = row.예약자;
       tr.appendChild(td1);
@@ -1220,12 +1332,17 @@ async function loadCheckoutStayData() {
       td4.textContent = row.stayOutR;
       tr.appendChild(td4);
 
-      // "제외" 버튼
       const td5 = document.createElement('td');
       const excludeBtn = document.createElement('button');
       excludeBtn.textContent = '제외';
       excludeBtn.style.backgroundColor = '#dc3545';
       excludeBtn.style.color = '#fff';
+
+      // (2) 이미 제외=true면 버튼 비활성화
+      if (row.excluded) {
+        excludeBtn.disabled = true;
+      }
+
       excludeBtn.onclick = () => {
         row.excluded = true;
         tr.style.textDecoration = 'line-through';
@@ -1270,6 +1387,7 @@ function sendCheckoutStayMessages() {
  *  [12] 퇴실메세지(당일) 탭
  * ========================================= */
 let checkoutDayList = [];
+
 async function loadCheckoutDayData() {
   const container = document.getElementById('checkoutDayListContainer');
   container.innerHTML = "불러오는 중...";
@@ -1282,7 +1400,7 @@ async function loadCheckoutDayData() {
     const todayStr = getTodayString();
     checkoutDayList = list.filter(row => {
       const period = (row.이용기간||'').trim();
-      if (period.includes('~')) return false;
+      if (period.includes('~')) return false; 
       return period===todayStr;
     });
 
@@ -1290,7 +1408,6 @@ async function loadCheckoutDayData() {
       container.innerHTML="<p>오늘 퇴실(당일) 대상이 없습니다.</p>";
       return;
     }
-
     const table = document.createElement('table');
     table.className = 'deposit-table';
     table.innerHTML = `
@@ -1311,6 +1428,14 @@ async function loadCheckoutDayData() {
 
       const tr = document.createElement('tr');
 
+      // (1) S열='발송됨'이면 자동 제외
+      if (row.sendStamp === '발송됨') {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+      }
+
+      // 셀들
       const td1 = document.createElement('td');
       td1.textContent = row.예약자;
       tr.appendChild(td1);
@@ -1327,12 +1452,16 @@ async function loadCheckoutDayData() {
       td4.textContent = row.dayOutQ;
       tr.appendChild(td4);
 
-      // 제외 버튼
       const td5 = document.createElement('td');
       const excludeBtn = document.createElement('button');
       excludeBtn.textContent = '제외';
       excludeBtn.style.backgroundColor = '#dc3545';
       excludeBtn.style.color = '#fff';
+
+      if(row.excluded) {
+        excludeBtn.disabled = true;
+      }
+
       excludeBtn.onclick = () => {
         row.excluded = true;
         tr.style.textDecoration = 'line-through';
@@ -1377,6 +1506,7 @@ function sendCheckoutDayMessages() {
  *  [13] 매너타임 탭
  * ========================================= */
 let mannerList = [];
+
 async function loadMannerData() {
   const container = document.getElementById('mannerListContainer');
   container.innerHTML = "불러오는 중...";
@@ -1400,7 +1530,6 @@ async function loadMannerData() {
       container.innerHTML = "<p>오늘 매너타임 대상(숙박) 없습니다.</p>";
       return;
     }
-
     const table = document.createElement('table');
     table.className = 'deposit-table';
     table.innerHTML = `
@@ -1417,9 +1546,16 @@ async function loadMannerData() {
 
     mannerList.forEach(row=>{
       row.excluded = false;
-
       const tr = document.createElement('tr');
 
+      // (1) '발송됨'이면 제외
+      if (row.sendStamp === '발송됨') {
+        row.excluded = true;
+        tr.style.textDecoration = 'line-through';
+        tr.style.color = 'red';
+      }
+
+      // 셀들
       const td1 = document.createElement('td');
       td1.textContent = row.예약자;
       tr.appendChild(td1);
@@ -1432,12 +1568,16 @@ async function loadMannerData() {
       td3.textContent = row.이용기간;
       tr.appendChild(td3);
 
-      // 제외 버튼
       const td4 = document.createElement('td');
       const excludeBtn = document.createElement('button');
       excludeBtn.textContent = '제외';
       excludeBtn.style.backgroundColor = '#dc3545';
       excludeBtn.style.color = '#fff';
+
+      if(row.excluded) {
+        excludeBtn.disabled = true;
+      }
+
       excludeBtn.onclick = () => {
         row.excluded = true;
         tr.style.textDecoration = 'line-through';
@@ -1477,6 +1617,7 @@ function sendMannerMessages() {
     alert(`매너타임 메세지 완료\n성공=${success}, 실패=${fail}`);
   })();
 }
+
 
 /** 공통: 오늘 날짜 "YYYY. M. D.(요일)" */
 function getTodayString() {
