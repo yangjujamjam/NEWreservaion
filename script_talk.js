@@ -576,6 +576,7 @@ async function sendOneReminder(row) {
     const result = await res.json();
     if (result.code === 0) {
       console.log(`[${row.예약번호}] 전날메세지 성공`);
+      await updateSendTimestamp(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 전날메세지 실패: ${result.message}`);
@@ -669,6 +670,7 @@ async function sendCheckoutStayOne(row) {
     const result = await res.json();
     if(result.code===0){
       console.log(`[${row.예약번호}] 퇴실(숙박) OK`);
+      await updateSendTimestamp(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 퇴실(숙박) FAIL: ${result.message}`);
@@ -711,6 +713,7 @@ async function sendCheckoutDayOne(row) {
     const result = await res.json();
     if(result.code===0){
       console.log(`[${row.예약번호}] 퇴실(당일) OK`);
+      await updateSendTimestamp(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 퇴실(당일) FAIL: ${result.message}`);
@@ -791,6 +794,7 @@ async function sendMannerOne(row) {
     const result = await res.json();
     if(result.code===0){
       console.log(`[${row.예약번호}] 매너타임 OK`);
+      await updateSendTimestamp(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 매너타임 FAIL: ${result.message}`);
@@ -803,10 +807,10 @@ async function sendMannerOne(row) {
 }
 
 /**
- * updateSendTimestamp(rowIndex) 함수
- * - GAS 웹앱의 mode=updateSendStamp를 호출하여 시트1의 S열(19번 열)에 "발송됨"을 기록
+ * updateSendTimestamp(rowIndex)
+ *  - Code.gs (mode=updateSendStamp)로 호출
+ *  - 시트1 S열(19)='발송됨'
  */
-
 async function updateSendTimestamp(rowIndex) {
   const url = gasUrl + `?mode=updateSendStamp&rowIndex=${rowIndex}`;
   try {
