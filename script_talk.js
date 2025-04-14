@@ -802,10 +802,10 @@ async function sendMannerOne(row) {
   }
 }
 
-/** =========================================
- *  [8] (옵션) 발송 후 S열에 시간 기록
- *      원하시면 아래 함수 & 각 전송 성공 시점에 호출
- * ========================================= */
+/**
+ * updateSendTimestamp(rowIndex) 함수
+ * - GAS 웹앱의 mode=updateSendStamp를 호출하여 시트1의 S열(19번 열)에 "발송됨"을 기록
+ */
 
 async function updateSendTimestamp(rowIndex) {
   const url = gasUrl + `?mode=updateSendStamp&rowIndex=${rowIndex}`;
