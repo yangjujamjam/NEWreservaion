@@ -576,6 +576,9 @@ async function sendOneReminder(row) {
     const result = await res.json();
     if (result.code === 0) {
       console.log(`[${row.예약번호}] 전날메세지 성공`);
+
+      await fetch(`${gasUrl}?mode=updateReminder&rowIndex=${row.rowIndex}&newValue=발송됨`);
+
       await updateSendTimestamp(row.rowIndex);
       return true;
     } else {
