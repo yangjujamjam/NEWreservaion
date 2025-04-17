@@ -14,13 +14,14 @@ window.onload = function() {
   showTab('paste');  // 기본 탭: "붙여넣기"
   buildCalendar();    // 달력 초기화
   fetchLastCContent();
+  initReserveAlertSelectors();
 };
 
 /** =========================================
  *  [3] 탭 전환
  * ========================================= */
 function showTab(tabName) {
-  const tabs = ['paste','manual','deposit','reminder','checkoutStay','checkoutDay','manner'];
+  const tabs = ['paste','manual','deposit','reminder','checkoutStay','checkoutDay','manner','reserveAlert'];
   tabs.forEach(name => {
     document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).style.display = (tabName===name?'block':'none');
     document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)+'Btn')?.classList.toggle('active', tabName===name);
@@ -1541,7 +1542,7 @@ function sendMannerMessages(){
       const r= await sendMannerOne(row);
       if(r){
         success++;
-        // S열='발송됨'
+        
         await updateSendTimestamp(row.rowIndex);
       } else {
         fail++;
@@ -1567,3 +1568,147 @@ async function fetchLastCContent() {
     console.error('마지막 C열 가져오기 실패:', err);
   }
 }
+
+
+function initReserveAlertSelectors(){
+  const thisYear = new Date().getFullYear();
+
+  // 저장용 연도/월
+  const ySel1 = document.getElementById('preReserveYear');
+  const mSel1 = document.getElementById('preReserveMonth');
+  if(ySel1 && mSel1) {
+    ySel1.innerHTML = `<option value="${thisYear}">${thisYear}</option>`;
+    for(let m=1; m<=12; m++){
+      const opt = document.createElement('option');
+      opt.value = String(m);
+      opt.textContent = m+'월';
+      mSel1.appendChild(opt);
+    }
+  }
+   // 조회용 연도/월
+  const ySel2 = document.getElementById('searchReserveYear');
+  const mSel2 = document.getElementById('searchReserveMonth');
+  if(ySel2 && mSel2) {
+    ySel2.innerHTML = `<option value="${thisYear}">${thisYear}</option>`;
+    for(let m=1; m<=12; m++){
+      const opt = document.createElement('option');
+      opt.value = String(m);
+      opt.textContent = m+'월';
+      mSel2.appendChild(opt);
+    }
+  }
+}
+
+function formatPhone344(el){
+  // 숫자만 추출
+  let digits = el.value.replace(/\D/g,'');
+  if(digits.length > 11){
+    digits = digits.substring(0,11);
+  }
+  // 3-4-4
+  if(digits.length <= 3){
+    el.value = digits;
+  } else if(digits.length <= 7){
+    el.value = digits.slice(0,3)+'-'+digits.slice(3);
+  } else {
+    el.value = digits.slice(0,3)+'-'+digits.slice(3,7)+'-'+digits.slice(7);
+  }
+}
+async function savePreReservation(){
+  const phone = document.getElementById('preReservePhone').value.trim();
+  const year  = document.getElementById('preReserveYear').value.trim();
+  let month   = document.getElementById('preReserveMonth').value.trim();
+
+  // "3-4-4" 꼭 13자여야 한다면 체크
+  // 연도/월 필수 체크
+  if(!phone || !year || !month){
+    alert("전화번호/연도/월을 모두 입력하세요.");
+    return;
+  }
+
+  // month에서 '월' 문자를 제거 (ex '3월' -> '3')
+  month = month.replace(/\D/g,'');
+
+  try {
+    const params = new URLSearchParams({
+      mode: 'addPreReservation',
+      phone,
+      year,
+      month
+    });
+    const url = gasUrl + '?' + params.toString();
+    const res = await fetch(url);
+    const txt = await res.text();
+    alert(txt);  // "저장 완료" or "중복된 전화번호" 등
+  } catch(err){
+    console.error(err);
+    alert("오류 발생");
+  }
+}
+async function loadPreReservationList(){
+  const year  = document.getElementById('searchReserveYear').value.trim();
+  let month   = document.getElementById('searchReserveMonth').value.trim().replace(/\D/g,'');
+
+  if(!year || !month){
+    alert("연도와 월을 선택해 주세요.");
+    return;
+  }
+
+  try {
+    // code.gs에서 해당 연도+월 목록을 가져올 API를 추가할 것
+    const url = gasUrl + '?mode=getPreReservationList'
+                + '&year='+year
+                + '&month='+month;
+    const res = await fetch(url);
+    const dataList = await res.json();  // [{phone:'010-1234-5678', year:'2025', month:'3'}, ...]
+    renderPreReservationList(dataList);
+  } catch(err){
+    console.error(err);
+    alert("조회 중 오류 발생");
+  }
+}
+
+function renderPreReservationList(list){
+  const container = document.getElementById('preReserveListContainer');
+  container.innerHTML = "";
+
+  if(!list || !list.length){
+    container.textContent = "해당 연도/월에 등록된 전화번호가 없습니다.";
+    return;
+  }
+
+  const table = document.createElement('table');
+  table.className = 'deposit-table';
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>전화번호</th>
+        <th>연도</th>
+        <th>월</th>
+      </tr>
+    </thead>
+  `;
+  const tbody = document.createElement('tbody');
+
+  list.forEach(item=>{
+    const tr = document.createElement('tr');
+    const td1= document.createElement('td');
+    td1.textContent = item.phone;
+    tr.appendChild(td1);
+
+    const td2= document.createElement('td');
+    td2.textContent = item.year;
+    tr.appendChild(td2);
+
+    const td3= document.createElement('td');
+    td3.textContent = item.month;
+    tr.appendChild(td3);
+
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+
