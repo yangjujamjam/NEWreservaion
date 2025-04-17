@@ -1207,15 +1207,13 @@ async function loadCheckoutStayData() {
     const tbody= document.createElement("tbody");
 
     checkoutStayList.forEach(row=>{
-      row.excluded = (row.sendStamp === "발송됨" || row.colV === "발송됨");
+      row.excluded = row.sendStamp === "발송됨" || row.colV === "발송됨"; // 여기서 V열 확인 추가
 
       const tr= document.createElement("tr");
 
-      // S열='발송됨' => 제외
-      if(row.sendStamp==="발송됨"){
-        row.excluded=true;
-        tr.style.textDecoration="line-through";
-        tr.style.color="red";
+      if (row.excluded) {
+        tr.style.textDecoration = "line-through";
+        tr.style.color = "red";
       }
 
       const td1= document.createElement("td");
@@ -1330,14 +1328,13 @@ async function loadCheckoutDayData(){
     const tbody= document.createElement("tbody");
 
     checkoutDayList.forEach(row=>{
-      row.excluded = (row.sendStamp === "발송됨" || row.colW === "발송됨");
+      row.excluded = row.sendStamp === "발송됨" || row.colW === "발송됨"; // 여기서 W열 확인 추가
 
       const tr= document.createElement("tr");
 
-      if(row.sendStamp==="발송됨"){
-        row.excluded=true;
-        tr.style.textDecoration="line-through";
-        tr.style.color="red";
+      if (row.excluded) {
+        tr.style.textDecoration = "line-through";
+        tr.style.color = "red";
       }
 
       const td1= document.createElement("td");
@@ -1455,13 +1452,12 @@ async function loadMannerData(){
     const tbody= document.createElement("tbody");
 
     mannerList.forEach(row=>{
-      row.excluded = (row.sendStamp === "발송됨" || row.colX === "발송됨");
+      row.excluded = row.sendStamp === "발송됨" || row.colX === "발송됨"; // 여기서 X열 확인 추가
       const tr= document.createElement("tr");
 
-      if(row.sendStamp==="발송됨"){
-        row.excluded=true;
-        tr.style.textDecoration="line-through";
-        tr.style.color="red";
+      if (row.excluded) {
+        tr.style.textDecoration = "line-through";
+        tr.style.color = "red";
       }
 
       const td1= document.createElement("td");
