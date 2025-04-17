@@ -828,3 +828,118 @@ async function updateSendX(rowIndex) {  // 매너타임 (X열)
   const url = gasUrl + `?mode=updateManner&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
+
+async function sendPreReserveTalk(){
+  // 현재 조회된 연도/월
+  const year  = document.getElementById('searchReserveYear').value.trim();
+  let month   = document.getElementById('searchReserveMonth').value.trim().replace(/\D/g,'');
+
+  if(!year || !month){
+    alert("연도/월이 선택되지 않았습니다.");
+    return;
+  }
+
+  // 목록 컨테이너에서 전화번호들 읽어오기
+  const rows = document.querySelectorAll('#preReserveListContainer table tbody tr');
+  if(!rows.length){
+    alert("보낼 대상이 없습니다.");
+    return;
+  }
+
+  const phones = [];
+  rows.forEach(tr=>{
+    const tds = tr.querySelectorAll('td');
+    const p = tds[0].textContent.trim();   // 전화번호
+    // year= tds[1].textContent.trim();
+    // month= tds[2].textContent.trim();
+    phones.push(p);
+  });
+
+  if(!phones.length){
+    alert("대상이 없습니다.");
+    return;
+  }
+
+  const ok = confirm(`총 ${phones.length}명에게 사전알림톡을 보낼까요?`);
+  if(!ok) return;
+
+  // 하나씩 전송
+  let success =0, fail=0;
+  for(let i=0; i<phones.length; i++){
+    const phone = phones[i];
+    const res = await sendPreReserveTalkOne(phone, year, month);
+    if(res) success++;
+    else fail++;
+  }
+
+  alert(`사전알림톡 전송완료\n성공=${success} / 실패=${fail}`);
+}
+
+////////////////////////////////////
+// 사전알림톡 (TZ_3719) - 웹링크 1개
+////////////////////////////////////
+const TEMPLATE_CODE_PREOPEN = 'TZ_3719';
+const TEMPLATE_TEXT_PREOPEN = 
+`안녕하세요, 양주잼잼 글램핑입니다.
+
+오픈 알림 신청하신 #{월}월 실시간 예약이 지금 오픈되었습니다. 
+실시간 예약은 아래에 있는 바로가기 버튼을 눌러 이용하실 수 있습니다.
+
+인기 있는 날짜는 빠르게 마감될 수 있으니,
+원하시는 날짜가 있으시면 조금 서둘러 예약 부탁드립니다.
+
+고객님의 소중한 휴식과 즐거운 추억을 위해 최선을 다하겠습니다.
+항상 감사합니다.`;
+
+async function sendPreReserveTalkOne(phone, year, month) {
+  // 1) 메시지 텍스트 치환
+  const msg = TEMPLATE_TEXT_PREOPEN.replace('#{월}', month);
+
+  // 2) 버튼 (웹링크 1개)
+  const buttonObj = {
+    button: [
+      {
+        name: "실시간 예약 바로가기",
+        linkType: "WL",
+        linkMo: "https://naver.me/5l7kbLzr",
+        linkPc: "https://naver.me/5l7kbLzr"
+      }
+    ]
+  };
+
+  // 3) 알리고 파라미터
+  const params = new URLSearchParams({
+    apikey:    ALIMTALK_API_KEY,
+    userid:    ALIMTALK_USER_ID,
+    senderkey: ALIMTALK_SENDERKEY,
+    tpl_code:  TEMPLATE_CODE_PREOPEN,
+    sender:    ALIMTALK_SENDER,
+
+    receiver_1: phone.replace(/\D/g,''), // 숫자만
+    recvname_1: '고객님',
+    subject_1:  '예약 오픈 안내',
+    message_1:  msg,
+    failover:   'N'
+  });
+  params.append('button_1', JSON.stringify(buttonObj));
+
+  // 4) 전송
+  try {
+    const res = await fetch(ALIMTALK_API_URL, {
+      method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body: params
+    });
+    const result = await res.json();
+    if(result.code===0){
+      console.log(`[사전알림] ${phone} OK`);
+      return true;
+    } else {
+      console.warn(`[사전알림] ${phone} FAIL: ${result.message}`);
+      return false;
+    }
+  } catch(e){
+    console.error(e);
+    return false;
+  }
+}
