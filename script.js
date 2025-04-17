@@ -1551,11 +1551,28 @@ function savePreReservation() {
     });
 }
 
-function selectMonth(month) {
-  const buttons = document.querySelectorAll('.month-select-button button');
-  buttons.forEach(btn => btn.classList.remove('selected'));
-  buttons[month - 1].classList.add('selected');
+function selectPreMonth(month) {
+  selectedMonth = month;
+  updatePreReservationCount(month);
+}
 
-  selectedMonth = month;  // 선택된 월을 글로벌 변수에 저장
-  updatePreReservationCount(month); // 선택된 월의 개수 업데이트
+function updatePreReservationCount(month) {
+  fetch(`${gasUrl}?mode=getPreReservationCount&month=${month}`)
+    .then(res => res.text())
+    .then(count => {
+      document.getElementById('preReservationCount').innerText = `현재 선택한 월의 사전예약 수: ${count}건`;
+    });
+}
+
+function sendPreReservationAlert() {
+  if (!selectedMonth) {
+    alert('먼저 월을 선택해주세요.');
+    return;
+  }
+
+  alert(`${selectedMonth}월의 사전예약 알림톡을 보냅니다.\n(알림톡 템플릿과 로직은 이후 제공해주세요.)`);
+}
+
+function onlyNumbers(el) {
+  el.value = el.value.replace(/\D/g, '');
 }
