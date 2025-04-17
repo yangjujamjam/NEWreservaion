@@ -5,7 +5,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbyHkYFL1SuanwweFR5AnVH7WkVVrHCq3OIkEfNWH5Low5vu3qDnznOuhezNeuWWMF7B/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbxUSV3sj91RNsE1QdTWSDUc63wSHT5Wjm0EFewktwmTy9IobBRJIR1ZBzeHTauago2C/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
@@ -1527,3 +1527,52 @@ function sendMannerMessages(){
   })();
 }
 
+/** =========================================
+ *  [14] 사전예약 알림 탭
+ * ========================================= */
+let selectedMonth = "";
+
+function savePreReservation() {
+  const phone = document.getElementById('prePhoneNumber').value.trim();
+  const month = document.getElementById('preMonthSelect').value;
+  
+  if (!phone || !month) {
+    alert('전화번호와 월을 선택해주세요.');
+    return;
+  }
+
+  fetch(`${gasUrl}?mode=addPreReservation&phone=${phone}&month=${month}`)
+    .then(res => res.text())
+    .then(result => {
+      alert(result);
+      if (result === '저장 완료') {
+        updatePreReservationCount(month);
+      }
+    });
+}
+
+function selectPreMonth(month) {
+  selectedMonth = month;
+  updatePreReservationCount(month);
+}
+
+function updatePreReservationCount(month) {
+  fetch(`${gasUrl}?mode=getPreReservationCount&month=${month}`)
+    .then(res => res.text())
+    .then(count => {
+      document.getElementById('preReservationCount').innerText = `현재 선택한 월의 사전예약 수: ${count}건`;
+    });
+}
+
+function sendPreReservationAlert() {
+  if (!selectedMonth) {
+    alert('먼저 월을 선택해주세요.');
+    return;
+  }
+
+  alert(`${selectedMonth}월의 사전예약 알림톡을 보냅니다.\n(알림톡 템플릿과 로직은 이후 제공해주세요.)`);
+}
+
+function onlyNumbers(el) {
+  el.value = el.value.replace(/\D/g, '');
+}
