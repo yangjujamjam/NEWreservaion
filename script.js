@@ -121,6 +121,20 @@ function parseNaverReservation(text) {
     !unwantedOptions.some(unwanted => line.includes(unwanted))
   );
 
+  // 3) "요청사항" 파싱
+  const requestStartIndex = lines.findIndex(line => line.includes('요청사항'));
+  let requestEndIndex = lines.findIndex(line => line.includes('유입경로'));
+  if (requestEndIndex === -1) {
+    requestEndIndex = lines.length; // 요청사항 이후에 "유입경로"가 없으면 텍스트 끝까지
+  }
+  
+  const requestLines = (requestStartIndex !== -1 && requestEndIndex > requestStartIndex)
+    ? lines.slice(requestStartIndex + 1, requestEndIndex).filter(Boolean)
+    : [];
+    
+  // 이대로 합치면 "\n"으로 연결하든, ","로 연결하든 자유
+  const 요청사항 = requestLines.join('\n');
+
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
   if (totalPeopleIndex !== -1 && totalPeopleIndex + 1 < lines.length) {
