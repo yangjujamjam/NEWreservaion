@@ -5,7 +5,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbyHkYFL1SuanwweFR5AnVH7WkVVrHCq3OIkEfNWH5Low5vu3qDnznOuhezNeuWWMF7B/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbzysdX8RQFdP6uclyMrWaW8GqXuXwf7xTgRUTOUmq_3LpafF0NgVJJtxpOCtUfyCJAn/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
@@ -13,6 +13,7 @@ const gasUrl = 'https://script.google.com/macros/s/AKfycbyHkYFL1SuanwweFR5AnVH7W
 window.onload = function() {
   showTab('paste');  // 기본 탭: "붙여넣기"
   buildCalendar();    // 달력 초기화
+  fetchLastCContent();
 };
 
 /** =========================================
@@ -1548,4 +1549,21 @@ function sendMannerMessages(){
     }
     alert(`매너타임 메세지 완료\n성공=${success}, 실패=${fail}`);
   })();
+}
+
+/**
+ * 시트1 마지막 C열 내용을 가져와서 #lastCSpan 에 표시
+ */
+async function fetchLastCContent() {
+  try {
+    const url = gasUrl + '?mode=fetchLastC'; // code.gs에서 처리
+    const res = await fetch(url);
+    const text = await res.text(); // plain text
+    const cSpan = document.getElementById('lastCSpan');
+    if (cSpan) {
+      cSpan.textContent = `! (${text}) 까지 완료함`;
+    }
+  } catch (err) {
+    console.error('마지막 C열 가져오기 실패:', err);
+  }
 }
