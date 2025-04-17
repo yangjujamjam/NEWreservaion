@@ -19,7 +19,7 @@ window.onload = function() {
  *  [3] 탭 전환
  * ========================================= */
 function showTab(tabName) {
-  const tabs = ['paste','manual','deposit','reminder','checkoutStay','checkoutDay','manner'];
+  const tabs = ['paste','manual','deposit','reminder','checkoutStay','checkoutDay','manner','preReservation'];
   tabs.forEach(name => {
     document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).style.display = (tabName===name?'block':'none');
     document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)+'Btn')?.classList.toggle('active', tabName===name);
