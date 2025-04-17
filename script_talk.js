@@ -579,7 +579,7 @@ async function sendOneReminder(row) {
 
       await fetch(`${gasUrl}?mode=updateReminder&rowIndex=${row.rowIndex}&newValue=발송됨`);
 
-      await updateSendTimestamp(row.rowIndex);
+      await updateSendU(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 전날메세지 실패: ${result.message}`);
@@ -673,7 +673,7 @@ async function sendCheckoutStayOne(row) {
     const result = await res.json();
     if(result.code===0){
       console.log(`[${row.예약번호}] 퇴실(숙박) OK`);
-      await updateSendTimestamp(row.rowIndex);
+      await updateSendV(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 퇴실(숙박) FAIL: ${result.message}`);
@@ -716,7 +716,7 @@ async function sendCheckoutDayOne(row) {
     const result = await res.json();
     if(result.code===0){
       console.log(`[${row.예약번호}] 퇴실(당일) OK`);
-      await updateSendTimestamp(row.rowIndex);
+      await updateSendW(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 퇴실(당일) FAIL: ${result.message}`);
@@ -797,7 +797,7 @@ async function sendMannerOne(row) {
     const result = await res.json();
     if(result.code===0){
       console.log(`[${row.예약번호}] 매너타임 OK`);
-      await updateSendTimestamp(row.rowIndex);
+      await updateSendX(row.rowIndex);
       return true;
     } else {
       console.warn(`[${row.예약번호}] 매너타임 FAIL: ${result.message}`);
@@ -809,18 +809,22 @@ async function sendMannerOne(row) {
   }
 }
 
-/**
- * updateSendTimestamp(rowIndex)
- *  - Code.gs (mode=updateSendStamp)로 호출
- *  - 시트1 S열(19)='발송됨'
- */
-async function updateSendTimestamp(rowIndex) {
-  const url = gasUrl + `?mode=updateSendStamp&rowIndex=${rowIndex}`;
-  try {
-    const res = await fetch(url);
-    const txt = await res.text();
-    console.log(`updateSendTimestamp(${rowIndex}): ${txt}`);
-  } catch (err) {
-    console.error(err);
-  }
+async function updateSendU(rowIndex) {  // 전날메세지 (U열)
+  const url = gasUrl + `?mode=updateReminder&rowIndex=${rowIndex}`;
+  await fetch(url);
+}
+
+async function updateSendV(rowIndex) {  // 퇴실메세지 숙박 (V열)
+  const url = gasUrl + `?mode=updateCheckoutStay&rowIndex=${rowIndex}`;
+  await fetch(url);
+}
+
+async function updateSendW(rowIndex) {  // 퇴실메세지 당일 (W열)
+  const url = gasUrl + `?mode=updateCheckoutDay&rowIndex=${rowIndex}`;
+  await fetch(url);
+}
+
+async function updateSendX(rowIndex) {  // 매너타임 (X열)
+  const url = gasUrl + `?mode=updateManner&rowIndex=${rowIndex}`;
+  await fetch(url);
 }
