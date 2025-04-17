@@ -1063,7 +1063,7 @@ async function loadTomorrowData() {
     const tbody= document.createElement("tbody");
 
     reminderList.forEach(row=>{
-      row.excluded= false;
+      row.excluded = row.sendStamp === "발송됨" || row.colU === "발송됨"; // 여기서 U열 확인 추가
 
       const tr= document.createElement("tr");
       // S열='발송됨'이면 자동 제외
