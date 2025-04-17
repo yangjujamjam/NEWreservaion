@@ -1066,9 +1066,7 @@ async function loadTomorrowData() {
       row.excluded = row.sendStamp === "발송됨" || row.colU === "발송됨"; // 여기서 U열 확인 추가
 
       const tr= document.createElement("tr");
-      // S열='발송됨'이면 자동 제외
-      if(row.sendStamp==="발송됨") {
-        row.excluded= true;
+      if(row.excluded) {
         tr.style.textDecoration="line-through";
         tr.style.color="red";
       }
@@ -1533,17 +1531,3 @@ function sendMannerMessages(){
   })();
 }
 
-/** =========================================
- *  [14] 시트 S열=발송됨 처리
- * ========================================= */
-async function updateSendTimestamp(rowIndex) {
-  // mode=updateSendStamp & rowIndex
-  const url= gasUrl+ `?mode=updateSendStamp&rowIndex=${rowIndex}`;
-  try{
-    const res= await fetch(url);
-    const txt= await res.text();
-    console.log(`updateSendTimestamp(${rowIndex}): ${txt}`);
-  }catch(e){
-    console.error(e);
-  }
-}
