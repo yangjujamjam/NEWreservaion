@@ -1152,8 +1152,6 @@ function sendReminderMessages() {
       const success= await sendOneReminder(row); // script_talk.js
       if(success){
         successCount++;
-        // 발송됨 => S열='발송됨' 기록
-        await updateSendTimestamp(row.rowIndex);
       } else {
         failCount++;
       }
