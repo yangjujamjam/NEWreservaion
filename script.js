@@ -543,6 +543,7 @@ function generateReservationMessage() {
 - 이용기간: ${data.이용기간}
 - 수량: ${data.수량 || '(복수객실)'}
 - 옵션: ${data.옵션 ? data.옵션.replace(/, /g,'\n') : '없음'}
+- 요청사항: ${data.요청사항 ? data.요청사항 : '없음'}
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}
