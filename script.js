@@ -1207,7 +1207,7 @@ async function loadCheckoutStayData() {
     const tbody= document.createElement("tbody");
 
     checkoutStayList.forEach(row=>{
-      row.excluded=false;
+      row.excluded = (row.sendStamp === "발송됨" || row.colV === "발송됨");
 
       const tr= document.createElement("tr");
 
@@ -1330,7 +1330,7 @@ async function loadCheckoutDayData(){
     const tbody= document.createElement("tbody");
 
     checkoutDayList.forEach(row=>{
-      row.excluded=false;
+      row.excluded = (row.sendStamp === "발송됨" || row.colW === "발송됨");
 
       const tr= document.createElement("tr");
 
@@ -1455,7 +1455,7 @@ async function loadMannerData(){
     const tbody= document.createElement("tbody");
 
     mannerList.forEach(row=>{
-      row.excluded=false;
+      row.excluded = (row.sendStamp === "발송됨" || row.colX === "발송됨");
       const tr= document.createElement("tr");
 
       if(row.sendStamp==="발송됨"){
