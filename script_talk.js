@@ -810,21 +810,21 @@ async function sendMannerOne(row) {
 }
 
 async function updateSendU(rowIndex) {  // 전날메세지 (U열)
-  const url = gasUrl + `?mode=updateReminder&rowIndex=${rowIndex}`;
+  const url = gasUrl + `?mode=updateReminder&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
 
 async function updateSendV(rowIndex) {  // 퇴실메세지 숙박 (V열)
-  const url = gasUrl + `?mode=updateCheckoutStay&rowIndex=${rowIndex}`;
+  const url = gasUrl + `?mode=updateCheckoutStay&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
 
 async function updateSendW(rowIndex) {  // 퇴실메세지 당일 (W열)
-  const url = gasUrl + `?mode=updateCheckoutDay&rowIndex=${rowIndex}`;
+  const url = gasUrl + `?mode=updateCheckoutDay&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
 
 async function updateSendX(rowIndex) {  // 매너타임 (X열)
-  const url = gasUrl + `?mode=updateManner&rowIndex=${rowIndex}`;
+  const url = gasUrl + `?mode=updateManner&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
