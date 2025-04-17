@@ -287,3 +287,73 @@ pre {
 .btn-kakao:active {
   background-color: #FCCE00; /* 더 어두워진 노랑 */
 }
+
+/* 입력창과 선택창, 저장버튼을 한 줄로 정렬 */
+.pre-reservation-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 각 요소 사이의 간격 조정 */
+  margin-bottom: 15px;
+}
+
+/* 전화번호 입력창 */
+.pre-reservation-input-group input[type="text"] {
+  width: 200px !important; /* 전화번호 입력창 길이 조정 */
+  height: 40px;
+  font-size: 14px;
+}
+
+/* 월 선택 스크롤 입력창 */
+.pre-reservation-input-group select {
+  width: 100px !important; /* 월 선택창 길이 조정 */
+  height: 40px;
+  font-size: 14px;
+}
+
+/* 저장 버튼 크기 조정 */
+.pre-reservation-input-group button {
+  width: 80px !important; /* 저장 버튼 길이 조정 */
+  height: 40px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* 1~12월 선택 버튼 스타일 */
+.month-select-button {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.month-select-button button {
+  margin: 3px;
+  width: 50px;
+  height: 35px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  background-color: #007bff;
+  color: white;
+}
+
+/* 선택된 버튼 스타일 변경 */
+.month-select-button button.selected {
+  background-color: #ffc107 !important;
+  color: black;
+}
+
+/* 하단 버튼 그룹 간격 넓히기 */
+.pre-reservation-action-buttons {
+  margin-top: 25px;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.pre-reservation-action-buttons button {
+  height: 40px;
+  padding: 0 10px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
