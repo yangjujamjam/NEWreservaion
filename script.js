@@ -1552,38 +1552,10 @@ function savePreReservation() {
 }
 
 function selectMonth(month) {
-  // 모든 버튼의 선택상태 초기화
   const buttons = document.querySelectorAll('.month-select-button button');
   buttons.forEach(btn => btn.classList.remove('selected'));
-
-  // 선택된 버튼에 스타일 적용
   buttons[month - 1].classList.add('selected');
 
-function updatePreReservationCount(month) {
-  fetch(`{gasUrl}?mode=getPreReservationCount&month=${month}`)
-    .then(response => response.text())
-    .then(count => {
-      document.getElementById('selectedMonthCount').innerText = `현재 선택한 월의 사전예약 수: ${count}건`;
-    });
-}
-
-function savePreReservation() {
-  const phone = document.getElementById('phoneNumberInput').value.trim();
-  const month = document.getElementById('monthSelect').value;
-
-  if (!phone || !month) {
-    alert("전화번호와 월을 모두 선택해주세요.");
-    return;
-  }
-
-  fetch(`{gasUrl}?mode=addPreReservation&phone=${phone}&month=${month}`)
-    .then(response => response.text())
-    .then(result => {
-      alert(result);
-      if (result === "저장 완료") {
-        document.getElementById('phoneNumberInput').value = '';
-        document.getElementById('monthSelect').value = '';
-        selectMonth(month);
-      }
-    });
+  selectedMonth = month;  // 선택된 월을 글로벌 변수에 저장
+  updatePreReservationCount(month); // 선택된 월의 개수 업데이트
 }
