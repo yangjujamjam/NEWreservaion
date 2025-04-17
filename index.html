@@ -140,6 +140,44 @@
     <button type="button" onclick="sendMannerMessages()">매너타임 메세지 보내기</button>
   </div>
 
+  <!-- 사전예약 알림 탭 UI -->
+<div id="tabPreReservation" style="display:none;">
+  <h3>사전예약 알림</h3>
+
+  <div style="margin-bottom:15px;">
+    <input type="text" id="prePhoneNumber" placeholder="전화번호 입력 (숫자만)" oninput="onlyNumbers(this)" maxlength="12">
+    <select id="preMonthSelect">
+      <option value="">월 선택</option>
+      <option value="1">1월</option><option value="2">2월</option>
+      <option value="3">3월</option><option value="4">4월</option>
+      <option value="5">5월</option><option value="6">6월</option>
+      <option value="7">7월</option><option value="8">8월</option>
+      <option value="9">9월</option><option value="10">10월</option>
+      <option value="11">11월</option><option value="12">12월</option>
+    </select>
+    <button onclick="savePreReservation()">저장</button>
+  </div>
+
+  <div id="monthButtonsContainer">
+    <button onclick="selectPreMonth(1)">1월</button>
+    <button onclick="selectPreMonth(2)">2월</button>
+    <button onclick="selectPreMonth(3)">3월</button>
+    <button onclick="selectPreMonth(4)">4월</button>
+    <button onclick="selectPreMonth(5)">5월</button>
+    <button onclick="selectPreMonth(6)">6월</button>
+    <button onclick="selectPreMonth(7)">7월</button>
+    <button onclick="selectPreMonth(8)">8월</button>
+    <button onclick="selectPreMonth(9)">9월</button>
+    <button onclick="selectPreMonth(10)">10월</button>
+    <button onclick="selectPreMonth(11)">11월</button>
+    <button onclick="selectPreMonth(12)">12월</button>
+  </div>
+
+  <h4 id="preReservationCount">현재 선택한 월의 사전예약 수: 0건</h4>
+
+  <button onclick="sendPreReservationAlert()">사전예약 알림톡 보내기</button>
+</div>
+
   <!-- 버튼 영역 -->
   <div class="buttons">
     <button onclick="processReservation()">⚙파싱 결과 보기</button>
