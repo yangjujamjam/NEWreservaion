@@ -338,8 +338,8 @@ pre {
 
 /* 선택된 버튼 스타일 변경 */
 .month-select-button button.selected {
-  background-color: #ffc107 !important;
-  color: black;
+  background-color: #007bff;
+  color: #fff;
 }
 
 /* 하단 버튼 그룹 간격 넓히기 */
@@ -357,3 +357,9 @@ pre {
   cursor: pointer;
 }
 
+.pre-reservation-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 20px;
+}
