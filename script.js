@@ -122,18 +122,27 @@ function parseNaverReservation(text) {
   );
 
   // 3) "요청사항" 파싱
-  const requestStartIndex = lines.findIndex(line => line.includes('요청사항'));
-  let requestEndIndex = lines.findIndex(line => line.includes('유입경로'));
-  if (requestEndIndex === -1) {
-    requestEndIndex = lines.length; // 요청사항 이후에 "유입경로"가 없으면 텍스트 끝까지
+  let requestLine = lines.find(line => line.includes('요청사항'));
+  let 요청사항 = '';
+
+  if (requestLine) {
+    // 2-1) "요청사항"이라는 단어 끝 위치
+    const startIndex = requestLine.indexOf('요청사항') + '요청사항'.length;
+
+    // 2-2) startIndex부터 라인의 끝까지 잘라내기
+    let snippet = requestLine.substring(startIndex).trim();
+
+    //    "요청사항:" 이라면 콜론, 등호 등 불필요한 문자 제거
+    snippet = snippet.replace(/^[:=]/, '').trim();
+
+    // 2-3) 만약 같은 줄에 "유입경로"가 있다면 그 전까지만.
+    const uipIndex = snippet.indexOf('유입경로');
+    if (uipIndex !== -1) {
+      snippet = snippet.substring(0, uipIndex).trim();
+    }
+
+    요청사항 = snippet;  // 최종 저장
   }
-  
-  const requestLines = (requestStartIndex !== -1 && requestEndIndex > requestStartIndex)
-    ? lines.slice(requestStartIndex + 1, requestEndIndex).filter(Boolean)
-    : [];
-    
-  // 이대로 합치면 "\n"으로 연결하든, ","로 연결하든 자유
-  const 요청사항 = requestLines.join('\n');
 
   let totalPeopleIndex = lines.findIndex(line => line.includes('총 이용 인원 정보'));
   let 총이용인원 = '';
@@ -160,6 +169,7 @@ function parseNaverReservation(text) {
     이용기간:     getValue('이용기간'),
     수량:         getValue('수량'),
     옵션:         filteredOptions.join(', '),
+    요청사항,
     총이용인원,
     입실시간,
     결제금액:     결제금액 || 결제예상금액,
@@ -543,7 +553,7 @@ function generateReservationMessage() {
 - 이용기간: ${data.이용기간}
 - 수량: ${data.수량 || '(복수객실)'}
 - 옵션: ${data.옵션 ? data.옵션.replace(/, /g,'\n') : '없음'}
-- 요청사항: ${data.요청사항 ? data.요청사항 : '없음'}
+- 요청사항: ${data.요청사항 ? data.요청사항 : '없음'} 
 - 총 이용 인원: ${data.총이용인원}
 - 입실시간: ${data.입실시간}
 - 결제금액: ${data.결제금액}
