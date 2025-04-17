@@ -24,8 +24,6 @@
     <button id="tabCheckoutStayBtn" onclick="showTab('checkoutStay'); loadCheckoutStayData();">🛌퇴실메세지(숙박)</button>
     <button id="tabCheckoutDayBtn" onclick="showTab('checkoutDay'); loadCheckoutDayData();">🏄‍♀️퇴실메세지(당일)</button>
     <button id="tabMannerBtn" onclick="showTab('manner'); loadMannerData();">🙏매너타임</button>
-    <button id="tabPreReservationBtn" onclick="showTab('preReservation'); loadPreReservationData();">🔔사전예약 알림</button>
-    
   </div>
 
   <!-- 붙여넣기 탭 -->
@@ -141,48 +139,6 @@
     <div id="mannerListContainer">Loading...</div>
     <button type="button" onclick="sendMannerMessages()">매너타임 메세지 보내기</button>
   </div>
-  
-<!-- 사전예약 입력 그룹 -->
-<div class="pre-reservation-input-group">
-  <input type="text" id="phoneNumberInput" placeholder="전화번호 입력">
-  <select id="monthSelect">
-    <option value="">월 선택</option>
-    <option value="1">1월</option>
-    <option value="2">2월</option>
-    <option value="3">3월</option>
-    <option value="4">4월</option>
-    <option value="5">5월</option>
-    <option value="6">6월</option>
-    <option value="7">7월</option>
-    <option value="8">8월</option>
-    <option value="9">9월</option>
-    <option value="10">10월</option>
-    <option value="11">11월</option>
-    <option value="12">12월</option>
-  </select>
-  <button onclick="savePreReservation()">저장</button>
-</div>
-
-<!-- 월 선택 버튼 -->
-<div class="month-select-button">
-  <button onclick="selectMonth(1)">1월</button>
-  <button onclick="selectMonth(2)">2월</button>
-  <button onclick="selectMonth(3)">3월</button>
-  <button onclick="selectMonth(4)">4월</button>
-  <button onclick="selectMonth(5)">5월</button>
-  <button onclick="selectMonth(6)">6월</button>
-  <button onclick="selectMonth(7)">7월</button>
-  <button onclick="selectMonth(8)">8월</button>
-  <button onclick="selectMonth(9)">9월</button>
-  <button onclick="selectMonth(10)">10월</button>
-  <button onclick="selectMonth(11)">11월</button>
-  <button onclick="selectMonth(12)">12월</button>
-</div>
-
-<div id="selectedMonthCount">현재 선택한 월의 사전예약 수: 0건</div>
-
-  <button onclick="sendPreReservation()">사전예약 알림톡 보내기</button>
-</div>
 
   <!-- 버튼 영역 -->
   <div class="buttons">
