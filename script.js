@@ -1551,28 +1551,39 @@ function savePreReservation() {
     });
 }
 
-function selectPreMonth(month) {
-  selectedMonth = month;
-  updatePreReservationCount(month);
-}
+function selectMonth(month) {
+  // 모든 버튼의 선택상태 초기화
+  const buttons = document.querySelectorAll('.month-select-button button');
+  buttons.forEach(btn => btn.classList.remove('selected'));
+
+  // 선택된 버튼에 스타일 적용
+  buttons[month - 1].classList.add('selected');
 
 function updatePreReservationCount(month) {
-  fetch(`${gasUrl}?mode=getPreReservationCount&month=${month}`)
-    .then(res => res.text())
+  fetch(`{gasUrl}?mode=getPreReservationCount&month=${month}`)
+    .then(response => response.text())
     .then(count => {
-      document.getElementById('preReservationCount').innerText = `현재 선택한 월의 사전예약 수: ${count}건`;
+      document.getElementById('selectedMonthCount').innerText = `현재 선택한 월의 사전예약 수: ${count}건`;
     });
 }
 
-function sendPreReservationAlert() {
-  if (!selectedMonth) {
-    alert('먼저 월을 선택해주세요.');
+function savePreReservation() {
+  const phone = document.getElementById('phoneNumberInput').value.trim();
+  const month = document.getElementById('monthSelect').value;
+
+  if (!phone || !month) {
+    alert("전화번호와 월을 모두 선택해주세요.");
     return;
   }
 
-  alert(`${selectedMonth}월의 사전예약 알림톡을 보냅니다.\n(알림톡 템플릿과 로직은 이후 제공해주세요.)`);
-}
-
-function onlyNumbers(el) {
-  el.value = el.value.replace(/\D/g, '');
+  fetch(`{gasUrl}?mode=addPreReservation&phone=${phone}&month=${month}`)
+    .then(response => response.text())
+    .then(result => {
+      alert(result);
+      if (result === "저장 완료") {
+        document.getElementById('phoneNumberInput').value = '';
+        document.getElementById('monthSelect').value = '';
+        selectMonth(month);
+      }
+    });
 }
