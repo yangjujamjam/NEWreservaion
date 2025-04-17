@@ -144,17 +144,6 @@
     <button type="button" onclick="sendMannerMessages()">매너타임 메세지 보내기</button>
   </div>
 
-  <!-- 버튼 영역 -->
-  <div class="buttons">
-    <button onclick="processReservation()">⚙파싱 결과 보기</button>
-    <button onclick="generateReservationMessage()">📑안내문자 양식적용</button>
-    <button class="btn-kakao" onclick="confirmAlimtalk()">💬알림톡 발송</button>
-    <button onclick="sendToSheet()">✅구글 스프레드시트로 보내기</button>
-  </div>
-
-  <pre id="outputData">여기에 결과가 표시됩니다.</pre>
-</div>
-
 <!-- 사전예약 알림 탭 -->
 <div id="tabReserveAlert" class="tab-content" style="display:none;">
   <h3>사전예약 알림</h3>
@@ -196,6 +185,18 @@
     사전알림톡 보내기
   </button>
 
+</div>
+
+
+  <!-- 버튼 영역 -->
+  <div class="buttons">
+    <button onclick="processReservation()">⚙파싱 결과 보기</button>
+    <button onclick="generateReservationMessage()">📑안내문자 양식적용</button>
+    <button class="btn-kakao" onclick="confirmAlimtalk()">💬알림톡 발송</button>
+    <button onclick="sendToSheet()">✅구글 스프레드시트로 보내기</button>
+  </div>
+
+  <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 </div>
   
 
