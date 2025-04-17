@@ -27,6 +27,7 @@
     <button id="tabCheckoutStayBtn" onclick="showTab('checkoutStay'); loadCheckoutStayData();">🛌퇴실메세지(숙박)</button>
     <button id="tabCheckoutDayBtn" onclick="showTab('checkoutDay'); loadCheckoutDayData();">🏄‍♀️퇴실메세지(당일)</button>
     <button id="tabMannerBtn" onclick="showTab('manner'); loadMannerData();">🙏매너타임</button>
+    <button id="tabReserveAlertBtn" onclick="showTab('reserveAlert')">🔔사전예약 알림</button>
   </div>
 
   <!-- 붙여넣기 탭 -->
@@ -153,6 +154,50 @@
 
   <pre id="outputData">여기에 결과가 표시됩니다.</pre>
 </div>
+
+<!-- 사전예약 알림 탭 -->
+<div id="tabReserveAlert" class="tab-content" style="display:none;">
+  <h3>사전예약 알림</h3>
+
+  <!-- 1) 전화번호/연도/월 입력 후 저장 -->
+  <div style="margin-bottom: 1em;">
+    <label>전화번호: </label>
+    <input type="text" id="preReservePhone" placeholder="010-1234-5678" oninput="formatPhone344(this)"/>
+
+    <label>연도: </label>
+    <select id="preReserveYear"></select>
+
+    <label>월: </label>
+    <select id="preReserveMonth"></select>
+
+    <button onclick="savePreReservation()">저장</button>
+  </div>
+
+  <hr />
+
+  <!-- 2) 특정 연도/월로 저장된 전화번호 목록 조회 -->
+  <div style="margin-bottom: 1em;">
+    <label>연도: </label>
+    <select id="searchReserveYear"></select>
+
+    <label>월: </label>
+    <select id="searchReserveMonth"></select>
+
+    <button onclick="loadPreReservationList()">조회</button>
+  </div>
+
+  <div id="preReserveListContainer" style="margin-bottom:1em;">
+    <!-- 여기 조회된 전화번호 목록 테이블을 표시 -->
+  </div>
+
+  <!-- 3) 사전알림톡 보내기 버튼 -->
+  <button style="background-color:#f39c12; color:#fff; padding:0.5em 1em;"
+          onclick="sendPreReserveTalk()">
+    사전알림톡 보내기
+  </button>
+
+</div>
+  
 
 <!-- nav.html 로드 (옵션) -->
 <script>
