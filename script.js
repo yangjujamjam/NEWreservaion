@@ -5,7 +5,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbzAWQELHR1vgfDy0g3jHelaPUMlVSa17oIZGx7yT1ygs7viu9eitg9oA-Z_Ksxfk_cH/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbwdH8F1OCakGY_jccRe_-uS60GmdtC8WSs3cACqFC1YArhhaFGfOtXRfaB-Olz2s1AE/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
@@ -15,6 +15,7 @@ window.onload = function() {
   buildCalendar();    // 달력 초기화
   fetchLastCContent();
   initReserveAlertSelectors();
+  initReserveAlertTabSelectors();
 };
 
 /** =========================================
@@ -1594,145 +1595,81 @@ async function fetchLastCContent() {
 }
 
 
-function initReserveAlertSelectors(){
-  const thisYear = new Date().getFullYear();
+function initReserveSelectors(){
+  const yearSel=document.getElementById('searchReserveYear');
+  const monthSel=document.getElementById('searchReserveMonth');
+  const currentYear=new Date().getFullYear();
 
-  // 저장용 연도/월
-  const ySel1 = document.getElementById('preReserveYear');
-  const mSel1 = document.getElementById('preReserveMonth');
-  if(ySel1 && mSel1) {
-    ySel1.innerHTML = `<option value="${thisYear}">${thisYear}</option>`;
-    for(let m=1; m<=12; m++){
-      const opt = document.createElement('option');
-      opt.value = String(m);
-      opt.textContent = m+'월';
-      mSel1.appendChild(opt);
-    }
-  }
-   // 조회용 연도/월
-  const ySel2 = document.getElementById('searchReserveYear');
-  const mSel2 = document.getElementById('searchReserveMonth');
-  if(ySel2 && mSel2) {
-    ySel2.innerHTML = `<option value="${thisYear}">${thisYear}</option>`;
-    for(let m=1; m<=12; m++){
-      const opt = document.createElement('option');
-      opt.value = String(m);
-      opt.textContent = m+'월';
-      mSel2.appendChild(opt);
-    }
+  yearSel.innerHTML=`<option>${currentYear}</option>`;
+  monthSel.innerHTML='';
+  for(let i=1;i<=12;i++){
+    monthSel.innerHTML+=`<option value="${i}">${i}월</option>`;
   }
 }
 
-function formatPhone344(el){
-  // 숫자만 추출
-  let digits = el.value.replace(/\D/g,'');
-  if(digits.length > 11){
-    digits = digits.substring(0,11);
-  }
-  // 3-4-4
-  if(digits.length <= 3){
-    el.value = digits;
-  } else if(digits.length <= 7){
-    el.value = digits.slice(0,3)+'-'+digits.slice(3);
-  } else {
-    el.value = digits.slice(0,3)+'-'+digits.slice(3,7)+'-'+digits.slice(7);
-  }
-}
-async function savePreReservation(){
-  const phone = document.getElementById('preReservePhone').value.trim();
-  const year  = document.getElementById('preReserveYear').value.trim();
-  let month   = document.getElementById('preReserveMonth').value.trim();
-
-  // "3-4-4" 꼭 13자여야 한다면 체크
-  // 연도/월 필수 체크
-  if(!phone || !year || !month){
-    alert("전화번호/연도/월을 모두 입력하세요.");
-    return;
-  }
-
-  // month에서 '월' 문자를 제거 (ex '3월' -> '3')
-  month = month.replace(/\D/g,'');
-
-  try {
-    const params = new URLSearchParams({
-      mode: 'addPreReservation',
-      phone,
-      year,
-      month
-    });
-    const url = gasUrl + '?' + params.toString();
-    const res = await fetch(url);
-    const txt = await res.text();
-    alert(txt);  // "저장 완료" or "중복된 전화번호" 등
-  } catch(err){
-    console.error(err);
-    alert("오류 발생");
-  }
-}
 async function loadPreReservationList(){
-  const year  = document.getElementById('searchReserveYear').value.trim();
-  let month   = document.getElementById('searchReserveMonth').value.trim().replace(/\D/g,'');
+  const year=document.getElementById('searchReserveYear').value;
+  const month=document.getElementById('searchReserveMonth').value;
 
-  if(!year || !month){
-    alert("연도와 월을 선택해 주세요.");
+  const container=document.getElementById('preReserveListContainer');
+  container.innerHTML="불러오는 중...";
+
+  const res=await fetch(`${gasUrl}?mode=getPreReservationList&year=${year}&month=${month}`);
+  const list=await res.json();
+
+  if(!list.length){
+    container.innerHTML="조회된 내역 없음";
     return;
   }
 
-  try {
-    // code.gs에서 해당 연도+월 목록을 가져올 API를 추가할 것
-    const url = gasUrl + '?mode=getPreReservationList'
-                + '&year='+year
-                + '&month='+month;
-    const res = await fetch(url);
-    const dataList = await res.json();  // [{phone:'010-1234-5678', year:'2025', month:'3'}, ...]
-    renderPreReservationList(dataList);
-  } catch(err){
-    console.error(err);
-    alert("조회 중 오류 발생");
-  }
+  let html=`<table><tr><th>전화번호</th><th>연도</th><th>월</th></tr>`;
+  list.forEach(r=>{
+    html+=`<tr><td>${r.phone}</td><td>${r.year}</td><td>${r.month}</td></tr>`;
+  });
+  html+=`</table>`;
+
+  container.innerHTML=html;
+}
+function excludeReserveAlert(btn){
+  const tr = btn.closest('tr');
+  tr.style.textDecoration="line-through";
+  tr.style.color="red";
+  btn.disabled=true;
+  tr.dataset.excluded = "true";
 }
 
-function renderPreReservationList(list){
-  const container = document.getElementById('preReserveListContainer');
-  container.innerHTML = "";
+async function sendReserveAlertMessages(){
+  const container = document.getElementById('reserveAlertListContainer');
+  const rows = container.querySelectorAll('tbody tr:not([data-excluded="true"])');
 
-  if(!list || !list.length){
-    container.textContent = "해당 연도/월에 등록된 전화번호가 없습니다.";
+  if(rows.length===0){
+    alert("보낼 대상이 없습니다.");
     return;
   }
 
-  const table = document.createElement('table');
-  table.className = 'deposit-table';
-  table.innerHTML = `
-    <thead>
-      <tr>
-        <th>전화번호</th>
-        <th>연도</th>
-        <th>월</th>
-      </tr>
-    </thead>
-  `;
-  const tbody = document.createElement('tbody');
+  if(!confirm("사전예약 알림톡을 보낼까요?")) return;
 
-  list.forEach(item=>{
-    const tr = document.createElement('tr');
-    const td1= document.createElement('td');
-    td1.textContent = item.phone;
-    tr.appendChild(td1);
+  let success=0, fail=0;
 
-    const td2= document.createElement('td');
-    td2.textContent = item.year;
-    tr.appendChild(td2);
+  for(const row of rows){
+    const phone = row.dataset.phone;
+    try {
+      const res = await fetch(`${gasUrl}?mode=sendReserveAlert&phone=${phone}`);
+      const txt = await res.text();
 
-    const td3= document.createElement('td');
-    td3.textContent = item.month;
-    tr.appendChild(td3);
+      if(txt==="발송 성공"){
+        success++;
+        await fetch(`${gasUrl}?mode=updateReserveAlertSent&phone=${phone}`);
+      } else {
+        fail++;
+      }
+    } catch(err){
+      console.error(err);
+      fail++;
+    }
+  }
 
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  container.appendChild(table);
+  alert(`전송 완료: 성공=${success}, 실패=${fail}`);
 }
 
 /** =========================================
