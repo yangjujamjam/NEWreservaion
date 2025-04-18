@@ -144,48 +144,19 @@
     <button type="button" onclick="sendMannerMessages()">매너타임 메세지 보내기</button>
   </div>
 
-<!-- 사전예약 알림 탭 -->
+<!-- 사전예약 알림탭 추가 -->
 <div id="tabReserveAlert" class="tab-content" style="display:none;">
-  <h3>사전예약 알림</h3>
-
-  <!-- 1) 전화번호/연도/월 입력 후 저장 -->
-  <div style="margin-bottom: 1em;">
-    <label>전화번호: </label>
-    <input type="text" id="preReservePhone" placeholder="010-1234-5678" oninput="formatPhone344(this)"/>
-
-    <label>연도: </label>
-    <select id="preReserveYear"></select>
-
-    <label>월: </label>
-    <select id="preReserveMonth"></select>
-
-    <button onclick="savePreReservation()">저장</button>
-  </div>
-
-  <hr />
-
-  <!-- 2) 특정 연도/월로 저장된 전화번호 목록 조회 -->
-  <div style="margin-bottom: 1em;">
-    <label>연도: </label>
-    <select id="searchReserveYear"></select>
-
-    <label>월: </label>
-    <select id="searchReserveMonth"></select>
-
-    <button onclick="loadPreReservationList()">조회</button>
-  </div>
-
-  <div id="preReserveListContainer" style="margin-bottom:1em;">
-    <!-- 여기 조회된 전화번호 목록 테이블을 표시 -->
-  </div>
-
-  <!-- 3) 사전알림톡 보내기 버튼 -->
-  <button style="background-color:#f39c12; color:#fff; padding:0.5em 1em;"
-          onclick="sendPreReserveTalk()">
-    사전알림톡 보내기
-  </button>
-
+  <h3>사전예약 알림톡 보내기</h3>
+  
+  <select id="reserveAlertYear"></select>
+  <select id="reserveAlertMonth"></select>
+  
+  <button onclick="loadReserveAlertList()">리스트 불러오기</button>
+  <button onclick="sendReserveAlertMessages()">사전알림톡 보내기</button>
+  
+  <div id="reserveAlertListContainer"></div>
 </div>
+
 
 
   <!-- 버튼 영역 -->
