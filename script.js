@@ -5,7 +5,7 @@
 /** =========================================
  *  [1] 전역 설정
  * ========================================= */
-const gasUrl = 'https://script.google.com/macros/s/AKfycbybN78Ze7XliIdSBxa50loyEHRf7FqKK0_psDX1EJVUV-rK_lOdNTAqyNmHLa_MxlHx/exec';
+const gasUrl = 'https://script.google.com/macros/s/AKfycbze5JksJOwqKpQFI_ykKdoz8FKsSocjD4ExYIW7Gaj7q68Q9Wp1LjE11fvtZDh77wd9/exec';
 
 /** =========================================
  *  [2] 페이지 로드 시 초기 처리
@@ -1090,7 +1090,7 @@ async function loadTomorrowData() {
     const tbody= document.createElement("tbody");
 
     reminderList.forEach(row=>{
-      row.excluded = row.sendStamp === "전날메세지 완료" || row.colU === "전날메세지 완료"; // 여기서 U열 확인 추가
+      row.excluded = row.sendStamp === "발송됨" || row.colU === "발송됨"; // 여기서 U열 확인 추가
 
       const tr= document.createElement("tr");
       if(row.excluded) {
@@ -1239,7 +1239,7 @@ async function loadCheckoutStayData() {
     const tbody= document.createElement("tbody");
 
     checkoutStayList.forEach(row=>{
-      row.excluded = row.sendStamp === "퇴실메세지(숙박) 완료" || row.colV === "퇴실메세지(숙박) 완료"; // 여기서 V열 확인 추가
+      row.excluded = row.sendStamp === "발송됨" || row.colV === "발송됨"; // 여기서 V열 확인 추가
 
       const tr= document.createElement("tr");
 
@@ -1365,7 +1365,7 @@ async function loadCheckoutDayData(){
     const tbody= document.createElement("tbody");
 
     checkoutDayList.forEach(row=>{
-      row.excluded = row.sendStamp === "퇴실메세지(당일) 완료" || row.colW === "퇴실메세지(당일) 완료"; // 여기서 W열 확인 추가
+      row.excluded = row.sendStamp === "발송됨" || row.colW === "발송됨"; // 여기서 W열 확인 추가
 
       const tr= document.createElement("tr");
 
@@ -1495,7 +1495,7 @@ async function loadMannerData(){
     const tbody= document.createElement("tbody");
 
     mannerList.forEach(row=>{
-      row.excluded = row.sendStamp === "매너타임 완료" || row.colX === "매너타임 완료"; // 여기서 X열 확인 추가
+      row.excluded = row.sendStamp === "발송됨" || row.colX === "발송됨"; // 여기서 X열 확인 추가
       const tr= document.createElement("tr");
 
       if (row.excluded) {
