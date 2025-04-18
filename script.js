@@ -1175,12 +1175,18 @@ async function sendReminderMessages() {
 
   let successCount = 0, failCount = 0;
 
-  for (let row of targets) {
-    const success = await sendOneReminder(row);
-    if (success) {
-      successCount++;
-      await updateSendTimestamp(row.rowIndex, 'updateReminder');  // U열
-    } else {
+  for (let i = 0; i < targets.length; i++) {
+    const row = targets[i];
+    try {
+      const success = await sendOneReminder(row);
+      if (success) {
+        successCount++;
+        await updateSendTimestamp(row.rowIndex, 'updateReminder');
+      } else {
+        failCount++;
+      }
+    } catch (error) {
+      console.error(error);
       failCount++;
     }
   }
@@ -1299,12 +1305,18 @@ async function sendCheckoutStayMessages() {
 
   let successCount = 0, failCount = 0;
 
-  for (let row of targets) {
-    const success = await sendCheckoutStayOne(row);
-    if (success) {
-      successCount++;
-      await updateSendTimestamp(row.rowIndex, 'updateCheckoutStay');  // V열
-    } else {
+  for (let i = 0; i < targets.length; i++) {
+    const row = targets[i];
+    try {
+      const success = await sendCheckoutStayOne(row);
+      if (success) {
+        successCount++;
+        await updateSendTimestamp(row.rowIndex, 'updateCheckoutStay');
+      } else {
+        failCount++;
+      }
+    } catch (error) {
+      console.error(error);
       failCount++;
     }
   }
@@ -1419,12 +1431,18 @@ async function sendCheckoutDayMessages() {
 
   let successCount = 0, failCount = 0;
 
-  for (let row of targets) {
-    const success = await sendCheckoutDayOne(row);
-    if (success) {
-      successCount++;
-      await updateSendTimestamp(row.rowIndex, 'updateCheckoutDay');  // W열
-    } else {
+  for (let i = 0; i < targets.length; i++) {
+    const row = targets[i];
+    try {
+      const success = await sendCheckoutDayOne(row);
+      if (success) {
+        successCount++;
+        await updateSendTimestamp(row.rowIndex, 'updateCheckoutDay');
+      } else {
+        failCount++;
+      }
+    } catch (error) {
+      console.error(error);
       failCount++;
     }
   }
@@ -1538,12 +1556,18 @@ async function sendMannerMessages() {
 
   let successCount = 0, failCount = 0;
 
-  for (let row of targets) {
-    const success = await sendMannerOne(row);
-    if (success) {
-      successCount++;
-      await updateSendTimestamp(row.rowIndex, 'updateManner');  // X열
-    } else {
+  for (let i = 0; i < targets.length; i++) {
+    const row = targets[i];
+    try {
+      const success = await sendMannerOne(row);
+      if (success) {
+        successCount++;
+        await updateSendTimestamp(row.rowIndex, 'updateManner');
+      } else {
+        failCount++;
+      }
+    } catch (error) {
+      console.error(error);
       failCount++;
     }
   }
