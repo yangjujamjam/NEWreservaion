@@ -1164,27 +1164,28 @@ function getTomorrowString() {
 }
 
 // 전날메세지 -> 제외=false
-function sendReminderMessages() {
-  const targets= reminderList.filter(r=>!r.excluded);
-  if(!targets.length){
+async function sendReminderMessages() {
+  const targets = reminderList.filter(r => !r.excluded);
+  if (!targets.length) {
     alert("메시지 보낼 대상이 없습니다.");
     return;
   }
-  const ok= confirm("메세지를 보낼까요?");
-  if(!ok) return;
 
-  (async()=>{
-    let successCount=0, failCount=0;
-    for(let row of targets){
-      const success= await sendOneReminder(row); // script_talk.js
-      if(success){
-        successCount++;
-      } else {
-        failCount++;
-      }
+  if (!confirm("전날 메세지를 보낼까요?")) return;
+
+  let successCount = 0, failCount = 0;
+
+  for (let row of targets) {
+    const success = await sendOneReminder(row);
+    if (success) {
+      successCount++;
+      await updateSendTimestamp(row.rowIndex, 'updateReminder');  // U열
+    } else {
+      failCount++;
     }
-    alert(`전날 메세지 전송 완료\n성공=${successCount}, 실패=${failCount}`);
-  })();
+  }
+
+  alert(`전날 메세지 전송 완료\n성공=${successCount}, 실패=${failCount}`);
 }
 
 /** =========================================
@@ -1287,29 +1288,28 @@ async function loadCheckoutStayData() {
   }
 }
 
-function sendCheckoutStayMessages(){
-  const targets= checkoutStayList.filter(r=>!r.excluded);
-  if(!targets.length){
-    alert("대상이 없습니다.");
+async function sendCheckoutStayMessages() {
+  const targets = checkoutStayList.filter(r => !r.excluded);
+  if (!targets.length) {
+    alert("메시지 보낼 대상이 없습니다.");
     return;
   }
-  const ok= confirm("퇴실메세지(숙박)를 보낼까요?");
-  if(!ok) return;
 
-  (async()=>{
-    let success=0, fail=0;
-    for(let row of targets){
-      const res= await sendCheckoutStayOne(row);
-      if(res){
-        success++;
-        // S열='발송됨'
-        await updateSendTimestamp(row.rowIndex);
-      } else {
-        fail++;
-      }
+  if (!confirm("퇴실메세지(숙박)를 보낼까요?")) return;
+
+  let successCount = 0, failCount = 0;
+
+  for (let row of targets) {
+    const success = await sendCheckoutStayOne(row);
+    if (success) {
+      successCount++;
+      await updateSendTimestamp(row.rowIndex, 'updateCheckoutStay');  // V열
+    } else {
+      failCount++;
     }
-    alert(`퇴실메세지(숙박) 완료\n성공=${success}, 실패=${fail}`);
-  })();
+  }
+
+  alert(`퇴실메세지(숙박) 전송 완료\n성공=${successCount}, 실패=${failCount}`);
 }
 
 /** =========================================
@@ -1408,30 +1408,30 @@ async function loadCheckoutDayData(){
   }
 }
 
-function sendCheckoutDayMessages(){
-  const targets= checkoutDayList.filter(r=> !r.excluded);
-  if(!targets.length){
-    alert("대상이 없습니다.");
+async function sendCheckoutDayMessages() {
+  const targets = checkoutDayList.filter(r => !r.excluded);
+  if (!targets.length) {
+    alert("메시지 보낼 대상이 없습니다.");
     return;
   }
-  const ok= confirm("퇴실메세지(당일)을 보낼까요?");
-  if(!ok) return;
 
-  (async()=>{
-    let success=0, fail=0;
-    for(let row of targets){
-      const r= await sendCheckoutDayOne(row);
-      if(r){
-        success++;
-        // S열='발송됨'
-        await updateSendTimestamp(row.rowIndex);
-      } else {
-        fail++;
-      }
+  if (!confirm("퇴실메세지(당일)를 보낼까요?")) return;
+
+  let successCount = 0, failCount = 0;
+
+  for (let row of targets) {
+    const success = await sendCheckoutDayOne(row);
+    if (success) {
+      successCount++;
+      await updateSendTimestamp(row.rowIndex, 'updateCheckoutDay');  // W열
+    } else {
+      failCount++;
     }
-    alert(`퇴실메세지(당일) 완료\n성공=${success}, 실패=${fail}`);
-  })();
+  }
+
+  alert(`퇴실메세지(당일) 전송 완료\n성공=${successCount}, 실패=${failCount}`);
 }
+
 
 /** =========================================
  *  [13] 매너타임 탭
@@ -1527,30 +1527,30 @@ async function loadMannerData(){
   }
 }
 
-function sendMannerMessages(){
-  const targets= mannerList.filter(r=> !r.excluded);
-  if(!targets.length){
-    alert("대상이 없습니다.");
+async function sendMannerMessages() {
+  const targets = mannerList.filter(r => !r.excluded);
+  if (!targets.length) {
+    alert("메시지 보낼 대상이 없습니다.");
     return;
   }
-  const ok= confirm("매너타임 메세지를 보낼까요?");
-  if(!ok) return;
 
-  (async()=>{
-    let success=0, fail=0;
-    for(let row of targets){
-      const r= await sendMannerOne(row);
-      if(r){
-        success++;
-        
-        await updateSendTimestamp(row.rowIndex);
-      } else {
-        fail++;
-      }
+  if (!confirm("매너타임 메세지를 보낼까요?")) return;
+
+  let successCount = 0, failCount = 0;
+
+  for (let row of targets) {
+    const success = await sendMannerOne(row);
+    if (success) {
+      successCount++;
+      await updateSendTimestamp(row.rowIndex, 'updateManner');  // X열
+    } else {
+      failCount++;
     }
-    alert(`매너타임 메세지 완료\n성공=${success}, 실패=${fail}`);
-  })();
+  }
+
+  alert(`매너타임 메세지 전송 완료\n성공=${successCount}, 실패=${failCount}`);
 }
+
 
 /**
  * 시트1 마지막 C열 내용을 가져와서 #lastCSpan 에 표시
