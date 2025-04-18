@@ -1735,4 +1735,22 @@ function renderPreReservationList(list){
   container.appendChild(table);
 }
 
-
+/** =========================================
+ *  [14] 알림톡 발송 후 타임스탬프 업데이트 처리
+ * ========================================= */
+async function updateSendTimestamp(rowIndex, mode) {
+  try {
+    const res = await fetch(`${gasUrl}?mode=${mode}&rowIndex=${rowIndex}`);
+    const txt = await res.text();
+    if (txt.includes("완료") || txt.includes("성공")) {
+      console.log(`[${rowIndex}] 상태 업데이트 성공`);
+      return true;
+    } else {
+      console.error(`[${rowIndex}] 상태 업데이트 실패: ${txt}`);
+      return false;
+    }
+  } catch (error) {
+    console.error(`[${rowIndex}] 상태 업데이트 중 오류:`, error);
+    return false;
+  }
+}
