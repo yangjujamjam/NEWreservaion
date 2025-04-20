@@ -144,17 +144,44 @@
     <button type="button" onclick="sendMannerMessages()">매너타임 메세지 보내기</button>
   </div>
 
-<!-- 사전예약 알림탭 추가 -->
+<!-- 사전예약 알림탭 추가 (수정됨) -->
 <div id="tabReserveAlert" class="tab-content" style="display:none;">
-  <h3>사전예약 알림톡 보내기</h3>
-  
-  <select id="reserveAlertYear"></select>
-  <select id="reserveAlertMonth"></select>
-  
-  <button onclick="loadReserveAlertList()">리스트 불러오기</button>
-  <button onclick="sendReserveAlertMessages()">사전알림톡 보내기</button>
-  
-  <div id="reserveAlertListContainer"></div>
+  <h3>사전예약 알림톡 관리</h3>
+
+  <!-- (A) 저장 섹션 -->
+  <div class="pre-reservation-input-group">
+    <input type="text"
+           id="prePhoneInput"
+           placeholder="전화번호 입력 (숫자만)"
+           oninput="this.value = this.value.replace(/\D/g,'')" />
+    <input type="text"
+           id="preYearInput"
+           placeholder="연도 입력 (예: 2025)"
+           oninput="this.value = this.value.replace(/\D/g,'')" />
+    <select id="preMonthInput">
+      <option value="">월</option>
+      <!-- 1월부터 12월까지 옵션 -->
+      ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
+    </select>
+    <button onclick="savePreReservationEntry()">저장</button>
+  </div>
+
+  <hr/>
+
+  <!-- (B) 검색 섹션 -->
+  <div class="pre-reservation-input-group">
+    <select id="reserveSearchYear"></select>
+    <select id="reserveSearchMonth"></select>
+    <button onclick="loadPreReservationList()">리스트 불러오기</button>
+  </div>
+
+  <!-- (C) 저장된 내역 표시 -->
+  <div id="preReserveListContainer"></div>
+
+  <!-- (D) 알림톡 전송 -->
+  <div class="pre-reservation-action-buttons">
+    <button class="btn-kakao" onclick="sendPreReserveTalk()">사전 알림톡 보내기</button>
+  </div>
 </div>
 
 
