@@ -1600,20 +1600,23 @@ async function fetchLastCContent() {
 function initPreReservationTab() {
   const now = new Date();
   const currentYear = now.getFullYear();
-  const yearSel = document.getElementById('reserveSearchYear');
-  const monthSel = document.getElementById('reserveSearchMonth');
-  const preYear = document.getElementById('preYearInput');
-  const preMonth = document.getElementById('preMonthInput');
 
-  // (A) 검색용 연도/월 셀렉트 초기화
+  // 검색용 연도/월
+  const yearSel  = document.getElementById('reserveSearchYear');
+  const monthSel = document.getElementById('reserveSearchMonth');
   yearSel.innerHTML = `<option value="${currentYear}">${currentYear}년</option>`;
   for (let m = 1; m <= 12; m++) {
     monthSel.innerHTML += `<option value="${m}">${m}월</option>`;
   }
 
-  // (B) 저장용 연도/월 기본값
-  preYear.value = currentYear;
-  // preMonth는 <select> 태그 내 옵션이 이미 index.html에서 생성됨
+  // 저장용 연도
+  document.getElementById('preYearInput').value = currentYear;
+
+  // **저장용 월</>**
+  const preMonthSel = document.getElementById('preMonthInput');
+  for (let m = 1; m <= 12; m++) {
+    preMonthSel.innerHTML += `<option value="${m}">${m}월</option>`;
+  }
 }
 
 // (C) 저장 버튼 핸들러
