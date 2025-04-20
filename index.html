@@ -158,11 +158,10 @@
            id="preYearInput"
            placeholder="연도 입력 (예: 2025)"
            oninput="this.value = this.value.replace(/\D/g,'')" />
-    <select id="preMonthInput">
-      <option value="">월</option>
-      <!-- 1월부터 12월까지 옵션 -->
-      ${Array.from({length:12},(_,i)=>`<option value="${i+1}">${i+1}월</option>`).join('')}
-    </select>
+     <select id="preMonthInput">
+       <option value="">월</option>
+       <!-- JS에서 채워줄 예정 -->
+     </select>
     <button onclick="savePreReservationEntry()">저장</button>
   </div>
 
