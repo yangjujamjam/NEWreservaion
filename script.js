@@ -189,8 +189,8 @@ function parseYanoljaReservation(text) {
   const isStay   = lines.some(l => l.includes('<숙박>'));
   const isDayUse = lines.some(l => l.includes('<대실>') || l.includes('<데이유즈>'));
 
-  // 2) 예약번호 / 객실 / 금액 / 예약자 및 전화번호
-  const 예약번호 = lines.find(l => /^[0-9]{16,}/)?.trim() || '';
+  // 2) 예약번호: 순수 숫자 12자리 이상인 첫 번째 라인
+  const 예약번호 = lines.find(l => /^\d{12,}$/.test(l)) || '';
   const 객실명   = lines.find(l => /\)\s*[가-힣]+\s?카라반|우드캐빈/.test(l)) || '';
   const 이용객실 = (객실명.match(/대형 카라반|복층 우드캐빈/) || [''])[0];
   const 금액행   = lines.find(l => /^\(?[0-9,]+원$/.test(l)) || '';
