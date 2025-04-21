@@ -184,70 +184,59 @@ function parseNaverReservation(text) {
  *    [야놀자 파싱]
  * ========================== */
 function parseYanoljaReservation(text) {
-  const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  // 1) 플랫폼 태그 확인
+  const isStay   = lines.some(l => l.includes('<숙박>'));
+  const isDayUse = lines.some(l => l.includes('<대실>') || l.includes('<데이유즈>'));
 
-  const 예약번호 = lines[3];
-  const 객실라인 = lines.find(line =>
-    line.includes('카라반') || line.includes('우드캐빈') || line.includes('파티룸') || line.includes('몽골')
-  );
-  const 이용객실 = 객실라인 ? 객실라인.replace(/\(.*\)/, '').trim() : '';
+  // 2) 예약번호 / 객실 / 금액 / 예약자 및 전화번호
+  const 예약번호 = lines.find(l => /^[0-9]{16,}/)?.trim() || '';
+  const 객실명   = lines.find(l => /\)\s*[가-힣]+\s?카라반|우드캐빈/.test(l)) || '';
+  const 이용객실 = (객실명.match(/대형 카라반|복층 우드캐빈/) || [''])[0];
+  const 금액행   = lines.find(l => /^\(?[0-9,]+원$/.test(l)) || '';
+  const 결제금액 = 금액행.replace(/\D/g, '') + '원';
+  const rsrvLine = lines.find(l => /\s*\/\s*[0-9]{9,}/.test(l)) || '';
+  let [예약자, 전화] = rsrvLine.split('/').map(s => s.trim());
+  전화 = format12DigitPhone(전화);
 
-  const 금액라인 = lines.find(line => line.includes('원'));
-  const 결제금액 = 금액라인
-    ? 금액라인.replace('원', '').replace(/,/g, '').trim() + '원'
-    : '';
-
-  const 예약자라인 = lines.find(line => line.includes('/'));
-  let 예약자 = '';
-  let 전화번호 = '';
-  if (예약자라인) {
-    const splitted = 예약자라인.split('/');
-    예약자 = splitted[0].trim();
-    전화번호 = splitted[1] ? splitted[1].trim() : '';
-    전화번호 = format12DigitPhone(전화번호);
-  }
-
-  const 체크인라인   = lines.find(line => line.includes('~'));
-  const idx          = lines.indexOf(체크인라인);
-  const 체크아웃라인 = idx !== -1 ? lines[idx + 1] : '';
-
-  const 이용유형 = lines[1] || '';
-  let 이용기간 = '';
-  let 입실시간 = '';
-
-  const formatDate = date => {
-    const match = date.match(/(\d{4})-(\d{2})-(\d{2})\((.)\)/);
-    if (!match) return date;
-    const [y, m, d, day] = match.slice(1);
-    return `${Number(y)}. ${Number(m)}. ${Number(d)}.(${day})`;
+  // 3) 날짜·시간 라인 추출
+  const dateLines = lines.filter(l => /^\d{4}-\d{2}-\d{2}\([^)]+\)/.test(l) || l.startsWith('~'));
+  const formatDate = dstr => {
+    const m = dstr.replace(/^~/,'').match(/^(\d{4})-(\d{2})-(\d{2})(\([^)]+\))/);
+    if (!m) return '';
+    const [ , Y, M, D, day ] = m;
+    return `${Y}. ${parseInt(M,10)}. ${parseInt(D,10)}.${day}`;
   };
+  const parseTime = str => (str.match(/(\d{1,2}:\d{2})/g)||[])[0] || '';
+  let 이용기간, 입실시간;
 
-  if (이용유형.includes('대실')) {
-    // 당일(대실)
-    if (체크인라인) {
-      이용기간 = formatDate(체크인라인.split(' ')[0]);
-      const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
-      const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
-      입실시간 = (입실시간Match && 퇴실시간Match)
-        ? `${입실시간Match[0]}~${퇴실시간Match[0]}`
-        : '';
-    }
+  if (isStay && dateLines.length >= 2) {
+    const first = dateLines[0];
+    const second = dateLines[1];
+    const d1 = formatDate(first);
+    const d2 = formatDate(second);
+    이용기간 = `${d1}~${d2}`;
+    const t1 = parseTime(first);
+    const t2 = parseTime(second);
+    입실시간 = `[숙박] ${t1} 입실 / ${t2} 퇴실`;
+  } else if (isDayUse && dateLines.length >= 2) {
+    const first = dateLines[0];
+    // 두번째 명시된 라인에서 시간만
+    const second = dateLines[1];
+    이용기간 = formatDate(first);
+    const t1 = parseTime(first);
+    const t2 = parseTime(second);
+    입실시간 = `${t1}~${t2}`;
   } else {
-    // 숙박
-    if (체크인라인) {
-      const inDateStr = 체크인라인.split(' ')[0];
-      const outDateStr= 체크아웃라인.split(' ')[0];
-      이용기간 = `${formatDate(inDateStr)}~${formatDate(outDateStr)}`;
-      const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
-      const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
-      입실시간 = `[숙박] ${(입실시간Match ? 입실시간Match[0] : '')} 입실 / ${(퇴실시간Match ? 퇴실시간Match[0] : '')} 퇴실`;
-    }
+    // fallback
+    이용기간 = '';
+    입실시간 = '';
   }
 
   return {
     예약번호,
     예약자,
-    전화번호,
+    전화번호: 전화,
     이용객실,
     이용기간,
     수량: '1',
