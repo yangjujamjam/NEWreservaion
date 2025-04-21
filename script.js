@@ -36,7 +36,7 @@ function isManualTabActive() {
  *  [4] 붙여넣기 탭 (예약 정보 파싱)
  * ========================================= */
 function detectPlatform(text) {
-  if (text.includes("야놀자"))   return "야놀자";
+  if (text.includes("NOL"))   return "NOL";
   if (text.includes("여기어때")) return "여기어때";
   return "네이버"; // default
 }
@@ -44,7 +44,7 @@ function detectPlatform(text) {
 function parseReservation(text) {
   const platform = detectPlatform(text);
   if (platform === "네이버")   return parseNaverReservation(text);
-  if (platform === "야놀자")   return parseYanoljaReservation(text);
+  if (platform === "NOL")   return parseYanoljaReservation(text);
   if (platform === "여기어때") return parseHereReservation(text);
   return parseNaverReservation(text);
 }
@@ -618,10 +618,10 @@ ${formattedParsedData}
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
 https://litt.ly/jamjam_bbq`;
   }
-  else if (data.예약플랫폼 === '야놀자') {
+  else if (data.예약플랫폼 === 'NOL') {
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
-야놀자로 예약하셨다면
+NOL로 예약하셨다면
 여기로 성함과 전화번호를 꼭 남겨주세요!
 
 ${formattedParsedData}
