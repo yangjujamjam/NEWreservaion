@@ -234,7 +234,7 @@ ${formattedOption}
     recvname_1: data.예약자 || '고객님',
     subject_1:  '예약 안내',
     message_1:  messageText,
-    failover:   'Y'
+    failover:   'N'
   });
 
   // (e) [중요] TZ_1465 / TZ_1466 / TZ_1481 → 채널추가 버튼 필요
@@ -349,7 +349,7 @@ function sendAlimtalkForDeposit(row) {
     recvname_1: row.예약자 || '고객님',
     subject_1:  '예약 안내',
     message_1:  finalText,
-    failover:   'Y'
+    failover:   'N'
   });
 
   if (tplCode === 'TZ_1466' || tplCode === 'TZ_1465') {
@@ -527,7 +527,7 @@ async function sendOneReminder(row) {
     recvname_1: row.예약자||'고객님',
     subject_1:  '전날 안내',
     message_1:  tplText,
-    failover:   'Y'
+    failover:   'N'
   });
 
   // 전날메세지: 5개 웹링크 버튼
@@ -661,7 +661,7 @@ async function sendCheckoutStayOne(row) {
     recvname_1: row.예약자 || '고객님',
     subject_1:  '퇴실 안내(숙박)',
     message_1:  tplText,
-    failover:   'Y'
+    failover:   'N'
   });
 
   try {
@@ -704,7 +704,7 @@ async function sendCheckoutDayOne(row) {
     recvname_1: row.예약자||'고객님',
     subject_1:  '퇴실 안내(당일)',
     message_1:  tplText,
-    failover:   'Y'
+    failover:   'N'
   });
 
   try {
@@ -785,7 +785,7 @@ async function sendMannerOne(row) {
     recvname_1: row.예약자||'고객님',
     subject_1:  '매너타임 안내',
     message_1:  tplText,
-    failover:   'Y'
+    failover:   'N'
   });
 
   try {
@@ -919,7 +919,7 @@ async function sendPreReserveTalkOne(phone, year, month) {
     recvname_1: '고객님',
     subject_1:  '예약 오픈 안내',
     message_1:  msg,
-    failover:   'Y'
+    failover:   'N'
   });
   params.append('button_1', JSON.stringify(buttonObj));
 
