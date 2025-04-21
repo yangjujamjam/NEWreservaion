@@ -181,7 +181,7 @@ function parseNaverReservation(text) {
 }
 
 /** ==========================
- *    [야놀자/NOL 미리예약 파싱]
+ *    [야놀자 파싱] (수정)
  * ========================== */
 function parseYanoljaReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
@@ -207,23 +207,8 @@ function parseYanoljaReservation(text) {
     전화번호 = format12DigitPhone(전화번호);
   }
 
-  // 체크인라인과 체크아웃라인 처리 (형식에 따라 유연하게)
-  const 체크인체크아웃라인들 = lines.filter(line => line.match(/\d{4}-\d{2}-\d{2}\(.+?\)/));
-
-  let 체크인라인, 체크아웃라인;
-
-  if (체크인체크아웃라인들.length === 2) {
-    체크인라인 = 체크인체크아웃라인들[0];
-    체크아웃라인 = 체크인체크아웃라인들[1];
-  } else if (체크인체크아웃라인들.length === 1) {
-    const idx = lines.indexOf(체크인체크아웃라인들[0]);
-    체크인라인 = 체크인체크아웃라인들[0];
-    체크아웃라인 = lines[idx + 1] || '';
-  } else {
-    체크인라인 = lines.find(line => line.includes('~'));
-    const idx = lines.indexOf(체크인라인);
-    체크아웃라인 = idx !== -1 ? lines[idx + 1] : '';
-  }
+  const 체크인라인 = lines.find(line => line.match(/\d{4}-\d{2}-\d{2}\(.+?\).*\d{2}:\d{2}/));
+  const 체크아웃라인 = lines.find(line => line.includes('(1박)'));
 
   const 이용유형 = lines[1] || '';
   let 이용기간 = '';
@@ -267,9 +252,10 @@ function parseYanoljaReservation(text) {
     총이용인원: '대인2',
     입실시간,
     결제금액,
-    예약플랫폼: lines[0].includes('야놀자') ? '야놀자' : 'NOL'
+    예약플랫폼: (lines[0].includes('야놀자') || lines[0].includes('NOL')) ? '야놀자' : lines[0]
   };
 }
+
 
 
 /** ==========================
