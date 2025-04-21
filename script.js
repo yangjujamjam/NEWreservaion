@@ -36,7 +36,7 @@ function isManualTabActive() {
  *  [4] 붙여넣기 탭 (예약 정보 파싱)
  * ========================================= */
 function detectPlatform(text) {
-  if (text.includes("야놀자"))   return "야놀자";
+  if (text.includes("야놀자") || text.includes("NOL")) return "야놀자";
   if (text.includes("여기어때")) return "여기어때";
   return "네이버"; // default
 }
