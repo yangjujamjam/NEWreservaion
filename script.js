@@ -36,7 +36,7 @@ function isManualTabActive() {
  *  [4] 붙여넣기 탭 (예약 정보 파싱)
  * ========================================= */
 function detectPlatform(text) {
-  if (text.includes("NOL"))   return "NOL";
+  if (text.includes("야놀자"))   return "야놀자";
   if (text.includes("여기어때")) return "여기어때";
   return "네이버"; // default
 }
@@ -44,7 +44,7 @@ function detectPlatform(text) {
 function parseReservation(text) {
   const platform = detectPlatform(text);
   if (platform === "네이버")   return parseNaverReservation(text);
-  if (platform === "NOL")   return parseYanoljaReservation(text);
+  if (platform === "야놀자")   return parseYanoljaReservation(text);
   if (platform === "여기어때") return parseHereReservation(text);
   return parseNaverReservation(text);
 }
@@ -219,7 +219,7 @@ function parseYanoljaReservation(text) {
     const match = date.match(/(\d{4})-(\d{2})-(\d{2})\((.)\)/);
     if (!match) return date;
     const [y, m, d, day] = match.slice(1);
-    return ${Number(y)}. ${Number(m)}. ${Number(d)}.(${day});
+    return `${Number(y)}. ${Number(m)}. ${Number(d)}.(${day})`;
   };
 
   if (이용유형.includes('대실')) {
@@ -229,7 +229,7 @@ function parseYanoljaReservation(text) {
       const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
       const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
       입실시간 = (입실시간Match && 퇴실시간Match)
-        ? ${입실시간Match[0]}~${퇴실시간Match[0]}
+        ? `${입실시간Match[0]}~${퇴실시간Match[0]}`
         : '';
     }
   } else {
@@ -237,10 +237,10 @@ function parseYanoljaReservation(text) {
     if (체크인라인) {
       const inDateStr = 체크인라인.split(' ')[0];
       const outDateStr= 체크아웃라인.split(' ')[0];
-      이용기간 = ${formatDate(inDateStr)}~${formatDate(outDateStr)};
+      이용기간 = `${formatDate(inDateStr)}~${formatDate(outDateStr)}`;
       const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
       const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
-      입실시간 = [숙박] ${(입실시간Match ? 입실시간Match[0] : '')} 입실 / ${(퇴실시간Match ? 퇴실시간Match[0] : '')} 퇴실;
+      입실시간 = `[숙박] ${(입실시간Match ? 입실시간Match[0] : '')} 입실 / ${(퇴실시간Match ? 퇴실시간Match[0] : '')} 퇴실`;
     }
   }
 
@@ -255,10 +255,9 @@ function parseYanoljaReservation(text) {
     총이용인원: '대인2',
     입실시간,
     결제금액,
-    예약플랫폼: 'NOL'
+    예약플랫폼: '야놀자'
   };
 }
-
 
 /** ==========================
  *   [여기어때 파싱]
@@ -618,10 +617,10 @@ ${formattedParsedData}
 양손 가볍게, 잼잼 바베큐 키트 출시🍖
 https://litt.ly/jamjam_bbq`;
   }
-  else if (data.예약플랫폼 === 'NOL') {
+  else if (data.예약플랫폼 === '야놀자') {
     message = `[양주잼잼] 예약해 주셔서 진심으로 감사합니다♬
 
-NOL로 예약하셨다면
+야놀자로 예약하셨다면
 여기로 성함과 전화번호를 꼭 남겨주세요!
 
 ${formattedParsedData}
