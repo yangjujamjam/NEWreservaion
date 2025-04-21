@@ -181,7 +181,7 @@ function parseNaverReservation(text) {
 }
 
 /** ==========================
- *    [야놀자 파싱] (안정적 수정)
+ *    [야놀자 파싱]
  * ========================== */
 function parseYanoljaReservation(text) {
   const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
@@ -207,10 +207,9 @@ function parseYanoljaReservation(text) {
     전화번호 = format12DigitPhone(전화번호);
   }
 
-  // 체크인 및 체크아웃 날짜 라인 처리 개선
-  const 날짜라인들 = lines.filter(line => line.match(/\d{4}-\d{2}-\d{2}\(.+?\)/));
-  let 체크인라인 = 날짜라인들[0] || '';
-  let 체크아웃라인 = 날짜라인들[1] || '';
+  const 체크인라인   = lines.find(line => line.includes('~'));
+  const idx          = lines.indexOf(체크인라인);
+  const 체크아웃라인 = idx !== -1 ? lines[idx + 1] : '';
 
   const 이용유형 = lines[1] || '';
   let 이용기간 = '';
@@ -220,24 +219,28 @@ function parseYanoljaReservation(text) {
     const match = date.match(/(\d{4})-(\d{2})-(\d{2})\((.)\)/);
     if (!match) return date;
     const [y, m, d, day] = match.slice(1);
-    return `${Number(y)}. ${Number(m)}. ${Number(d)}.(${day})`;
+    return ${Number(y)}. ${Number(m)}. ${Number(d)}.(${day});
   };
 
   if (이용유형.includes('대실')) {
+    // 당일(대실)
     if (체크인라인) {
       이용기간 = formatDate(체크인라인.split(' ')[0]);
       const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
       const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
       입실시간 = (입실시간Match && 퇴실시간Match)
-        ? `${입실시간Match[0]}~${퇴실시간Match[0]}`
+        ? ${입실시간Match[0]}~${퇴실시간Match[0]}
         : '';
     }
   } else {
-    if (체크인라인 && 체크아웃라인) {
-      이용기간 = `${formatDate(체크인라인)}~${formatDate(체크아웃라인)}`;
+    // 숙박
+    if (체크인라인) {
+      const inDateStr = 체크인라인.split(' ')[0];
+      const outDateStr= 체크아웃라인.split(' ')[0];
+      이용기간 = ${formatDate(inDateStr)}~${formatDate(outDateStr)};
       const 입실시간Match = 체크인라인.match(/\d{2}:\d{2}/);
       const 퇴실시간Match = 체크아웃라인.match(/\d{2}:\d{2}/);
-      입실시간 = `[숙박] ${입실시간Match ? 입실시간Match[0] : ''} 입실 / ${퇴실시간Match ? 퇴실시간Match[0] : ''} 퇴실`;
+      입실시간 = [숙박] ${(입실시간Match ? 입실시간Match[0] : '')} 입실 / ${(퇴실시간Match ? 퇴실시간Match[0] : '')} 퇴실;
     }
   }
 
@@ -252,10 +255,9 @@ function parseYanoljaReservation(text) {
     총이용인원: '대인2',
     입실시간,
     결제금액,
-    예약플랫폼: (lines[0].includes('야놀자') || lines[0].includes('NOL')) ? '야놀자' : lines[0]
+    예약플랫폼: 'NOL'
   };
 }
-
 
 
 /** ==========================
