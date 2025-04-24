@@ -162,6 +162,7 @@ function confirmAlimtalk() {
 /**
  * (B) 붙여넣기/수기작성에서 parseReservation() or getManualReservationDataSingle() 한 결과로
  *     무통장/숙박/당일 템플릿을 분기하여 알림톡 전송
+ *  - failover='Y' → 카카오 실패 시 LMS 자동 전환
  */
 async function sendAlimtalk() {
   // (a) 예약 데이터 (붙여넣기 or 수기작성)
@@ -222,7 +223,7 @@ ${formattedOption}
     .replace('#{파싱내용}', parsingContent)
     .replace('#{이용시간}', usageTimeReplaced);
 
-  // (d) 알리고 파라미터
+  // (d) 알리고 파라미터 - failover='Y'
   const params = new URLSearchParams({
     apikey:     ALIMTALK_API_KEY,
     userid:     ALIMTALK_USER_ID,
@@ -234,7 +235,10 @@ ${formattedOption}
     recvname_1: data.예약자 || '고객님',
     subject_1:  '예약 안내',
     message_1:  messageText,
-    failover:   'N'
+    
+    failover:   'Y',                     // ★ 카카오 실패 시 LMS 자동전환
+    fsubject_1: '예약 안내(대체)',       // ★ LMS 제목
+    fmessage_1: messageText              // ★ LMS 본문 (원하시면 다른 문구 가능)
   });
 
   // (e) [중요] TZ_1465 / TZ_1466 / TZ_1481 → 채널추가 버튼 필요
@@ -251,7 +255,7 @@ ${formattedOption}
     });
     const result = await res.json();
     if(result.code===0) {
-      alert("알림톡 발송 성공");
+      alert("알림톡 발송 성공 (카카오 or LMS)");
     } else {
       alert("알림톡 발송 실패: " + result.message);
     }
@@ -301,6 +305,7 @@ async function confirmPaymentAlimtalk(row) {
 
 /**
  * (B) 무통장 입금확인 알림톡 (숙박=TZ_1466 / 당일=TZ_1465)
+ *   - failover='Y'
  */
 function sendAlimtalkForDeposit(row) {
   // 1) 숙박 or 당일
@@ -338,6 +343,7 @@ function sendAlimtalkForDeposit(row) {
     .replace('#{이용시간}', usageTime)
     .replace('#{파싱내용}', parsingContent);
 
+  // failover 파라미터
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
     userid:    ALIMTALK_USER_ID,
@@ -349,7 +355,10 @@ function sendAlimtalkForDeposit(row) {
     recvname_1: row.예약자 || '고객님',
     subject_1:  '예약 안내',
     message_1:  finalText,
-    failover:   'N'
+
+    failover:   'Y',
+    fsubject_1: '예약 안내(대체)',
+    fmessage_1: finalText
   });
 
   if (tplCode === 'TZ_1466' || tplCode === 'TZ_1465') {
@@ -364,7 +373,7 @@ function sendAlimtalkForDeposit(row) {
   .then(r => r.json())
   .then(result => {
     if(result.code===0) {
-      alert("알림톡 발송 성공");
+      alert("알림톡 발송 성공 (카카오 or LMS)");
     } else {
       alert("알림톡 발송 실패: " + result.message);
     }
@@ -504,6 +513,7 @@ const TEMPLATE_REMIND_DAYUSE_TEXT =
 /**
  * 전날메세지 -> 숙박/당일
  *  - 버튼 5개(웹링크)
+ *  - failover='Y'
  */
 async function sendOneReminder(row) {
   const isStay = row.이용기간.includes('~');
@@ -527,7 +537,10 @@ async function sendOneReminder(row) {
     recvname_1: row.예약자||'고객님',
     subject_1:  '전날 안내',
     message_1:  tplText,
-    failover:   'N'
+
+    failover:   'Y',
+    fsubject_1: '전날 안내(대체)',
+    fmessage_1: tplText
   });
 
   // 전날메세지: 5개 웹링크 버튼
@@ -583,10 +596,12 @@ async function sendOneReminder(row) {
       return true;
     } else {
       console.warn(`[${row.예약번호}] 전날메세지 실패: ${result.message}`);
+      alert("알림톡 발송 실패: " + result.message);
       return false;
     }
   } catch (err) {
     console.error(err);
+    alert("알림톡 발송 중 오류 발생");
     return false;
   }
 }
@@ -661,7 +676,10 @@ async function sendCheckoutStayOne(row) {
     recvname_1: row.예약자 || '고객님',
     subject_1:  '퇴실 안내(숙박)',
     message_1:  tplText,
-    failover:   'N'
+
+    failover:   'Y',
+    fsubject_1: '퇴실 안내(대체)',
+    fmessage_1: tplText
   });
 
   try {
@@ -677,10 +695,12 @@ async function sendCheckoutStayOne(row) {
       return true;
     } else {
       console.warn(`[${row.예약번호}] 퇴실(숙박) FAIL: ${result.message}`);
+      alert("알림톡 발송 실패: " + result.message);
       return false;
     }
   } catch(e){
     console.error(e);
+    alert("알림톡 발송 중 오류 발생");
     return false;
   }
 }
@@ -704,7 +724,10 @@ async function sendCheckoutDayOne(row) {
     recvname_1: row.예약자||'고객님',
     subject_1:  '퇴실 안내(당일)',
     message_1:  tplText,
-    failover:   'N'
+
+    failover:   'Y',
+    fsubject_1: '퇴실 안내(대체)',
+    fmessage_1: tplText
   });
 
   try {
@@ -720,10 +743,12 @@ async function sendCheckoutDayOne(row) {
       return true;
     } else {
       console.warn(`[${row.예약번호}] 퇴실(당일) FAIL: ${result.message}`);
+      alert("알림톡 발송 실패: " + result.message);
       return false;
     }
   } catch(e){
     console.error(e);
+    alert("알림톡 발송 중 오류 발생");
     return false;
   }
 }
@@ -769,7 +794,7 @@ const TEMPLATE_MANNER_TEXT =
 
 협조해 주셔서 감사합니다.`;
 
-/** 매너타임 → TY_8981 (버튼 없음) */
+/** 매너타임 → TY_8981 (버튼 없음, failover='Y') */
 async function sendMannerOne(row) {
   const tplCode = TEMPLATE_MANNER_CODE; // 'TY_8981'
   let tplText = TEMPLATE_MANNER_TEXT;   // 그대로 전송
@@ -785,7 +810,10 @@ async function sendMannerOne(row) {
     recvname_1: row.예약자||'고객님',
     subject_1:  '매너타임 안내',
     message_1:  tplText,
-    failover:   'N'
+
+    failover:   'Y',
+    fsubject_1: '매너타임(대체)',
+    fmessage_1: tplText
   });
 
   try {
@@ -801,10 +829,12 @@ async function sendMannerOne(row) {
       return true;
     } else {
       console.warn(`[${row.예약번호}] 매너타임 FAIL: ${result.message}`);
+      alert("알림톡 발송 실패: " + result.message);
       return false;
     }
   } catch(e){
     console.error(e);
+    alert("알림톡 발송 중 오류 발생");
     return false;
   }
 }
@@ -829,6 +859,9 @@ async function updateSendX(rowIndex) {  // 매너타임 (X열)
   await fetch(url);
 }
 
+/** =========================================
+ *  [8] 사전알림톡 (TZ_3719) - 웹링크 1개
+ * ========================================= */
 async function sendPreReserveTalk(){
   // 현재 조회된 연도/월
   const year  = document.getElementById('searchReserveYear').value.trim();
@@ -850,8 +883,6 @@ async function sendPreReserveTalk(){
   rows.forEach(tr=>{
     const tds = tr.querySelectorAll('td');
     const p = tds[0].textContent.trim();   // 전화번호
-    // year= tds[1].textContent.trim();
-    // month= tds[2].textContent.trim();
     phones.push(p);
   });
 
@@ -863,8 +894,7 @@ async function sendPreReserveTalk(){
   const ok = confirm(`총 ${phones.length}명에게 사전알림톡을 보낼까요?`);
   if(!ok) return;
 
-  // 하나씩 전송
-  let success =0, fail=0;
+  let success=0, fail=0;
   for(let i=0; i<phones.length; i++){
     const phone = phones[i];
     const res = await sendPreReserveTalkOne(phone, year, month);
@@ -915,15 +945,17 @@ async function sendPreReserveTalkOne(phone, year, month) {
     tpl_code:  TEMPLATE_CODE_PREOPEN,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: phone.replace(/\D/g,''), // 숫자만
+    receiver_1: phone.replace(/\D/g,''), 
     recvname_1: '고객님',
     subject_1:  '예약 오픈 안내',
     message_1:  msg,
-    failover:   'N'
+
+    failover:   'Y',                   // ★ 카카오 실패 시 LMS
+    fsubject_1: '예약 오픈(대체)',     // LMS 제목
+    fmessage_1: msg                    // LMS 내용
   });
   params.append('button_1', JSON.stringify(buttonObj));
 
-  // 4) 전송
   try {
     const res = await fetch(ALIMTALK_API_URL, {
       method:'POST',
@@ -936,10 +968,12 @@ async function sendPreReserveTalkOne(phone, year, month) {
       return true;
     } else {
       console.warn(`[사전알림] ${phone} FAIL: ${result.message}`);
+      alert("알림톡 발송 실패: " + result.message);
       return false;
     }
   } catch(e){
     console.error(e);
+    alert("알림톡 발송 중 오류 발생");
     return false;
   }
 }
