@@ -1,21 +1,16 @@
 /*******************************************************
- * script_talk.js
+ * script_talk.js (알림톡 및 대체문자 전체 적용 완성본)
  *******************************************************/
 
 /** =========================================
  *  [1] 알림톡 전역 설정
  * ========================================= */
-// 알리고(카카오) 발송용 API URL / API KEY / ...
 const ALIMTALK_API_URL   = 'https://kakaoapi.aligo.in/akv10/alimtalk/send/';
 const ALIMTALK_API_KEY   = 's2qfjf9gxkhzv0ms04bt54f3w8w6b9jd';
 const ALIMTALK_USER_ID   = 'yangjujamjam';
 const ALIMTALK_SENDERKEY = 'fc0570b6c7f7785506ea85b62838fd6fb37a3bcc';
 const ALIMTALK_SENDER    = '01059055559';
 
-/** 
- * [공통] 카톡 버튼 예: "채널추가" 
- *  - TZ_1465, TZ_1466, TZ_1481 템플릿에 적용
- */
 const DEFAULT_BUTTON_INFO = {
   button: [{
     name: "채널추가",
@@ -26,26 +21,21 @@ const DEFAULT_BUTTON_INFO = {
 };
 
 /** =========================================
- *  [2] (붙여넣기/수기작성 탭)
- *      무통장(TZ_1481), 숙박(TZ_1466), 당일(TZ_1465)
+ *  [2] 템플릿 정의 (알림톡 본문 및 대체문자용 동일 본문)
  * ========================================= */
-
-/** 무통장 템플릿 (TZ_1481) - 버튼(채널추가) 포함 */
-const TEMPLATE_CODE_BANK = 'TZ_1481';
-const TEMPLATE_TEXT_BANK = 
-`고객님 예약 신청해 주셔서 
+// 무통장 템플릿 (TZ_1481)
+const TEMPLATE_CODE_BANK    = 'TZ_1481';
+const TEMPLATE_TEXT_BANK    = `고객님 예약 신청해 주셔서 
 진심으로 감사드립니다.
 
 #{파싱내용}
 
 ▶계좌번호  우리 1005 504 540028 (주) 유연음
 
-※입금 시 입금자, 예약자명이 동일해야 하며, 
-예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.
+※입금 시 입금자, 예약자명이 동일해야 하며, 예약 안내 수신 후 "2시간 이내" 입금 확인이 안 될 시 자동 취소 처리됩니다.
 
 ■ 이용 안내
-▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 
-   현장에서 추가 결제가 필요합니다.
+▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
 
 ▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며 현장 결제 가능합니다.  
 ※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.  
@@ -58,16 +48,14 @@ const TEMPLATE_TEXT_BANK =
 
 ※예약 내용을 다시 한번 확인하시고 수정 또는 변경 사항이 있으면 연락 바랍니다.`;
 
-/** 숙박 템플릿 (TZ_1466) - 버튼(채널추가) 포함 */
+// 숙박 템플릿 (TZ_1466)
 const TEMPLATE_CODE_LODGING = 'TZ_1466';
-const TEMPLATE_TEXT_LODGING = 
-`예약해 주셔서 진심으로 감사합니다♪
+const TEMPLATE_TEXT_LODGING = `예약해 주셔서 진심으로 감사합니다♪
 
 #{파싱내용}
 
 ■ 숙박 안내
-▶ 2인을 초과하여 예약하신 경우, 인원 추가를 선택하지 않으셨다면 
-   현장에서 추가 결제가 필요합니다.
+▶ 2인을 초과하여 예약하신 경우, 인원 추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
 
 ▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며, 현장에서 결제 가능합니다.
 ※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.
@@ -81,7 +69,6 @@ const TEMPLATE_TEXT_LODGING =
 ▶ 수영장은 체크인 시간 2시간 전부터 이용 가능합니다.
 
 예약 내용을 다시 한번 확인해 주시고, 수정이나 변경이 있으시면 연락 바랍니다.
-
 
 ■ 환불 규정
 ▶ 취소 수수료
@@ -104,10 +91,9 @@ const TEMPLATE_TEXT_LODGING =
 
 ※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.`;
 
-/** 당일(대실) 템플릿 (TZ_1465) - 버튼(채널추가) 포함 */
-const TEMPLATE_CODE_DAYUSE = 'TZ_1465';
-const TEMPLATE_TEXT_DAYUSE =
-`예약해 주셔서 진심으로 감사합니다♪
+// 당일 템플릿 (TZ_1465)
+const TEMPLATE_CODE_DAYUSE  = 'TZ_1465';
+const TEMPLATE_TEXT_DAYUSE  = `예약해 주셔서 진심으로 감사합니다♪
 
 ■ 선택하신 이용시간은
 #{이용시간}이며, 예약하신 방문 시간을 꼭 지켜주시기 바랍니다.
@@ -115,8 +101,7 @@ const TEMPLATE_TEXT_DAYUSE =
 #{파싱내용}
 
 ■ 이용 안내
-▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 
-   현장에서 추가 결제가 필요합니다.
+▶ 2인을 초과하여 예약하셨을 경우, 인원추가를 선택하지 않으셨다면 현장에서 추가 결제가 필요합니다.
 
 ▶ 옵션(인원추가, 바베큐, 불멍, 온수풀)은 별도이며 현장 결제 가능합니다.  
 ※ 고기 및 채소 포함 옵션은 당일 취소가 불가능합니다.  
@@ -130,7 +115,6 @@ const TEMPLATE_TEXT_DAYUSE =
 ▶ 수영장은 체크인 시간 2시간 전부터 이용 가능합니다.
 
 예약 내용을 다시 한번 확인하시고 수정 또는 변경 사항이 있으면 연락 바랍니다.
-
 
 ■ 환불 규정
 ▶ 취소 수수료  
@@ -146,243 +130,9 @@ const TEMPLATE_TEXT_DAYUSE =
 
 ※ 기상악화 및 천재지변으로 인한 취소 및 환불은 어렵습니다.`;
 
-/** =========================================
- *  [3] 붙여넣기/수기작성 탭 → "알림톡 보내기" 로직
- * ========================================= */
-
-/**
- * (A) "알림톡 보내기" 버튼 → 확인 후 발송
- */
-function confirmAlimtalk() {
-  const ok = confirm("알림톡을 보내시겠습니까?");
-  if(!ok) return;
-  sendAlimtalk();
-}
-
-/**
- * (B) 붙여넣기/수기작성에서 parseReservation() or getManualReservationDataSingle() 한 결과로
- *     무통장/숙박/당일 템플릿을 분기하여 알림톡 전송
- */
-async function sendAlimtalk() {
-  // (a) 예약 데이터 (붙여넣기 or 수기작성)
-  let data;
-  if (isManualTabActive()) {
-    data = getManualReservationDataSingle(); 
-  } else {
-    const text = document.getElementById('inputData').value;
-    data = parseReservation(text);
-  }
-
-  // (b) 템플릿 코드/메시지 분기
-  let templateCode = '';
-  let templateText = '';
-
-  if (data.무통장여부) {
-    // 무통장 => TZ_1481
-    templateCode = TEMPLATE_CODE_BANK;
-    templateText = TEMPLATE_TEXT_BANK;
-  }
-  else if (['네이버','야놀자','여기어때'].includes(data.예약플랫폼)) {
-    // 숙박/당일 여부 (~ 포함이면 숙박)
-    const isOvernight = data.이용기간.includes('~');
-    if (isOvernight) {
-      templateCode = TEMPLATE_CODE_LODGING;   // TZ_1466
-      templateText = TEMPLATE_TEXT_LODGING;
-    } else {
-      templateCode = TEMPLATE_CODE_DAYUSE;    // TZ_1465
-      templateText = TEMPLATE_TEXT_DAYUSE;
-    }
-  }
-  else {
-    // 기타(수기입력 등)는 숙박 템플릿으로 예시
-    templateCode = TEMPLATE_CODE_LODGING;     // TZ_1466
-    templateText = TEMPLATE_TEXT_LODGING;
-  }
-
-  // (c) 치환
-  const usageTimeReplaced = (data.입실시간||'').replace('[당일캠핑] ','');
-  const formattedOption = data.옵션 
-    ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n')
-    : '없음';
-
-  const parsingContent = `
-- 예약번호: ${data.예약번호}
-- 예약자: ${data.예약자}
-- 전화번호: ${data.전화번호}
-- 이용객실: ${data.이용객실}
-- 이용기간: ${data.이용기간}
-- 수량: ${data.수량 || '(복수객실)'}
-- 옵션:
-${formattedOption}
-- 총 이용 인원: ${data.총이용인원}
-- 입실시간: ${data.입실시간}
-- 결제금액: ${data.결제금액}`.trim();
-
-  let messageText = templateText
-    .replace('#{파싱내용}', parsingContent)
-    .replace('#{이용시간}', usageTimeReplaced);
-
-  // (d) 알리고 파라미터
-  const params = new URLSearchParams({
-    apikey:     ALIMTALK_API_KEY,
-    userid:     ALIMTALK_USER_ID,
-    senderkey:  ALIMTALK_SENDERKEY,
-    tpl_code:   templateCode,
-    sender:     ALIMTALK_SENDER,
-
-    receiver_1: (data.전화번호||'').replace(/\D/g, ''),
-    recvname_1: data.예약자 || '고객님',
-    subject_1:  '예약 안내',
-    message_1:  messageText,
-    failover:   'N'
-  });
-
-  // (e) [중요] TZ_1465 / TZ_1466 / TZ_1481 → 채널추가 버튼 필요
-  if (templateCode === 'TZ_1465' || templateCode === 'TZ_1466' || templateCode === 'TZ_1481') {
-    params.append('button_1', JSON.stringify(DEFAULT_BUTTON_INFO));
-  }
-
-  // (f) 전송
-  try {
-    const res = await fetch(ALIMTALK_API_URL, {
-      method: 'POST',
-      headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-      body: params
-    });
-    const result = await res.json();
-    if(result.code===0) {
-      alert("알림톡 발송 성공");
-    } else {
-      alert("알림톡 발송 실패: " + result.message);
-    }
-  } catch(err) {
-    console.error(err);
-    alert("알림톡 발송 중 오류 발생");
-  }
-}
-
-/** =========================================
- *  [4] 무통장 입금확인 탭 → 입금확인 처리 & 알림톡
- * ========================================= */
-
-/**
- * (A) '입금확인' 버튼 → confirmPaymentAlimtalk(row)
- *   1) 시트1에 '입금확인' 표시
- *   2) 알림톡(숙박=TZ_1466, 당일=TZ_1465) 발송
- */
-async function confirmPaymentAlimtalk(row) {
-  const ok = confirm("입금이 확인되었습니까?");
-  if(!ok) return;
-
-  // 1) 시트 L열='입금확인' 업데이트
-  try {
-    const updateUrl = gasUrl + `?mode=updateDeposit&rowIndex=${row.rowIndex}&newValue=입금확인`;
-    const res = await fetch(updateUrl);
-    const text = await res.text();
-    if(!(text.includes("완료") || text.includes("성공"))) {
-      alert("스프레드시트 업데이트 실패: " + text);
-      return;
-    }
-    alert("스프레드시트 '입금확인' 처리 완료");
-  } catch(e) {
-    console.error(e);
-    alert("업데이트 중 오류 발생");
-    return;
-  }
-
-  // 2) 알림톡 발송 (숙박=TZ_1466 / 당일=TZ_1465)
-  sendAlimtalkForDeposit(row);
-
-  // 3) 무통장 목록 재조회
-  if(typeof loadDepositData === 'function') {
-    loadDepositData();
-  }
-}
-
-/**
- * (B) 무통장 입금확인 알림톡 (숙박=TZ_1466 / 당일=TZ_1465)
- */
-function sendAlimtalkForDeposit(row) {
-  // 1) 숙박 or 당일
-  const isStay = row.이용기간.includes('~');
-  let tplCode, tplText;
-
-  if (isStay) {
-    tplCode = TEMPLATE_CODE_LODGING;  // 'TZ_1466'
-    tplText = TEMPLATE_TEXT_LODGING;
-  } else {
-    tplCode = TEMPLATE_CODE_DAYUSE;   // 'TZ_1465'
-    tplText = TEMPLATE_TEXT_DAYUSE;
-  }
-
-  // 2) #{이용시간} 치환 (당일만)
-  let usageTime = '';
-  if(!isStay) {
-    const match = row.이용기간.match(/(\d{1,2}:\d{2}~\d{1,2}:\d{2})/);
-    usageTime = match ? match[1] : (row.입실시간 || '').replace('[당일캠핑]','').trim();
-  }
-
-  // 3) #{파싱내용}
-  const parsingContent = `
-- 예약번호: ${row.예약번호}
-- 예약자: ${row.예약자}
-- 전화번호: ${row.전화번호}
-- 이용객실: ${row.이용객실}
-- 수량: ${row.수량}
-- 옵션: ${row.옵션 || '없음'}
-- 총이용인원: ${row.총이용인원}
-- 입실시간: ${row.입실시간}
-- 결제금액: ${row.결제금액}`.trim();
-
-  let finalText = tplText
-    .replace('#{이용시간}', usageTime)
-    .replace('#{파싱내용}', parsingContent);
-
-  const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
-    senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  tplCode,
-    sender:    ALIMTALK_SENDER,
-
-    receiver_1: (row.전화번호 || '').replace(/\D/g, ''),
-    recvname_1: row.예약자 || '고객님',
-    subject_1:  '예약 안내',
-    message_1:  finalText,
-    failover:   'N'
-  });
-
-  if (tplCode === 'TZ_1466' || tplCode === 'TZ_1465') {
-    params.append('button_1', JSON.stringify(DEFAULT_BUTTON_INFO));
-  }
-
-  fetch(ALIMTALK_API_URL, {
-    method: 'POST',
-    headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-    body: params
-  })
-  .then(r => r.json())
-  .then(result => {
-    if(result.code===0) {
-      alert("알림톡 발송 성공");
-    } else {
-      alert("알림톡 발송 실패: " + result.message);
-    }
-  })
-  .catch(e => {
-    console.error(e);
-    alert("알림톡 발송 중 오류 발생");
-  });
-}
-
-/** =========================================
- *  [5] 전날메세지 탭 → 숙박(TY_8998) / 당일(TZ_1472)
- *      => (웹링크 버튼 5개)
- * ========================================= */
-
+// 전날 안내 템플릿 (숙박: TY_8998)
 const TEMPLATE_REMIND_LODGING_CODE = 'TY_8998';
-const TEMPLATE_REMIND_LODGING_TEXT =
-`안녕하세요 양주잼잼입니다. 
+const TEMPLATE_REMIND_LODGING_TEXT = `안녕하세요 양주잼잼입니다. 
 방문 전  확인 부탁드리겠습니다.
 
 ■ 숙박 이용안내
@@ -416,7 +166,7 @@ const TEMPLATE_REMIND_LODGING_TEXT =
 - 객실 수건 오염(세안 외 용도 사용) 시 장당 5,000원 변상
 
 ■ 온수 사용 안내
-- 각 객실은 카라반형태의 
+- 각 객실은 카라반형태의  
 "캠핑트레일러숙박시설"입니다.
 
 일반 건물과 달리 온수를
@@ -445,9 +195,9 @@ const TEMPLATE_REMIND_LODGING_TEXT =
 - 수영복, 물놀이 튜브, 구명조끼, 슬리퍼
 - 비치타올/담요`;
 
+// 전날 안내 템플릿 (당일: TZ_1472)
 const TEMPLATE_REMIND_DAYUSE_CODE = 'TZ_1472';
-const TEMPLATE_REMIND_DAYUSE_TEXT =
-`안녕하세요 양주잼잼입니다. 
+const TEMPLATE_REMIND_DAYUSE_TEXT = `안녕하세요 양주잼잼입니다. 
 방문 전  확인 부탁드리겠습니다.
 
 ■ 당일캠핑 이용 안내
@@ -501,103 +251,9 @@ const TEMPLATE_REMIND_DAYUSE_TEXT =
 - 수영복, 튜브, 구명조끼, 슬리퍼
 - 비치타올/담요`;
 
-/**
- * 전날메세지 -> 숙박/당일
- *  - 버튼 5개(웹링크)
- */
-async function sendOneReminder(row) {
-  const isStay = row.이용기간.includes('~');
-  let tplCode = isStay ? TEMPLATE_REMIND_LODGING_CODE : TEMPLATE_REMIND_DAYUSE_CODE;
-  let tplText = isStay ? TEMPLATE_REMIND_LODGING_TEXT : TEMPLATE_REMIND_DAYUSE_TEXT;
-
-  if(!isStay) {
-    let usageTime = (row.입실시간||'').replace('[당일캠핑]','').trim();
-    if(!usageTime) usageTime='예약시간';
-    tplText = tplText.replace('#{이용시간}', usageTime);
-  }
-
-  const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
-    senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  tplCode,
-    sender:    ALIMTALK_SENDER,
-
-    receiver_1: (row.전화번호||'').replace(/\D/g,''),
-    recvname_1: row.예약자||'고객님',
-    subject_1:  '전날 안내',
-    message_1:  tplText,
-    failover:   'N'
-  });
-
-  // 전날메세지: 5개 웹링크 버튼
-  const buttons = {
-    button: [
-      {
-        name: "바베큐 사용방법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=9ex2OggS0IA",
-        linkPc: "https://www.youtube.com/watch?v=9ex2OggS0IA"
-      },
-      {
-        name: "불멍 사용방법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=PooftL_OeGg",
-        linkPc: "https://www.youtube.com/watch?v=PooftL_OeGg"
-      },
-      {
-        name: "추울때/우천시 불멍 위치",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=7P0xkKLxxzw",
-        linkPc: "https://www.youtube.com/watch?v=7P0xkKLxxzw"
-      },
-      {
-        name: "[카라반] 보일러 사용법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=rS_tgpgX4ME",
-        linkPc: "https://www.youtube.com/watch?v=rS_tgpgX4ME"
-      },
-      {
-        name: "[우드캐빈] 보일러 사용법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=wpfEl7rBR1k",
-        linkPc: "https://www.youtube.com/watch?v=wpfEl7rBR1k"
-      }
-    ]
-  };
-  params.append('button_1', JSON.stringify(buttons));
-
-  try {
-    const res = await fetch(ALIMTALK_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: params
-    });
-    const result = await res.json();
-    if (result.code === 0) {
-      console.log(`[${row.예약번호}] 전날메세지 성공`);
-
-      await fetch(`${gasUrl}?mode=updateReminder&rowIndex=${row.rowIndex}&newValue=발송됨`);
-
-      await updateSendU(row.rowIndex);
-      return true;
-    } else {
-      console.warn(`[${row.예약번호}] 전날메세지 실패: ${result.message}`);
-      return false;
-    }
-  } catch (err) {
-    console.error(err);
-    return false;
-  }
-}
-
-/** =========================================
- *  [6] 퇴실메세지(숙박=TZ_1475), (당일=TZ_1476)
- *      => 버튼 없음
- * ========================================= */
+// 퇴실 안내 템플릿 (숙박: TZ_1475)
 const TEMPLATE_CHECKOUT_STAY_CODE = 'TZ_1475';
-const TEMPLATE_CHECKOUT_STAY_TEXT =
-`■ 퇴실 전 체크아웃 안내
+const TEMPLATE_CHECKOUT_STAY_TEXT = `■ 퇴실 전 체크아웃 안내
 
 금일 퇴실 시간은 #{퇴실시간}시입니다.
 TV 리모콘이 들어있는 바구니와 함께
@@ -616,9 +272,9 @@ TV 리모콘이 들어있는 바구니와 함께
 
 잊으신 물건이 없는지 꼼꼼히 확인하시고, 즐거운 추억만 가득 담아 가시길 바랍니다.`;
 
+// 퇴실 안내 템플릿 (당일: TZ_1476)
 const TEMPLATE_CHECKOUT_DAY_CODE = 'TZ_1476';
-const TEMPLATE_CHECKOUT_DAY_TEXT =
-`■ 퇴실 전 확인사항
+const TEMPLATE_CHECKOUT_DAY_TEXT = `■ 퇴실 전 확인사항
 
 ▶퇴실 시간은 #{퇴실시간} 입니다.
 퇴실 시 놓고 가신 물건이 없는지 반드시 확인해 주세요.
@@ -642,98 +298,9 @@ const TEMPLATE_CHECKOUT_DAY_TEXT =
 
 이용해 주셔서 감사합니다.`;
 
-/** 퇴실메세지(숙박) → row.stayOutR */
-async function sendCheckoutStayOne(row) {
-  const tplCode = TEMPLATE_CHECKOUT_STAY_CODE; // 'TZ_1475'
-  let tplText = TEMPLATE_CHECKOUT_STAY_TEXT;
-
-  const checkOutTime = (row.stayOutR || "11:00");
-  tplText = tplText.replace('#{퇴실시간}', checkOutTime);
-
-  const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
-    senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  tplCode,
-    sender:    ALIMTALK_SENDER,
-
-    receiver_1: (row.전화번호 || '').replace(/\D/g,''),
-    recvname_1: row.예약자 || '고객님',
-    subject_1:  '퇴실 안내(숙박)',
-    message_1:  tplText,
-    failover:   'N'
-  });
-
-  try {
-    const res = await fetch(ALIMTALK_API_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-      body: params
-    });
-    const result = await res.json();
-    if(result.code===0){
-      console.log(`[${row.예약번호}] 퇴실(숙박) OK`);
-      await updateSendV(row.rowIndex);
-      return true;
-    } else {
-      console.warn(`[${row.예약번호}] 퇴실(숙박) FAIL: ${result.message}`);
-      return false;
-    }
-  } catch(e){
-    console.error(e);
-    return false;
-  }
-}
-
-/** 퇴실메세지(당일) → row.dayOutQ */
-async function sendCheckoutDayOne(row) {
-  const tplCode = TEMPLATE_CHECKOUT_DAY_CODE; // 'TZ_1476'
-  let tplText = TEMPLATE_CHECKOUT_DAY_TEXT;
-
-  const checkOutTime = (row.dayOutQ || "19:00");
-  tplText = tplText.replace('#{퇴실시간}', checkOutTime);
-
-  const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
-    senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  tplCode,
-    sender:    ALIMTALK_SENDER,
-
-    receiver_1: (row.전화번호||'').replace(/\D/g,''),
-    recvname_1: row.예약자||'고객님',
-    subject_1:  '퇴실 안내(당일)',
-    message_1:  tplText,
-    failover:   'N'
-  });
-
-  try {
-    const res = await fetch(ALIMTALK_API_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-      body: params
-    });
-    const result = await res.json();
-    if(result.code===0){
-      console.log(`[${row.예약번호}] 퇴실(당일) OK`);
-      await updateSendW(row.rowIndex);
-      return true;
-    } else {
-      console.warn(`[${row.예약번호}] 퇴실(당일) FAIL: ${result.message}`);
-      return false;
-    }
-  } catch(e){
-    console.error(e);
-    return false;
-  }
-}
-
-/** =========================================
- *  [7] 매너타임 (TY_8981) - 버튼 없음
- * ========================================= */
+// 매너타임 템플릿 (TY_8981)
 const TEMPLATE_MANNER_CODE = 'TY_8981';
-const TEMPLATE_MANNER_TEXT =
-`■ 매너타임 안내
+const TEMPLATE_MANNER_TEXT = `■ 매너타임 안내
 
 양주잼잼 글램핑을 방문해 주셔서 감사합니다.
 모두가 편안한 시간을 보낼 수 있도록 다음 사항을 준수해 주세요.
@@ -741,7 +308,7 @@ const TEMPLATE_MANNER_TEXT =
 ▶ 매너타임: 밤 10시부터
 - 밤 10시 이후 큰 소리 대화, 개인 스피커 등 사용 금지
 - 주변 객실에 피해가 가지 않도록 소음 최소화 필수
-- 신발은 객실 내 신발장에 보관해 주세요. (분실·파손 시 책임지지 않습니다.)
+- 신발은 객실 내 신발장에 보관해 주세요. (분失·파손 시 책임지지 않습니다.)
 
 ▶ 불멍(모닥불) 이용 시 주의사항
 - 화재 예방을 위해 반드시 충분한 공간 확보 및 주변 환경 확인 필수
@@ -769,118 +336,9 @@ const TEMPLATE_MANNER_TEXT =
 
 협조해 주셔서 감사합니다.`;
 
-/** 매너타임 → TY_8981 (버튼 없음) */
-async function sendMannerOne(row) {
-  const tplCode = TEMPLATE_MANNER_CODE; // 'TY_8981'
-  let tplText = TEMPLATE_MANNER_TEXT;   // 그대로 전송
-
-  const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
-    senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  tplCode,
-    sender:    ALIMTALK_SENDER,
-
-    receiver_1: (row.전화번호||'').replace(/\D/g,''),
-    recvname_1: row.예약자||'고객님',
-    subject_1:  '매너타임 안내',
-    message_1:  tplText,
-    failover:   'N'
-  });
-
-  try {
-    const res = await fetch(ALIMTALK_API_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-      body: params
-    });
-    const result = await res.json();
-    if(result.code===0){
-      console.log(`[${row.예약번호}] 매너타임 OK`);
-      await updateSendX(row.rowIndex);
-      return true;
-    } else {
-      console.warn(`[${row.예약번호}] 매너타임 FAIL: ${result.message}`);
-      return false;
-    }
-  } catch(e){
-    console.error(e);
-    return false;
-  }
-}
-
-async function updateSendU(rowIndex) {  // 전날메세지 (U열)
-  const url = gasUrl + `?mode=updateReminder&rowIndex=${rowIndex}&newValue=발송됨`;
-  await fetch(url);
-}
-
-async function updateSendV(rowIndex) {  // 퇴실메세지 숙박 (V열)
-  const url = gasUrl + `?mode=updateCheckoutStay&rowIndex=${rowIndex}&newValue=발송됨`;
-  await fetch(url);
-}
-
-async function updateSendW(rowIndex) {  // 퇴실메세지 당일 (W열)
-  const url = gasUrl + `?mode=updateCheckoutDay&rowIndex=${rowIndex}&newValue=발송됨`;
-  await fetch(url);
-}
-
-async function updateSendX(rowIndex) {  // 매너타임 (X열)
-  const url = gasUrl + `?mode=updateManner&rowIndex=${rowIndex}&newValue=발송됨`;
-  await fetch(url);
-}
-
-async function sendPreReserveTalk(){
-  // 현재 조회된 연도/월
-  const year  = document.getElementById('searchReserveYear').value.trim();
-  let month   = document.getElementById('searchReserveMonth').value.trim().replace(/\D/g,'');
-
-  if(!year || !month){
-    alert("연도/월이 선택되지 않았습니다.");
-    return;
-  }
-
-  // 목록 컨테이너에서 전화번호들 읽어오기
-  const rows = document.querySelectorAll('#preReserveListContainer table tbody tr');
-  if(!rows.length){
-    alert("보낼 대상이 없습니다.");
-    return;
-  }
-
-  const phones = [];
-  rows.forEach(tr=>{
-    const tds = tr.querySelectorAll('td');
-    const p = tds[0].textContent.trim();   // 전화번호
-    // year= tds[1].textContent.trim();
-    // month= tds[2].textContent.trim();
-    phones.push(p);
-  });
-
-  if(!phones.length){
-    alert("대상이 없습니다.");
-    return;
-  }
-
-  const ok = confirm(`총 ${phones.length}명에게 사전알림톡을 보낼까요?`);
-  if(!ok) return;
-
-  // 하나씩 전송
-  let success =0, fail=0;
-  for(let i=0; i<phones.length; i++){
-    const phone = phones[i];
-    const res = await sendPreReserveTalkOne(phone, year, month);
-    if(res) success++;
-    else fail++;
-  }
-
-  alert(`사전알림톡 전송완료\n성공=${success} / 실패=${fail}`);
-}
-
-////////////////////////////////////
-// 사전알림톡 (TZ_3719) - 웹링크 1개
-////////////////////////////////////
-const TEMPLATE_CODE_PREOPEN = 'TZ_3719';
-const TEMPLATE_TEXT_PREOPEN = 
-`안녕하세요, 양주잼잼 글램핑입니다.
+// 오픈 알림 템플릿 (TZ_3719)
+const TEMPLATE_PREOPEN_CODE = 'TZ_3719';
+const TEMPLATE_PREOPEN_TEXT = `안녕하세요, 양주잼잼 글램핑입니다.
 
 오픈 알림 신청하신 #{월}월 실시간 예약이 지금 오픈되었습니다. 
 실시간 예약은 아래에 있는 바로가기 버튼을 눌러 이용하실 수 있습니다.
@@ -889,57 +347,118 @@ const TEMPLATE_TEXT_PREOPEN =
 원하시는 날짜가 있으시면 조금 서둘러 예약 부탁드립니다.
 
 고객님의 소중한 휴식과 즐거운 추억을 위해 최선을 다하겠습니다.
-항상 감사합니다.`;
+항상 감사합니다.
 
-async function sendPreReserveTalkOne(phone, year, month) {
-  // 1) 메시지 텍스트 치환
-  const msg = TEMPLATE_TEXT_PREOPEN.replace('#{월}', month);
+▶실시간예약 바로가기
+https://naver.me/5l7kbLzr`;
 
-  // 2) 버튼 (웹링크 1개)
-  const buttonObj = {
-    button: [
-      {
-        name: "실시간 예약 바로가기",
-        linkType: "WL",
-        linkMo: "https://naver.me/5l7kbLzr",
-        linkPc: "https://naver.me/5l7kbLzr"
-      }
-    ]
-  };
+/** =========================================
+ *  [3] 알림톡 전송 로직 (sendAlimtalk)
+ * ========================================= */
+async function sendAlimtalk() {
+  let data;
+  if (isManualTabActive()) {
+    data = getManualReservationDataSingle();
+  } else {
+    data = parseReservation(document.getElementById('inputData').value);
+  }
 
-  // 3) 알리고 파라미터
+  let templateCode = '';
+  let templateText = '';
+
+  if (data.무통장여부) {
+    templateCode = TEMPLATE_CODE_BANK;
+    templateText = TEMPLATE_TEXT_BANK;
+  } else if (['네이버','야놀자','여기어때'].includes(data.예약플랫폼)) {
+    templateCode = data.이용기간.includes('~') ? TEMPLATE_CODE_LODGING : TEMPLATE_CODE_DAYUSE;
+    templateText = data.이용기간.includes('~') ? TEMPLATE_TEXT_LODGING : TEMPLATE_TEXT_DAYUSE;
+  } else {
+    templateCode = TEMPLATE_CODE_LODGING;
+    templateText = TEMPLATE_TEXT_LODGING;
+  }
+
+  // 치환값 준비
+  const usageTimeReplaced = (data.입실시간 || '').replace('[당일캠핑] ', '');
+  const formattedOption = data.옵션 ? data.옵션.split(',').map(opt => `▶${opt.trim()}`).join('\n') : '없음';
+  const parsingContent = `- 예약번호: ${data.예약번호}\n- 예약자: ${data.예약자}\n- 전화번호: ${data.전화번호}\n- 이용객실: ${data.이용객실}\n- 이용기간: ${data.이용기간}\n- 수량: ${data.수량 || '(복수객실)'}\n- 옵션:\n${formattedOption}\n- 총 이용 인원: ${data.총이용인원}\n- 입실시간: ${data.입실시간}\n- 결제금액: ${data.결제금액}`;
+
+  // 알림톡 본문 생성
+  const messageText = templateText.replace('#{파싱내용}', parsingContent).replace('#{이용시간}', usageTimeReplaced);
+
+  // 기본 파라미터
   const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
+    apikey: ALIMTALK_API_KEY,
+    userid: ALIMTALK_USER_ID,
     senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  TEMPLATE_CODE_PREOPEN,
-    sender:    ALIMTALK_SENDER,
-
-    receiver_1: phone.replace(/\D/g,''), // 숫자만
-    recvname_1: '고객님',
-    subject_1:  '예약 오픈 안내',
-    message_1:  msg,
-    failover:   'N'
+    tpl_code: templateCode,
+    sender: ALIMTALK_SENDER,
+    receiver_1: data.전화번호.replace(/\D/g, ''),
+    recvname_1: data.예약자 || '고객님',
+    subject_1: '예약 안내',
+    message_1: messageText,
+    failover: 'Y'
   });
-  params.append('button_1', JSON.stringify(buttonObj));
 
-  // 4) 전송
+  // 버튼 적용 (필요한 템플릿)
+  if (['TZ_1481','TZ_1466','TZ_1465'].includes(templateCode)) {
+    params.append('button_1', JSON.stringify(DEFAULT_BUTTON_INFO));
+  }
+
+  // 대체문자 설정 (fsubject_1, fmessage_1)
+  switch (templateCode) {
+    case TEMPLATE_CODE_BANK:
+      params.append('fsubject_1', '예약 신청 안내');
+      params.append('fmessage_1', TEMPLATE_TEXT_BANK.replace('#{파싱내용}', parsingContent));
+      break;
+    case TEMPLATE_CODE_LODGING:
+      params.append('fsubject_1', '숙박 예약 안내');
+      params.append('fmessage_1', TEMPLATE_TEXT_LODGING.replace('#{파싱내용}', parsingContent));
+      break;
+    case TEMPLATE_CODE_DAYUSE:
+      params.append('fsubject_1', '당일 예약 안내');
+      params.append('fmessage_1', TEMPLATE_TEXT_DAYUSE.replace('#{파싱내용}', parsingContent).replace('#{이용시간}', usageTimeReplaced));
+      break;
+    case TEMPLATE_REMIND_LODGING_CODE:
+      params.append('fsubject_1', '숙박 이용 안내');
+      params.append('fmessage_1', TEMPLATE_REMIND_LODGING_TEXT);
+      break;
+    case TEMPLATE_REMIND_DAYUSE_CODE:
+      params.append('fsubject_1', '당일캠핑 이용 안내');
+      params.append('fmessage_1', TEMPLATE_REMIND_DAYUSE_TEXT.replace('#{이용시간}', usageTimeReplaced));
+      break;
+    case TEMPLATE_CHECKOUT_STAY_CODE:
+      params.append('fsubject_1', '퇴실 안내(숙박)');
+      params.append('fmessage_1', TEMPLATE_CHECKOUT_STAY_TEXT.replace('#{퇴실시간}', data.stayOutR || '11:00'));
+      break;
+    case TEMPLATE_CHECKOUT_DAY_CODE:
+      params.append('fsubject_1', '퇴실 안내(당일)');
+      params.append('fmessage_1', TEMPLATE_CHECKOUT_DAY_TEXT.replace('#{퇴실시간}', data.dayOutQ || '19:00'));
+      break;
+    case TEMPLATE_MANNER_CODE:
+      params.append('fsubject_1', '매너타임 안내');
+      params.append('fmessage_1', TEMPLATE_MANNER_TEXT);
+      break;
+    case TEMPLATE_PREOPEN_CODE:
+      params.append('fsubject_1', '예약 오픈 안내');
+      params.append('fmessage_1', TEMPLATE_PREOPEN_TEXT.replace('#{월}', data.month || '')); 
+      break;
+  }
+
+  // 전송
   try {
     const res = await fetch(ALIMTALK_API_URL, {
-      method:'POST',
-      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      method: 'POST',
+      headers: {'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
       body: params
     });
     const result = await res.json();
-    if(result.code===0){
-      console.log(`[사전알림] ${phone} OK`);
-      return true;
+    if (result.code === 0) {
+      alert('알림톡 발송 성공');
     } else {
-      console.warn(`[사전알림] ${phone} FAIL: ${result.message}`);
-      return false;
+      alert('알림톡 발송 실패: ' + result.message);
     }
-  } catch(e){
-    console.error(e);
-    return false;
+  } catch (err) {
+    console.error(err);
+    alert('알림톡 발송 중 오류 발생');
   }
 }
