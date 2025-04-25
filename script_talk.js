@@ -3,6 +3,27 @@
  *******************************************************/
 
 /** =========================================
+ * [A] 한국 전화번호 포맷팅 (4-4-4 등)
+ * ========================================= */
+function formatPhoneNumber(raw) {
+  // 숫자만 추출
+  const digits = (raw||'').replace(/\D/g, '');
+  if(digits.length===12) {
+    // 4-4-4
+    return digits.replace(/^(\d{4})(\d{4})(\d{4})$/, '$1-$2-$3');
+  } else if(digits.length===11) {
+    // 3-4-4
+    return digits.replace(/^(\d{3})(\d{4})(\d{4})$/, '$1-$2-$3');
+  } else if(digits.length===10) {
+    // 3-3-4
+    return digits.replace(/^(\d{3})(\d{3})(\d{4})$/, '$1-$2-$3');
+  } else {
+    // 그 외는 그냥 숫자만
+    return digits;
+  }
+}
+
+/** =========================================
  *  [1] 알림톡 전역 설정
  * ========================================= */
 // 알리고(카카오) 발송용 API URL / API KEY / ...
@@ -223,7 +244,10 @@ ${formattedOption}
     .replace('#{파싱내용}', parsingContent)
     .replace('#{이용시간}', usageTimeReplaced);
 
-  // (d) 알리고 파라미터 - failover='Y'
+  // (d) 수신번호 포맷팅 (12자리 → 4-4-4, 11자리 → 3-4-4, etc.)
+  const receiverPhone = formatPhoneNumber(data.전화번호||'');
+
+  // (e) 알리고 파라미터 - failover='Y'
   const params = new URLSearchParams({
     apikey:     ALIMTALK_API_KEY,
     userid:     ALIMTALK_USER_ID,
@@ -231,22 +255,22 @@ ${formattedOption}
     tpl_code:   templateCode,
     sender:     ALIMTALK_SENDER,
 
-    receiver_1: (data.전화번호||'').replace(/\D/g, ''),
+    receiver_1: receiverPhone,           // 포맷팅된 번호
     recvname_1: data.예약자 || '고객님',
     subject_1:  '예약 안내',
     message_1:  messageText,
     
-    failover:   'Y',                     // ★ 카카오 실패 시 LMS 자동전환
-    fsubject_1: '예약 안내(대체)',       // ★ LMS 제목
-    fmessage_1: messageText              // ★ LMS 본문 (원하시면 다른 문구 가능)
+    failover:   'Y',                     // 카카오 실패 시 LMS 자동전환
+    fsubject_1: '예약 안내(대체)',       // LMS 제목
+    fmessage_1: messageText              // LMS 본문
   });
 
-  // (e) [중요] TZ_1465 / TZ_1466 / TZ_1481 → 채널추가 버튼 필요
+  // (f) [중요] TZ_1465 / TZ_1466 / TZ_1481 → 채널추가 버튼 필요
   if (templateCode === 'TZ_1465' || templateCode === 'TZ_1466' || templateCode === 'TZ_1481') {
     params.append('button_1', JSON.stringify(DEFAULT_BUTTON_INFO));
   }
 
-  // (f) 전송
+  // (g) 전송
   try {
     const res = await fetch(ALIMTALK_API_URL, {
       method: 'POST',
@@ -343,7 +367,9 @@ function sendAlimtalkForDeposit(row) {
     .replace('#{이용시간}', usageTime)
     .replace('#{파싱내용}', parsingContent);
 
-  // failover 파라미터
+  // [*] 전화번호 포맷팅
+  const receiverPhone = formatPhoneNumber(row.전화번호||'');
+
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
     userid:    ALIMTALK_USER_ID,
@@ -351,7 +377,7 @@ function sendAlimtalkForDeposit(row) {
     tpl_code:  tplCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: (row.전화번호 || '').replace(/\D/g, ''),
+    receiver_1: receiverPhone, 
     recvname_1: row.예약자 || '고객님',
     subject_1:  '예약 안내',
     message_1:  finalText,
@@ -388,6 +414,7 @@ function sendAlimtalkForDeposit(row) {
  *  [5] 전날메세지 탭 → 숙박(TY_8998) / 당일(TZ_1472)
  *      => (웹링크 버튼 5개)
  * ========================================= */
+
 
 const TEMPLATE_REMIND_LODGING_CODE = 'TY_8998';
 const TEMPLATE_REMIND_LODGING_TEXT =
@@ -526,6 +553,9 @@ async function sendOneReminder(row) {
     tplText = tplText.replace('#{이용시간}', usageTime);
   }
 
+  // 전화번호 포맷
+  const receiverPhone = formatPhoneNumber(row.전화번호||'');
+
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
     userid:    ALIMTALK_USER_ID,
@@ -533,7 +563,7 @@ async function sendOneReminder(row) {
     tpl_code:  tplCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: (row.전화번호||'').replace(/\D/g,''),
+    receiver_1: receiverPhone,
     recvname_1: row.예약자||'고객님',
     subject_1:  '전날 안내',
     message_1:  tplText,
@@ -543,7 +573,6 @@ async function sendOneReminder(row) {
     fmessage_1: tplText
   });
 
-  // 전날메세지: 5개 웹링크 버튼
   const buttons = {
     button: [
       {
@@ -589,9 +618,7 @@ async function sendOneReminder(row) {
     const result = await res.json();
     if (result.code === 0) {
       console.log(`[${row.예약번호}] 전날메세지 성공`);
-
       await fetch(`${gasUrl}?mode=updateReminder&rowIndex=${row.rowIndex}&newValue=발송됨`);
-
       await updateSendU(row.rowIndex);
       return true;
     } else {
@@ -659,11 +686,13 @@ const TEMPLATE_CHECKOUT_DAY_TEXT =
 
 /** 퇴실메세지(숙박) → row.stayOutR */
 async function sendCheckoutStayOne(row) {
-  const tplCode = TEMPLATE_CHECKOUT_STAY_CODE; // 'TZ_1475'
+  const tplCode = TEMPLATE_CHECKOUT_STAY_CODE;
   let tplText = TEMPLATE_CHECKOUT_STAY_TEXT;
 
   const checkOutTime = (row.stayOutR || "11:00");
   tplText = tplText.replace('#{퇴실시간}', checkOutTime);
+
+  const receiverPhone = formatPhoneNumber(row.전화번호||'');
 
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
@@ -672,7 +701,7 @@ async function sendCheckoutStayOne(row) {
     tpl_code:  tplCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: (row.전화번호 || '').replace(/\D/g,''),
+    receiver_1: receiverPhone,
     recvname_1: row.예약자 || '고객님',
     subject_1:  '퇴실 안내(숙박)',
     message_1:  tplText,
@@ -705,13 +734,14 @@ async function sendCheckoutStayOne(row) {
   }
 }
 
-/** 퇴실메세지(당일) → row.dayOutQ */
 async function sendCheckoutDayOne(row) {
-  const tplCode = TEMPLATE_CHECKOUT_DAY_CODE; // 'TZ_1476'
+  const tplCode = TEMPLATE_CHECKOUT_DAY_CODE;
   let tplText = TEMPLATE_CHECKOUT_DAY_TEXT;
 
   const checkOutTime = (row.dayOutQ || "19:00");
   tplText = tplText.replace('#{퇴실시간}', checkOutTime);
+
+  const receiverPhone = formatPhoneNumber(row.전화번호||'');
 
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
@@ -720,7 +750,7 @@ async function sendCheckoutDayOne(row) {
     tpl_code:  tplCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: (row.전화번호||'').replace(/\D/g,''),
+    receiver_1: receiverPhone,
     recvname_1: row.예약자||'고객님',
     subject_1:  '퇴실 안내(당일)',
     message_1:  tplText,
@@ -796,8 +826,10 @@ const TEMPLATE_MANNER_TEXT =
 
 /** 매너타임 → TY_8981 (버튼 없음, failover='Y') */
 async function sendMannerOne(row) {
-  const tplCode = TEMPLATE_MANNER_CODE; // 'TY_8981'
-  let tplText = TEMPLATE_MANNER_TEXT;   // 그대로 전송
+  const tplCode = TEMPLATE_MANNER_CODE; 
+  let tplText = TEMPLATE_MANNER_TEXT;  
+
+  const receiverPhone = formatPhoneNumber(row.전화번호||'');
 
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
@@ -806,7 +838,7 @@ async function sendMannerOne(row) {
     tpl_code:  tplCode,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: (row.전화번호||'').replace(/\D/g,''),
+    receiver_1: receiverPhone,
     recvname_1: row.예약자||'고객님',
     subject_1:  '매너타임 안내',
     message_1:  tplText,
@@ -839,22 +871,22 @@ async function sendMannerOne(row) {
   }
 }
 
-async function updateSendU(rowIndex) {  // 전날메세지 (U열)
+async function updateSendU(rowIndex) {
   const url = gasUrl + `?mode=updateReminder&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
 
-async function updateSendV(rowIndex) {  // 퇴실메세지 숙박 (V열)
+async function updateSendV(rowIndex) {
   const url = gasUrl + `?mode=updateCheckoutStay&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
 
-async function updateSendW(rowIndex) {  // 퇴실메세지 당일 (W열)
+async function updateSendW(rowIndex) {
   const url = gasUrl + `?mode=updateCheckoutDay&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
 
-async function updateSendX(rowIndex) {  // 매너타임 (X열)
+async function updateSendX(rowIndex) {
   const url = gasUrl + `?mode=updateManner&rowIndex=${rowIndex}&newValue=발송됨`;
   await fetch(url);
 }
@@ -863,7 +895,6 @@ async function updateSendX(rowIndex) {  // 매너타임 (X열)
  *  [8] 사전알림톡 (TZ_3719) - 웹링크 1개
  * ========================================= */
 async function sendPreReserveTalk(){
-  // 현재 조회된 연도/월
   const year  = document.getElementById('searchReserveYear').value.trim();
   let month   = document.getElementById('searchReserveMonth').value.trim().replace(/\D/g,'');
 
@@ -872,7 +903,6 @@ async function sendPreReserveTalk(){
     return;
   }
 
-  // 목록 컨테이너에서 전화번호들 읽어오기
   const rows = document.querySelectorAll('#preReserveListContainer table tbody tr');
   if(!rows.length){
     alert("보낼 대상이 없습니다.");
@@ -882,14 +912,9 @@ async function sendPreReserveTalk(){
   const phones = [];
   rows.forEach(tr=>{
     const tds = tr.querySelectorAll('td');
-    const p = tds[0].textContent.trim();   // 전화번호
+    const p = tds[0].textContent.trim(); 
     phones.push(p);
   });
-
-  if(!phones.length){
-    alert("대상이 없습니다.");
-    return;
-  }
 
   const ok = confirm(`총 ${phones.length}명에게 사전알림톡을 보낼까요?`);
   if(!ok) return;
@@ -905,9 +930,6 @@ async function sendPreReserveTalk(){
   alert(`사전알림톡 전송완료\n성공=${success} / 실패=${fail}`);
 }
 
-////////////////////////////////////
-// 사전알림톡 (TZ_3719) - 웹링크 1개
-////////////////////////////////////
 const TEMPLATE_CODE_PREOPEN = 'TZ_3719';
 const TEMPLATE_TEXT_PREOPEN = 
 `안녕하세요, 양주잼잼 글램핑입니다.
@@ -921,11 +943,13 @@ const TEMPLATE_TEXT_PREOPEN =
 고객님의 소중한 휴식과 즐거운 추억을 위해 최선을 다하겠습니다.
 항상 감사합니다.`;
 
+
 async function sendPreReserveTalkOne(phone, year, month) {
-  // 1) 메시지 텍스트 치환
   const msg = TEMPLATE_TEXT_PREOPEN.replace('#{월}', month);
 
-  // 2) 버튼 (웹링크 1개)
+  // 포맷팅
+  const receiverPhone = formatPhoneNumber(phone);
+
   const buttonObj = {
     button: [
       {
@@ -937,7 +961,6 @@ async function sendPreReserveTalkOne(phone, year, month) {
     ]
   };
 
-  // 3) 알리고 파라미터
   const params = new URLSearchParams({
     apikey:    ALIMTALK_API_KEY,
     userid:    ALIMTALK_USER_ID,
@@ -945,14 +968,14 @@ async function sendPreReserveTalkOne(phone, year, month) {
     tpl_code:  TEMPLATE_CODE_PREOPEN,
     sender:    ALIMTALK_SENDER,
 
-    receiver_1: phone.replace(/\D/g,''), 
+    receiver_1: receiverPhone,
     recvname_1: '고객님',
     subject_1:  '예약 오픈 안내',
     message_1:  msg,
 
-    failover:   'Y',                   // ★ 카카오 실패 시 LMS
-    fsubject_1: '예약 오픈(대체)',     // LMS 제목
-    fmessage_1: msg                    // LMS 내용
+    failover:   'Y',
+    fsubject_1: '예약 오픈(대체)',
+    fmessage_1: msg
   });
   params.append('button_1', JSON.stringify(buttonObj));
 
