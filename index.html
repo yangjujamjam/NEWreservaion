@@ -27,7 +27,7 @@
     <button id="tabCheckoutStayBtn" onclick="showTab('checkoutStay'); loadCheckoutStayData();">🛌퇴실메세지(숙박)</button>
     <button id="tabCheckoutDayBtn" onclick="showTab('checkoutDay'); loadCheckoutDayData();">🏄‍♀️퇴실메세지(당일)</button>
     <button id="tabMannerBtn" onclick="showTab('manner'); loadMannerData();">🙏매너타임</button>
-    <button id="tabReserveAlertBtn" onclick="showTab('reserveAlert')">🔔사전예약 알림</button>
+    <button id="tabReserveAlertBtn" onclick="showTab('reserveAlert'); loadPreReservationList();">🔔사전예약 알림</button>
   </div>
 
   <!-- 붙여넣기 탭 -->
@@ -146,24 +146,27 @@
 
 <!-- 사전예약 알림탭 추가 (수정됨) -->
 <div id="tabReserveAlert" class="tab-content" style="display:none;">
-  <h3>사전예약 알림톡 관리</h3>
-
-  <!-- (A) 저장 섹션 -->
+  <h3>🔔 사전예약 알림톡</h3>
   <div class="pre-reservation-input-group">
-    <input type="text"
-           id="prePhoneInput"
-           placeholder="전화번호 입력 (숫자만)"
-           oninput="this.value = this.value.replace(/\D/g,'')" />
-    <input type="text"
-           id="preYearInput"
-           placeholder="연도 입력 (예: 2025)"
-           oninput="this.value = this.value.replace(/\D/g,'')" />
-     <select id="preMonthInput">
-       <option value="">월</option>
-       <!-- JS에서 채워줄 예정 -->
-     </select>
-    <button onclick="savePreReservationEntry()">저장</button>
+    <label>
+      연도:
+      <select id="reserveSearchYear"></select>
+    </label>
+    <label>
+      월:
+      <select id="reserveSearchMonth"></select>
+    </label>
+    <button onclick="loadPreReservationList()">조회</button>
   </div>
+
+  <div id="preReserveListContainer">
+    <!-- 여기에 조회 결과 테이블이 올라갑니다 -->
+  </div>
+
+  <div style="margin-top:1em;">
+    <button class="btn-kakao" onclick="sendPreReserveTalk()">사전 알림톡 보내기</button>
+  </div>
+</div>
 
   <hr/>
 
