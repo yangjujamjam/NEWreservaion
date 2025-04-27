@@ -170,26 +170,9 @@
 
   <hr/>
 
-  <!-- (B) 검색 섹션 -->
-  <div class="pre-reservation-input-group">
-    <select id="reserveSearchYear"></select>
-    <select id="reserveSearchMonth"></select>
-    <button onclick="loadPreReservationList()">리스트 불러오기</button>
-  </div>
-
-  <!-- (C) 저장된 내역 표시 -->
-  <div id="preReserveListContainer"></div>
-
-  <!-- (D) 알림톡 전송 -->
-  <div class="pre-reservation-action-buttons">
-    <button class="btn-kakao" onclick="sendPreReserveTalk()">사전 알림톡 보내기</button>
-  </div>
-</div>
-
-
 
   <!-- 버튼 영역 -->
-  <div class="buttons">
+  <div id="commonControls" class="buttons">
     <button onclick="processReservation()">⚙파싱 결과 보기</button>
     <button onclick="generateReservationMessage()">📑안내문자 양식적용</button>
     <button class="btn-kakao" onclick="confirmAlimtalk()">💬알림톡 발송</button>
