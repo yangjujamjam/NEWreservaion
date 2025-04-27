@@ -1590,41 +1590,13 @@ function initPreReservationTab() {
   const now = new Date();
   const currentYear = now.getFullYear();
 
-  // 검색용 연도/월
+  // ▶ 조회용 연도/월만 초기화
   const yearSel  = document.getElementById('reserveSearchYear');
   const monthSel = document.getElementById('reserveSearchMonth');
-  yearSel.innerHTML = `<option value="${currentYear}">${currentYear}년</option>`;
+  yearSel.innerHTML  = `<option value="">연도</option><option value="${currentYear}">${currentYear}년</option>`;
+  monthSel.innerHTML = `<option value="">월</option>`;
   for (let m = 1; m <= 12; m++) {
     monthSel.innerHTML += `<option value="${m}">${m}월</option>`;
-  }
-
-  // 저장용 연도
-  document.getElementById('preYearInput').value = currentYear;
-
-  // **저장용 월</>**
-  const preMonthSel = document.getElementById('preMonthInput');
-  for (let m = 1; m <= 12; m++) {
-    preMonthSel.innerHTML += `<option value="${m}">${m}월</option>`;
-  }
-}
-
-// (C) 저장 버튼 핸들러
-async function savePreReservationEntry() {
-  const phone = document.getElementById('prePhoneInput').value.trim();
-  const year  = document.getElementById('preYearInput').value.trim();
-  const month = document.getElementById('preMonthInput').value.trim();
-  if (!phone || !year || !month) {
-    return alert('전화번호, 연도, 월을 모두 입력해주세요.');
-  }
-  try {
-    const res  = await fetch(`${gasUrl}?mode=addPreReservation&phone=${phone}&year=${year}&month=${month}`);
-    const txt  = await res.text();
-    alert(txt);
-    // 입력 필드 초기화
-    document.getElementById('prePhoneInput').value = '';
-  } catch (err) {
-    console.error(err);
-    alert('저장 중 오류가 발생했습니다.');
   }
 }
 
@@ -1637,13 +1609,16 @@ async function loadPreReservationList() {
   }
   const container = document.getElementById('preReserveListContainer');
   container.innerHTML = '불러오는 중...';
+
   try {
     const res  = await fetch(`${gasUrl}?mode=getPreReservationList&year=${year}&month=${month}`);
     const list = await res.json();
     if (!list.length) {
       container.innerHTML = '<p>조회된 내역이 없습니다.</p>';
+      window._preReserveList = [];
       return;
     }
+    // 테이블 렌더링
     let html = `<table class="deposit-table">
                   <thead>
                     <tr><th>전화번호</th><th>연도</th><th>월</th></tr>
@@ -1653,9 +1628,66 @@ async function loadPreReservationList() {
     });
     html += `</tbody></table>`;
     container.innerHTML = html;
+    // ★ 조회된 리스트를 전역 저장
+    window._preReserveList = list;
   } catch (err) {
     console.error(err);
     container.innerHTML = '<p>오류가 발생했습니다.</p>';
+    window._preReserveList = [];
+  }
+}
+
+/**
+ * ▶ 사전예약 조회 리스트(window._preReserveList) 에  
+ *   담긴 전화번호들만 골라서 알림톡 발송
+ */
+async function sendPreReserveTalk() {
+  const list = window._preReserveList || [];
+  if (!list.length) {
+    return alert('먼저 “조회” 버튼으로 리스트를 불러와주세요.');
+  }
+
+  // ———— 사전예약 템플릿 설정 ————
+  const templateCode = 'TZ_3719';
+  const templateText = `
+안녕하세요, 양주잼잼 글램핑입니다.
+
+오픈 알림 신청하신 #{월}월 실시간 예약이 지금 오픈되었습니다. 
+실시간 예약은 아래에 있는 바로가기 버튼을 눌러 이용하실 수 있습니다.
+
+인기 있는 날짜는 빠르게 마감될 수 있으니,
+원하시는 날짜가 있으시면 조금 서둘러 예약 부탁드립니다.
+
+고객님의 소중한 휴식과 즐거운 추억을 위해 최선을 다하겠습니다.
+항상 감사합니다.
+`;
+  const webButtonName = '실시간 예약 바로가기';
+  const webButtonUrl  = 'https://naver.me/5l7kbLzr';
+  const year  = document.getElementById('reserveSearchYear').value;
+  const month = document.getElementById('reserveSearchMonth').value;
+
+  if (!confirm(`${list.length}명에게 사전 알림톡을 보내시겠습니까?`)) {
+    return;
+  }
+
+  try {
+    const params = new URLSearchParams({
+      mode:            'sendPreNotifications',
+      year,
+      month,
+      templateCode,
+      templateText,
+      webButtonName,
+      webButtonUrl
+    });
+    const res = await fetch(`${gasUrl}?${params}`);
+    if (!res.ok) throw new Error(res.status);
+    const result = await res.json();  // [{phone,status},…]
+    alert(`총 ${result.length}건 발송 완료`);
+    console.log('발송 결과:', result);
+  } catch (e) {
+    console.error(e);
+    alert('발송 중 오류 발생: ' + e.message);
   }
 }
 
