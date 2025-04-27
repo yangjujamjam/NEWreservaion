@@ -26,6 +26,9 @@ function showTab(tabName) {
     document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)).style.display = (tabName===name?'block':'none');
     document.getElementById('tab'+name.charAt(0).toUpperCase()+name.slice(1)+'Btn')?.classList.toggle('active', tabName===name);
   });
+
+    const isPre = (tabName === 'reserveAlert');
+  document.getElementById('commonControls').style.display       = isPre ? 'none' : 'block';
 }
 
 function isManualTabActive() {
