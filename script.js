@@ -14,7 +14,7 @@ window.onload = function() {
   showTab('paste');  // 기본 탭: "붙여넣기"
   buildCalendar();    // 달력 초기화
   fetchLastCContent();
-  initPreReservationTab();
+  // initPreReservationTab(); // 쓰지 않으면 주석 처리
 };
 
 /** =========================================
