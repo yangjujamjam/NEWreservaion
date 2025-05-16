@@ -1,26 +1,32 @@
-// excelClipboard.js
+// excelClipboard.js 수정본 (DOMContentLoaded 추가)
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('excelUnifiedCopyBtn').addEventListener('click', function() {
+        let excelText = '';
+        
+        if (isManualTabActive()) {
+            excelText = parseManualTabForExcel();
+        } else {
+            const inputText = document.getElementById('inputData').value;
+            const platform = detectPlatform(inputText);
+            
+            if (platform === '네이버') {
+                excelText = parseNaverForExcel(inputText);
+            } else if (platform === '야놀자') {
+                excelText = parseYanoljaForExcel(inputText);
+            } else if (platform === '여기어때') {
+                excelText = parseHereForExcel(inputText);
+            } else {
+                alert('플랫폼을 인식할 수 없습니다.');
+                return;
+            }
+        }
 
-document.getElementById('excelUnifiedCopyBtn').addEventListener('click', function() {
-    const inputText = document.getElementById('inputData').value;
-    const platform = detectPlatform(inputText);
-    
-    let excelText = '';
-
-    if (platform === '네이버') {
-        excelText = parseNaverForExcel(inputText);
-    } else if (platform === '야놀자') {
-        excelText = parseYanoljaForExcel(inputText);
-    } else if (platform === '여기어때') {
-        excelText = parseHereForExcel(inputText);
-    } else {
-        alert('플랫폼을 인식할 수 없습니다.');
-        return;
-    }
-
-    navigator.clipboard.writeText(excelText)
-        .then(() => alert(`엑셀 형식으로 복사되었습니다! (${platform})`))
-        .catch(() => alert('클립보드 복사에 실패했습니다.'));
+        navigator.clipboard.writeText(excelText)
+            .then(() => alert('엑셀 형식으로 복사되었습니다!'))
+            .catch(() => alert('클립보드 복사에 실패했습니다.'));
+    });
 });
+
 
 // 플랫폼 자동 인식 함수
 function detectPlatform(text) {
