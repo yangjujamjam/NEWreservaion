@@ -537,34 +537,125 @@ const TEMPLATE_REMIND_DAYUSE_TEXT =
 - 수영복, 튜브, 구명조끼, 슬리퍼
 - 비치타올/담요`;
 
+const UA_0558 = `안녕하세요 양주잼잼입니다. 
+방문 전  확인 부탁드리겠습니다.
+
+■ 당일캠핑 이용 안내
+- #{이용시간}
+- 시간 연장은 일정상 불가할 수 있습니다.
+- 얼리체크인/레이트체크아웃: 1시간당 1인 5,000원 추가 (사전 관리실 문의 필수)
+
+▶ 체크인 안내
+- 도착 시 관리동(노란 건물)에서 입실 안내
+- 캠핑 웨건 카트로 짐 이동 가능
+
+▶ 공용시설
+- 매점: 오전 8시~오후 9시
+- 공용 샤워장/화장실: 관리동 왼편 위치
+- 흡연: 주차장 옆 흡연장만 이용 가능
+- 쓰레기: 주차장 옆 분리수거장 배출
+
+▶파티룸 시설
+냉난방기, 냉장고, 전자레인지, 일회용식기류, 냄비, 후라이팬, 가스버너, 조리도구가 준비되어 있습니다.
+
+■ 주의사항
+- 예약 인원 외 방문 불가
+- 반려동물 동반 불가
+- 전기그릴·개인 화로대 사용 금지 (가스버너 가능)
+- 수영장 내 취식·음주·비눗방울·불꽃놀이(폭죽) 금지
+- 객실 내 간단한 조리만 가능 (고기·생선 등 금지)
+- 비치용품·시설 파손 및 분실 시 변상 책임
+- 객실 수건 오염(세안 외 용도 사용) 시 장당 5,000원 변상
+
+■ 개인 준비물
+- 음식, 개인 세면도구, 휴대폰 충전기
+- 수영복, 튜브, 구명조끼, 슬리퍼
+- 비치타올/담요`;
+
+const UA_0715 = `안녕하세요 양주잼잼입니다. 
+방문 전  확인 부탁드리겠습니다.
+
+■ 당일캠핑 이용 안내
+- #{이용시간}
+- 시간 연장은 일정상 불가할 수 있습니다.
+- 얼리체크인/레이트체크아웃: 1시간당 1인 5,000원 추가 (사전 관리실 문의 필수)
+
+▶ 체크인 안내
+- 도착 시 관리동(노란 건물)에서 입실 안내
+- 캠핑 웨건 카트로 짐 이동 가능
+
+▶ 공용시설
+- 매점: 오전 8시~오후 9시
+- 공용 샤워장/화장실: 관리동 왼편 위치
+- 흡연: 주차장 옆 흡연장만 이용 가능
+- 쓰레기: 주차장 옆 분리수거장 배출
+
+▶몽골텐트 시설
+냉장고, 전자레인지, 일회용식기류, 냄비, 후라이팬, 가스버너, 조리도구가 준비되어 있습니다.
+
+■ 주의사항
+- 예약 인원 외 방문 불가
+- 반려동물 동반 불가
+- 전기그릴·개인 화로대 사용 금지 (가스버너 가능)
+- 수영장 내 취식·음주·비눗방울·불꽃놀이(폭죽) 금지
+- 비치용품·시설 파손 및 분실 시 변상 책임
+- 객실 수건 오염(세안 외 용도 사용) 시 장당 5,000원 변상
+
+■ 개인 준비물
+- 음식, 개인 세면도구, 휴대폰 충전기
+- 수영복, 튜브, 구명조끼, 슬리퍼
+- 비치타올/담요`;
+
 /**
  * 전날메세지 -> 숙박/당일
  *  - 버튼 5개(웹링크)
  *  - failover='Y'
  */
 async function sendOneReminder(row) {
-  const isStay = row.이용기간.includes('~');
-  let tplCode = isStay ? TEMPLATE_REMIND_LODGING_CODE : TEMPLATE_REMIND_DAYUSE_CODE;
-  let tplText = isStay ? TEMPLATE_REMIND_LODGING_TEXT : TEMPLATE_REMIND_DAYUSE_TEXT;
+  // 1) 템플릿 코드·본문 분기
+  let tplCode, tplText;
 
-  if(!isStay) {
-    let usageTime = (row.입실시간||'').replace('[당일캠핑]','').trim();
-    if(!usageTime) usageTime='예약시간';
+  // — 당일(이용기간에 '~' 없으면 당일)
+  const isStay = row.이용기간.includes('~');
+  if (!isStay) {
+    if (row.이용객실 === '파티룸') {
+      tplCode = 'UA_0558';
+      tplText = UA_0558;
+    } else if (row.이용객실 === '몽골텐트') {
+      tplCode = 'UA_0715';
+      tplText = UA_0715;
+    } else {
+      tplCode = TEMPLATE_REMIND_DAYUSE_CODE;    // TZ_1472
+      tplText = TEMPLATE_REMIND_DAYUSE_TEXT;
+    }
+  }
+  // — 숙박
+  else {
+    tplCode = TEMPLATE_REMIND_LODGING_CODE;     // TY_8998
+    tplText = TEMPLATE_REMIND_LODGING_TEXT;
+  }
+
+  // 2) #{이용시간} 치환 (당일 캠핑 전용)
+  if (tplText.includes('#{이용시간}')) {
+    let usageTime = (row.입실시간 || '')
+                      .replace('[당일캠핑]', '')
+                      .trim() || '예약시간';
     tplText = tplText.replace('#{이용시간}', usageTime);
   }
 
-  // 전화번호 포맷
-  const receiverPhone = formatPhoneNumber(row.전화번호||'');
+  // 3) 전화번호 포맷팅
+  const receiverPhone = formatPhoneNumber(row.전화번호 || '');
 
+  // 4) 파라미터 구성
   const params = new URLSearchParams({
-    apikey:    ALIMTALK_API_KEY,
-    userid:    ALIMTALK_USER_ID,
-    senderkey: ALIMTALK_SENDERKEY,
-    tpl_code:  tplCode,
-    sender:    ALIMTALK_SENDER,
+    apikey:     ALIMTALK_API_KEY,
+    userid:     ALIMTALK_USER_ID,
+    senderkey:  ALIMTALK_SENDERKEY,
+    tpl_code:   tplCode,
+    sender:     ALIMTALK_SENDER,
 
     receiver_1: receiverPhone,
-    recvname_1: row.예약자||'고객님',
+    recvname_1: row.예약자 || '고객님',
     subject_1:  '전날 안내',
     message_1:  tplText,
 
@@ -573,65 +664,69 @@ async function sendOneReminder(row) {
     fmessage_1: tplText
   });
 
-  const buttons = {
-    button: [
-      {
-        name: "바베큐 사용방법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=9ex2OggS0IA",
-        linkPc: "https://www.youtube.com/watch?v=9ex2OggS0IA"
-      },
-      {
-        name: "불멍 사용방법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=PooftL_OeGg",
-        linkPc: "https://www.youtube.com/watch?v=PooftL_OeGg"
-      },
-      {
-        name: "추울때/우천시 불멍 위치",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=7P0xkKLxxzw",
-        linkPc: "https://www.youtube.com/watch?v=7P0xkKLxxzw"
-      },
-      {
-        name: "[카라반] 보일러 사용법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=rS_tgpgX4ME",
-        linkPc: "https://www.youtube.com/watch?v=rS_tgpgX4ME"
-      },
-      {
-        name: "[우드캐빈] 보일러 사용법",
-        linkType: "WL",
-        linkMo: "https://www.youtube.com/watch?v=wpfEl7rBR1k",
-        linkPc: "https://www.youtube.com/watch?v=wpfEl7rBR1k"
-      }
-    ]
-  };
-  params.append('button_1', JSON.stringify(buttons));
+  // 5) 버튼 (숙박/당일 기본 버튼만)
+  if (tplCode === TEMPLATE_REMIND_LODGING_CODE || tplCode === TEMPLATE_REMIND_DAYUSE_CODE) {
+    params.append('button_1',
+      JSON.stringify({
+        button: [
+          {
+            name:     "바베큐 사용방법",
+            linkType: "WL",
+            linkMo:   "https://www.youtube.com/watch?v=9ex2OggS0IA",
+            linkPc:   "https://www.youtube.com/watch?v=9ex2OggS0IA"
+          },
+          {
+            name:     "불멍 사용방법",
+            linkType: "WL",
+            linkMo:   "https://www.youtube.com/watch?v=PooftL_OeGg",
+            linkPc:   "https://www.youtube.com/watch?v=PooftL_OeGg"
+          },
+          {
+            name:     "추울때/우천시 불멍 위치",
+            linkType: "WL",
+            linkMo:   "https://www.youtube.com/watch?v=7P0xkKLxxzw",
+            linkPc:   "https://www.youtube.com/watch?v=7P0xkKLxxzw"
+          },
+          {
+            name:     "[카라반] 보일러 사용법",
+            linkType: "WL",
+            linkMo:   "https://www.youtube.com/watch?v=rS_tgpgX4ME",
+            linkPc:   "https://www.youtube.com/watch?v=rS_tgpgX4ME"
+          },
+          {
+            name:     "[우드캐빈] 보일러 사용법",
+            linkType: "WL",
+            linkMo:   "https://www.youtube.com/watch?v=wpfEl7rBR1k",
+            linkPc:   "https://www.youtube.com/watch?v=wpfEl7rBR1k"
+          }
+        ]
+      })
+    );
+  }
 
+  // 6) 전송
   try {
     const res = await fetch(ALIMTALK_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
-      body: params
+      method:  'POST',
+      headers: { 'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8' },
+      body:     params
     });
     const result = await res.json();
     if (result.code === 0) {
-      console.log(`[${row.예약번호}] 전날메세지 성공`);
+      console.log(`[${row.예약번호}] 전날메세지 OK`);
       await fetch(`${gasUrl}?mode=updateReminder&rowIndex=${row.rowIndex}&newValue=발송됨`);
-      await updateSendU(row.rowIndex);
       return true;
     } else {
-      console.warn(`[${row.예약번호}] 전날메세지 실패: ${result.message}`);
+      console.warn(`[${row.예약번호}] 전날메세지 FAIL: ${result.message}`);
       alert("알림톡 발송 실패: " + result.message);
       return false;
     }
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    console.error(e);
     alert("알림톡 발송 중 오류 발생");
     return false;
   }
-}
+}  // sendOneReminder 끝
 
 /** =========================================
  *  [6] 퇴실메세지(숙박=TZ_1475), (당일=TZ_1476)
