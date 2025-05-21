@@ -89,12 +89,14 @@ let 이용객실 = '';
 if (siteLine) {
   const normalized = siteLine.replace(/\s+/g, '');
 
-  // [1] 특정 패턴은 강제 매핑
-  if (/대형카라반.*[ABC]타임/.test(normalized) || normalized.includes('대형카라반6시간')) {
-    이용객실 = '[당일캠핑] 대형카라반 6시간';
-  } else if (/복층(우드)?캐빈.*[ABC]타임/.test(normalized) || normalized.includes('복층캐빈6시간')) {
-    이용객실 = '[당일캠핑] 복층우드캐빈 6시간';
-  } else if (normalized.includes('대형카라반')) {
+  // 1) 특정 당일캠핑 타임형 문자열 포함 시 강제 매핑
+  if (/대형카라반[A-C]타임/.test(normalized)) {
+    이용객실 = '대형 카라반';
+  } else if (/복층(우드)?캐빈[A-C]타임/.test(normalized)) {
+    이용객실 = '복층 우드캐빈';
+  }
+  // 2) 일반 키워드 매핑
+  else if (normalized.includes('대형카라반')) {
     이용객실 = '대형 카라반';
   } else if (normalized.includes('복층우드캐빈') || normalized.includes('복층캐빈')) {
     이용객실 = '복층 우드캐빈';
