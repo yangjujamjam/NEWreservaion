@@ -84,15 +84,26 @@ function parseNaverReservation(text) {
     전화번호 = getValue('전화번호');
   }
 
-  let siteLine = lines.find(line => line.includes('사이트'));
-  let 이용객실 = '';
-  if (siteLine) {
-    const rooms = ['대형카라반', '복층우드캐빈', '파티룸', '몽골텐트'];
-    const normalizedSiteLine = siteLine.replace(/\s+/g, '');
-    이용객실 = rooms.find(room => normalizedSiteLine.includes(room));
-    if (이용객실 === '대형카라반')   이용객실 = '대형 카라반';
-    if (이용객실 === '복층우드캐빈') 이용객실 = '복층 우드캐빈';
+let siteLine = lines.find(line => line.includes('사이트'));
+let 이용객실 = '';
+if (siteLine) {
+  const normalized = siteLine.replace(/\s+/g, '');
+
+  // [1] 특정 패턴은 강제 매핑
+  if (/대형카라반.*[ABC]타임/.test(normalized) || normalized.includes('대형카라반6시간')) {
+    이용객실 = '[당일캠핑] 대형카라반 6시간';
+  } else if (/복층(우드)?캐빈.*[ABC]타임/.test(normalized) || normalized.includes('복층캐빈6시간')) {
+    이용객실 = '[당일캠핑] 복층우드캐빈 6시간';
+  } else if (normalized.includes('대형카라반')) {
+    이용객실 = '대형 카라반';
+  } else if (normalized.includes('복층우드캐빈') || normalized.includes('복층캐빈')) {
+    이용객실 = '복층 우드캐빈';
+  } else if (normalized.includes('파티룸')) {
+    이용객실 = '파티룸';
+  } else if (normalized.includes('몽골텐트')) {
+    이용객실 = '몽골텐트';
   }
+}
 
   // 옵션 처리
   const optionsStartIndex = lines.findIndex(line => line.includes('옵션'));
