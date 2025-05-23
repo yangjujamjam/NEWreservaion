@@ -358,21 +358,18 @@ function addRoomRow() {
 
   const roomSelect = document.createElement('select');
   roomSelect.className = 'room-type';
-  {
-    const defaultOpt = document.createElement('option');
-    defaultOpt.value = '';
-    defaultOpt.textContent = '(객실 선택)';
-    roomSelect.appendChild(defaultOpt);
 
-    const roomTypes = ['대형 카라반','복층 우드캐빈','파티룸','몽골텐트'];
-    roomTypes.forEach(rt=>{
-      const opt = document.createElement('option');
-      opt.value= rt;
-      opt.textContent= rt;
-      roomSelect.appendChild(opt);
-    });
-  }
-  roomSelect.addEventListener('change', ()=> {
+  // ▼▼▼ 여기서부터 수정된 부분 ▼▼▼
+  const roomTypes = ['(객실 선택)', '대형 카라반', '복층 우드캐빈', '파티룸', '몽골텐트', '객실없음'];
+  roomTypes.forEach(rt => {
+    const opt = document.createElement('option');
+    opt.value = rt === '(객실 선택)' ? '' : rt;
+    opt.textContent = rt;
+    roomSelect.appendChild(opt);
+  });
+  // ▲▲▲ 여기까지 수정된 부분 ▲▲▲
+
+  roomSelect.addEventListener('change', () => {
     populateRoomCountOptions(roomSelect.value, countSelect);
   });
   rowDiv.appendChild(roomSelect);
@@ -393,34 +390,38 @@ function addRoomRow() {
   container.appendChild(rowDiv);
 }
 
+// 객실별 수량 옵션도 '객실없음' 선택 시 기본 수량 1로 설정하는 부분 추가됨 (수정됨)
 function populateRoomCountOptions(roomName, countSelect) {
-  countSelect.innerHTML= '';
+  countSelect.innerHTML = '';
+  countSelect.disabled = false;
 
   let range = [];
-  if(!roomName) {
-    countSelect.disabled= true;
-    const opt= document.createElement('option');
+
+  if (roomName === '객실없음') {
+    range = [1]; // 객실없음 선택 시 기본 수량 1개로 처리
+  } else if (!roomName) {
+    countSelect.disabled = true;
+    const opt = document.createElement('option');
     opt.value = '';
     opt.textContent = '(수량)';
     countSelect.appendChild(opt);
     return;
+  } else {
+    if (roomName === '대형 카라반') {
+      range = Array.from({ length: 13 }, (_, i) => i);
+    } else if (roomName === '복층 우드캐빈') {
+      range = Array.from({ length: 7 }, (_, i) => i);
+    } else if (roomName === '파티룸') {
+      range = [0, 1, 2];
+    } else if (roomName === '몽골텐트') {
+      range = [0, 1];
+    }
   }
 
-  if(roomName==='대형 카라반'){
-    range= Array.from({length:13}, (_,i)=> i);
-  } else if(roomName==='복층 우드캐빈'){
-    range= Array.from({length:7}, (_,i)=> i);
-  } else if(roomName==='파티룸'){
-    range= [0,1,2];
-  } else if(roomName==='몽골텐트'){
-    range= [0,1];
-  }
-
-  countSelect.disabled= false;
   range.forEach(num => {
-    const opt= document.createElement('option');
-    opt.value= String(num);
-    opt.textContent= num + '개';
+    const opt = document.createElement('option');
+    opt.value = String(num);
+    opt.textContent = num + '개';
     countSelect.appendChild(opt);
   });
 }
